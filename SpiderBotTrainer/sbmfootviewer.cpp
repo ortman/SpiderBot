@@ -16,7 +16,7 @@ SbmFootViewer::SbmFootViewer(QWidget *parent) : QWidget(parent) {
     container->setAttribute(Qt::WA_PaintOnScreen);
     container->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QVBoxLayout *l = new QVBoxLayout();
-    l->setMargin(0);
+    //l->setMargin(0);
     l->addWidget(container);
     setLayout(l);
 

@@ -4,7 +4,7 @@
 #include "qsbmcameracontroller.h"
 
 Qt3DRender::QGeometryRenderer *createLine(const QVector3D& start, const QVector3D& end) {
-    auto *geometry = new Qt3DRender::QGeometry();
+    auto *geometry = new Qt3DCore::QGeometry();
 
     // position vertices (start and end)
     QByteArray bufferBytes;
@@ -17,14 +17,14 @@ Qt3DRender::QGeometryRenderer *createLine(const QVector3D& start, const QVector3
     *positions++ = end.y();
     *positions++ = end.z();
 
-    auto *buf = new Qt3DRender::QBuffer(geometry);
+    auto *buf = new Qt3DCore::QBuffer(geometry);
     buf->setData(bufferBytes);
 
-    auto *positionAttribute = new Qt3DRender::QAttribute(geometry);
-    positionAttribute->setName(Qt3DRender::QAttribute::defaultPositionAttributeName());
-    positionAttribute->setVertexBaseType(Qt3DRender::QAttribute::Float);
+    auto *positionAttribute = new Qt3DCore::QAttribute(geometry);
+    positionAttribute->setName(Qt3DCore::QAttribute::defaultPositionAttributeName());
+    positionAttribute->setVertexBaseType(Qt3DCore::QAttribute::Float);
     positionAttribute->setVertexSize(3);
-    positionAttribute->setAttributeType(Qt3DRender::QAttribute::VertexAttribute);
+    positionAttribute->setAttributeType(Qt3DCore::QAttribute::VertexAttribute);
     positionAttribute->setBuffer(buf);
     positionAttribute->setByteStride(3 * sizeof(float));
     positionAttribute->setCount(2);
@@ -37,12 +37,12 @@ Qt3DRender::QGeometryRenderer *createLine(const QVector3D& start, const QVector3
     *indices++ = 0;
     *indices++ = 1;
 
-    auto *indexBuffer = new Qt3DRender::QBuffer(geometry);
+    auto *indexBuffer = new Qt3DCore::QBuffer(geometry);
     indexBuffer->setData(indexBytes);
 
-    auto *indexAttribute = new Qt3DRender::QAttribute(geometry);
-    indexAttribute->setVertexBaseType(Qt3DRender::QAttribute::UnsignedInt);
-    indexAttribute->setAttributeType(Qt3DRender::QAttribute::IndexAttribute);
+    auto *indexAttribute = new Qt3DCore::QAttribute(geometry);
+    indexAttribute->setVertexBaseType(Qt3DCore::QAttribute::UnsignedInt);
+    indexAttribute->setAttributeType(Qt3DCore::QAttribute::IndexAttribute);
     indexAttribute->setBuffer(indexBuffer);
     indexAttribute->setCount(2);
     geometry->addAttribute(indexAttribute); // We add the indices linking the points in the geometry
@@ -68,7 +68,7 @@ Qt3DRender::QGeometryRenderer *createGrid(QSize size, int gSize, int startX, int
     int hPos = size.height() / 2;
     int hNeg = -hPos;
 
-    Qt3DRender::QGeometry *geometry = new Qt3DRender::QGeometry();
+    Qt3DCore::QGeometry *geometry = new Qt3DCore::QGeometry();
     // position vertices (start and end)
     QByteArray bufferBytes;
     bufferBytes.resize(3 * vertexCount * sizeof(float)); // (x + y + z) * pointCount
@@ -98,14 +98,14 @@ Qt3DRender::QGeometryRenderer *createGrid(QSize size, int gSize, int startX, int
         coords += gSize;
     }
 
-    Qt3DRender::QBuffer *buf = new Qt3DRender::QBuffer(geometry);
+    Qt3DCore::QBuffer *buf = new Qt3DCore::QBuffer(geometry);
     buf->setData(bufferBytes);
 
-    auto *positionAttribute = new Qt3DRender::QAttribute(geometry);
-    positionAttribute->setName(Qt3DRender::QAttribute::defaultPositionAttributeName());
-    positionAttribute->setVertexBaseType(Qt3DRender::QAttribute::Float);
+    auto *positionAttribute = new Qt3DCore::QAttribute(geometry);
+    positionAttribute->setName(Qt3DCore::QAttribute::defaultPositionAttributeName());
+    positionAttribute->setVertexBaseType(Qt3DCore::QAttribute::Float);
     positionAttribute->setVertexSize(3);
-    positionAttribute->setAttributeType(Qt3DRender::QAttribute::VertexAttribute);
+    positionAttribute->setAttributeType(Qt3DCore::QAttribute::VertexAttribute);
     positionAttribute->setBuffer(buf);
     positionAttribute->setByteStride(3 * sizeof(float));
     positionAttribute->setCount(vertexCount);
@@ -119,12 +119,12 @@ Qt3DRender::QGeometryRenderer *createGrid(QSize size, int gSize, int startX, int
         *indices++ = i;
     }
 
-    auto *indexBuffer = new Qt3DRender::QBuffer(geometry);
+    auto *indexBuffer = new Qt3DCore::QBuffer(geometry);
     indexBuffer->setData(indexBytes);
 
-    auto *indexAttribute = new Qt3DRender::QAttribute(geometry);
-    indexAttribute->setVertexBaseType(Qt3DRender::QAttribute::UnsignedInt);
-    indexAttribute->setAttributeType(Qt3DRender::QAttribute::IndexAttribute);
+    auto *indexAttribute = new Qt3DCore::QAttribute(geometry);
+    indexAttribute->setVertexBaseType(Qt3DCore::QAttribute::UnsignedInt);
+    indexAttribute->setAttributeType(Qt3DCore::QAttribute::IndexAttribute);
     indexAttribute->setBuffer(indexBuffer);
     indexAttribute->setCount(vertexCount);
     geometry->addAttribute(indexAttribute); // We add the indices linking the points in the geometry
@@ -153,7 +153,7 @@ SbmViewer::SbmViewer(QWidget *parent) : QWidget(parent) {
     container->setAttribute(Qt::WA_PaintOnScreen);
     container->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     QVBoxLayout *l = new QVBoxLayout();
-    l->setMargin(0);
+    //l->setMargin(0);
     l->addWidget(container);
     setLayout(l);
 

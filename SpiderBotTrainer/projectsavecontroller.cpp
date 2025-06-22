@@ -25,8 +25,8 @@ sbmFootStepInfo_t *parseStep(QXmlStreamReader *xml) {
                             token = xml->readNext();
                             if (token == QXmlStreamReader::Characters) {
                                 QVector<float> segmentAngles;
-                                QVector<QStringRef> list = xml->text().split(';');
-                                foreach(const QStringRef &angle, list) {
+                                QVector<QStringView> list = xml->text().split(';');
+                                foreach(const QStringView &angle, list) {
                                     segmentAngles.append(angle.toFloat());
                                 }
                                 angles.append(segmentAngles);
@@ -104,7 +104,7 @@ ProjectData *ProjectSaveController::load(QString fineName) {
                 QXmlStreamReader::TokenType token = xml.readNext();
                 while (!(token == QXmlStreamReader::EndElement && xml.name() == "project")) {
                     if (token == QXmlStreamReader::StartElement) {
-                        if (xml.name().startsWith("CMD0x")) {
+                        if (xml.name().startsWith(QString("CMD0x"))) {
                             ProjectDataCommand *cmd = parseCommand(&xml);
                             projData->addCommand(cmd);
                         }

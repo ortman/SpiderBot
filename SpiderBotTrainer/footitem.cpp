@@ -15,14 +15,14 @@ FootItem::FootItem(uint32_t segmentCount, float *angles, QWidget *parent):
     this->segmentCount = segmentCount;
     this->angles = angles;
 
-    mainLayout->setMargin(3);
+    //mainLayout->setMargin(3);
     mainLayout->setSpacing(0);
     this->setLayout(mainLayout);
 
     mainLayout->addWidget(lName, 0);
     mainLayout->addWidget(lValues, 1);
 
-    layoutEditor->setMargin(0);
+    //layoutEditor->setMargin(0);
     layoutEditor->setSpacing(0);
     QLabel *l;
     for (uint32_t i=0; i<segmentCount; ++i) {        

@@ -31,7 +31,7 @@ sbmFootStepInfo_t *CmdPositionItem::getStepInfo() {
 
 void CmdPositionItem::createUI() {
     QHBoxLayout *l = new QHBoxLayout();
-    l->setMargin(0);
+    //l->setMargin(0);
     l->setSpacing(3);
     lName->setText("default position");
     lName->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);

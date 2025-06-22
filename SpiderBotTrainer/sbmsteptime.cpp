@@ -12,7 +12,7 @@ SbmStepTime::SbmStepTime(double timeInterval, uint32_t timeInSteps, QWidget *par
         bUnits(new QToolButton()) {
     QHBoxLayout *layout = new QHBoxLayout();
     layout->setSpacing(2);
-    layout->setMargin(0);
+    //layout->setMargin(0);
 
     layout->addWidget(sbVal);
 
