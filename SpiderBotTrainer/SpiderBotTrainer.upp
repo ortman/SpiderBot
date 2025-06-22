@@ -1,0 +1,15 @@
+uses
+	CtrlLib,
+	GLCtrl,
+	plugin/glew;
+
+file
+	Foot3D.hpp,
+	Node3D.hpp,
+	View3D.hpp,
+	Layouts.lay,
+	main.cpp;
+
+mainconfig
+	"" = "GUI";
+
