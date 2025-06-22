@@ -47,7 +47,7 @@ public:
     foot4.Translate({25.f,   67.0f, 0.0f}).Rotate({-90.0f, -20.0f, 0.0f});
     foot5.Translate({-25.f, -67.0f, 0.0f}).Rotate({-90.0f, 160.0f, 0.0f});
     foot6.Translate({25.f,  -67.0f, 0.0f}).Rotate({-90.0f,  20.0f, 0.0f});
-    body.LoadSTL("model/Body.stl").SetColor(LtGreen);
+    body.LoadSTL("models/Body.stl").SetColor(LtGreen);
     body.Add(&foot1).Add(&foot2).Add(&foot3).Add(&foot4).Add(&foot5).Add(&foot6);
 
     viewer.Add(&body).ViewAll();
@@ -59,6 +59,7 @@ public:
 };
 
 GUI_APP_MAIN {
+	StdLogSetup(LOG_FILE);
   MainWindow win;
   win.Run();
 }

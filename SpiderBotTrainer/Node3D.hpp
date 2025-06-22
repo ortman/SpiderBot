@@ -88,7 +88,7 @@ public:
 		triangles.Clear();
 		FileIn in(filepath);
 		if (!in) {
-			//error = "Ошибка открытия файла: " + filepath;
+			LOG("Ошибка открытия файла: " + filepath);
 			//Refresh();
 			return *this;
 		}

@@ -9,16 +9,12 @@ class View3D : public GLCtrl {
 private:
 	Point mouseLeftStart, mouseRightStart, mouseLeftClickPos;
   float scale = 1.0f;
-  float distance = 2.0f;      // Начальное расстояние
-  float azimuth = (float)(-M_PI / 4.0);    // Начальный угол
-  float elevation = (float)(M_PI / 6.0);   // Начальный угол
-  bool mouseLeftDown = false;
-  bool mouseRightDown = false;
+  float distance = 2.0f;
+  float azimuth = (float)(-M_PI / 4.0);
+  float elevation = (float)(M_PI / 6.0);
   
 	Vector<Node3D*> nodes;
-	Point3f cameraPos = {0.8f, -1.0f, 0.5f};
-	Point3f cameraCenter = {0.0f, 0.0f, 0.0f};
-  Point3f pivotPoint = {0.0f, 0.0f, 0.0f}; // Центр вращения
+	Point3f cameraPos, cameraCenter, pivotPoint;
   
   // Обновляем позицию камеры на основе углов
   void UpdateCameraPosition() {
@@ -27,6 +23,18 @@ private:
     cameraPos.z = pivotPoint.z + distance * sin(elevation);
     cameraCenter = pivotPoint;
   }
+  
+	// Настройка освещения
+	GLfloat light_position[4] = { 15.0f, 15.0f, 15.0f, 0.0f };
+	GLfloat light_ambient[4] = { 0.2f, 0.2f, 0.2f, 0.1f };
+	GLfloat light_diffuse[4] = { 0.8f, 0.8f, 0.8f, 1.0f };
+	GLfloat light_specular[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	
+	// Настройка материала
+	GLfloat mat_ambient[4] = { 0.2f, 0.4f, 0.7f, 1.0f };
+	GLfloat mat_diffuse[4] = { 0.3f, 0.6f, 0.9f, 1.0f };
+	GLfloat mat_specular[4] = { 0.8f, 0.8f, 0.8f, 0.8f };
+	GLfloat mat_shininess[1] = { 50.0f };
 	
 public:
 	View3D() {
@@ -71,6 +79,7 @@ public:
     ExecuteGL([&] {
       GLuint selectBuf[512] = {0};
       GLint viewport[4];
+      //Rect viewport = CurrentViewport();
       glGetIntegerv(GL_VIEWPORT, viewport);
       
       glSelectBuffer(512, selectBuf);
@@ -81,7 +90,7 @@ public:
       
       // Настройка проекции
       glMatrixMode(GL_PROJECTION);
-      glPushMatrix();
+      //glPushMatrix();
       glLoadIdentity();
       
       // Область выбора вокруг курсора
@@ -91,7 +100,7 @@ public:
       
       // Настройка вида (должна совпадать с GLPaint)
       glMatrixMode(GL_MODELVIEW);
-      glPushMatrix();
+      //glPushMatrix();
       glLoadIdentity();
 			gluLookAt(cameraPos.x, cameraPos.y, cameraPos.z, cameraCenter.x, cameraCenter.y, cameraCenter.z, 0., 0., 1.);
 			glScalef(scale, scale, scale);
@@ -112,12 +121,12 @@ public:
       
       // Анализ результатов выбора
       GLint hits = glRenderMode(GL_RENDER);
-      
+            
       // Восстановление матриц
-      glMatrixMode(GL_MODELVIEW);
-      glPopMatrix();
-      glMatrixMode(GL_PROJECTION);
-      glPopMatrix();
+      //glMatrixMode(GL_MODELVIEW);
+      //glPopMatrix();
+      //glMatrixMode(GL_PROJECTION);
+      //glPopMatrix();
       
       // Обработка попаданий
       if (hits <= 0) {
@@ -142,7 +151,6 @@ public:
         }
         ptr += numNames;
       }
-      
     });
     return selectedId;
 	}
@@ -172,8 +180,7 @@ public:
 	
 private:
 	virtual void MouseMove(Point p, dword keyflags) {
-		//if (keyflags & K_MOUSELEFT) {
-    if (mouseLeftDown) { // Вращение ЛКМ
+		if (keyflags & K_MOUSELEFT) { // Вращение ЛКМ
       float dx = (float)(p.x - mouseLeftStart.x) * 0.01f;
       float dy = (float)(p.y - mouseLeftStart.y) * 0.01f;
       
@@ -187,8 +194,7 @@ private:
       UpdateCameraPosition();
       mouseLeftStart = p;
       Refresh();
-    // } else if (keyflags & K_MOUSERIGHT) {
-    } else if (mouseRightDown) { // Панорамирование ПКМ
+     } else if (keyflags & K_MOUSERIGHT) { // Панорамирование ПКМ
       float dx = (float)(p.x - mouseRightStart.x) * -0.001f;
       float dy = (float)(p.y - mouseRightStart.y) * 0.001f;
       
@@ -205,7 +211,6 @@ private:
 	
 	virtual void LeftDown(Point p, dword keyflags) {
     mouseLeftClickPos = mouseLeftStart = p;
-    mouseLeftDown = true;
     SetCapture();
 	}
 	
@@ -214,18 +219,15 @@ private:
       SelectNode(GetNodeId(p));
       Refresh();
     }
-    mouseLeftDown = false;
     ReleaseCapture();
 	}
 	
 	virtual void RightDown(Point p, dword keyflags) {
     mouseRightStart = p;
-    mouseRightDown = true;
     SetCapture();
 	}
 	
 	virtual void RightUp(Point p, dword keyflags) {
-    mouseRightDown = false;
     ReleaseCapture();
 	}
 	
@@ -239,27 +241,11 @@ private:
     UpdateCameraPosition();
     Refresh();
 	}
-		
-  virtual void GLResize(int w, int h) {
-    glViewport(0, 0, w, h);
-  }
   
   virtual void GLPaint() {
-		// Настройка освещения
-		GLfloat light_position[] = { 15.0f, 15.0f, 15.0f, 0.0f };
-		GLfloat light_ambient[] = { 0.2f, 0.2f, 0.2f, 0.1f };
-		GLfloat light_diffuse[] = { 0.8f, 0.8f, 0.8f, 1.0f };
-		GLfloat light_specular[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-		
-		// Настройка материала
-		GLfloat mat_ambient[] = { 0.2f, 0.4f, 0.7f, 1.0f };
-		GLfloat mat_diffuse[] = { 0.3f, 0.6f, 0.9f, 1.0f };
-		GLfloat mat_specular[] = { 0.8f, 0.8f, 0.8f, 0.8f };
-		GLfloat mat_shininess[] = { 50.0f };
- 
 		Point3f bgColor = {(float)SColorFace().GetR() / 255.0f, (float)SColorFace().GetG() / 255.0f, (float)SColorFace().GetB() / 255.0f};
-    glClearColor(bgColor.x, bgColor.y, bgColor.z, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(bgColor.x, bgColor.y, bgColor.z, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
 		// Включаем буфер глубины и освещение
 		glEnable(GL_DEPTH_TEST);
