@@ -1,7 +1,7 @@
 #ifndef _VIEW_3D_HPP_
 #define _VIEW_3D_HPP_
 
-#include "Foot3D.hpp"
+#include "Node3D.hpp"
 
 using namespace Upp;
 
@@ -22,6 +22,9 @@ private:
     cameraPos.y = pivotPoint.y + distance * cos(elevation) * cos(azimuth);
     cameraPos.z = pivotPoint.z + distance * sin(elevation);
     cameraCenter = pivotPoint;
+    light_position[0] = cameraPos.x;
+    light_position[1] = cameraPos.y;
+    light_position[2] = cameraPos.z;
   }
   
 	// Настройка освещения
@@ -37,12 +40,33 @@ private:
 	GLfloat mat_shininess[1] = { 50.0f };
 	
 public:
+	Event<int, Node3D*> WhenSelected; // id, node
 	View3D() {
 		UpdateCameraPosition();
 	}
 	
-	View3D& Add(Node3D *node) {
+	View3D& Add(Node3D* node) {
 		nodes.Add(node);
+	  return *this;
+	}
+	
+	bool Remove(Node3D* node) {
+		if (node == NULL) return false;
+		for (int i = 0; i < nodes.GetCount(); ++i) {
+			if (node == nodes[i]) {
+				nodes.Remove(i);
+				return true;
+			} else {
+				if (nodes[i]->Remove(node)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	View3D& Clear() {
+		nodes.Clear();
 	  return *this;
 	}
 	
@@ -62,10 +86,11 @@ public:
     float size = std::max({size_x, size_y, size_z});
     distance = size * 2.0f; // Автоматический зум
     
-    distance *= 1.8f; //TODO remove
+    distance *= 4.8f; //TODO remove
     
     // Обновляем позицию камеры
     UpdateCameraPosition();
+    Refresh();
     return *this;
 	}
   
@@ -155,27 +180,35 @@ public:
     return selectedId;
 	}
 	
-	Node3D* GetNode(int id) {
-		Node3D* node = NULL;
-		if (id < 0) return node;
-		for (Node3D* n : nodes) {
-			node = n->GetNode(id);
-	    if (node != NULL) break;
+	template <class T>
+	T* GetNode(int id) const {
+		if (id < 0) return NULL;
+		T* res = NULL;
+		for (Node3D* node : nodes) {
+			if (node->GetId() == id) {
+				return dynamic_cast<T*>(node);
+			}
+	    if ((res = node->GetNode<T>(id)) != NULL) {
+				return res;
+	    }
 	  }
-		return node;
+		return NULL;
 	}
 	
 	void SelectNode(Node3D* node) {
+		//if (node == NULL) return;
 		bool finded = false;
 		for (Node3D* n : nodes) {
-	    n->Selected(n == node);
-	    if (n == node) finded = true;
+	    n->Selected(node == n);
+	    if (node == n) finded = true;
 	  }
 	  if (!finded && node != NULL) node->Selected(true);
 	}
 	
 	void SelectNode(int id) {
-		SelectNode(GetNode(id));
+		Node3D* selectedNode = GetNode<Node3D>(id);
+		SelectNode(selectedNode);
+		WhenSelected(id, selectedNode);
 	}
 	
 private:

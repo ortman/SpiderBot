@@ -52,22 +52,24 @@ struct Triangle {
   Point3f vertices[3];
 };
 
-struct Node3D {
+class Node3D {
 private:
-	Vector<Node3D*> nodes;
-	int id;
+	Vector<Node3D*> createdNodes;
 	
+protected:
+  static int nextId;
+	int id;
   Point3f scale;
   Point3f rotate;
   Point3f translate;
   Color color = LtGray;
   bool isSelected = false;
-
-protected:
   Point3f min;
   Point3f max;
 	Vector<Triangle> triangles;
-  static int nextId;
+  
+	Vector<Node3D*> nodes;
+	Node3D* parent = NULL;
 	
 public:
 	Node3D() {
@@ -79,9 +81,62 @@ public:
 	  translate = {0.0f, 0.0f, 0.0f};
 	}
 	
-	Node3D& Add(Node3D *node) {
+	virtual Node3D* Duplicate(Node3D* src = NULL, bool uniqIDs = true) {
+		if (src == NULL) src = new Node3D();
+		if (!uniqIDs) src->id = id;
+		src->min = min;
+		src->max = max;
+		src->scale = scale;
+		src->rotate = rotate;
+		src->translate = translate;
+		src->color = color;
+		src->isSelected = isSelected;
+		src->triangles = clone(triangles);
+		Node3D* tmp;
+		for (Node3D* n : nodes) {
+			tmp = n->Duplicate(NULL, uniqIDs);
+			src->createdNodes.Add(tmp);
+			src->nodes.Add(tmp);
+		}
+		return src;
+	}
+	
+	virtual ~Node3D() {
+		for (Node3D* node : createdNodes) {
+			delete node;
+		}
+		createdNodes.Clear();
+		nodes.Clear();
+	}
+	
+	Node3D& Add(Node3D* node, bool autoFree = false) {
 		nodes.Add(node);
+		node->parent = this;
+		if (autoFree)
+			createdNodes.Add(node);
 	  return *this;
+	}
+	
+	bool Remove(Node3D* node) {
+		if (node == NULL) return false;
+		for (int i = 0; i < nodes.GetCount(); ++i) {
+			if (node == nodes[i]) {
+				nodes.Remove(i);
+				for (int j = 0; j < createdNodes.GetCount(); ++j) {
+					if (node == createdNodes[j]) {
+						delete createdNodes[j];
+						createdNodes.Remove(j);
+						break;
+					}
+				}
+				return true;
+			} else {
+				if (nodes[i]->Remove(node)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	virtual Node3D& LoadSTL(const String& filepath) {
@@ -163,9 +218,17 @@ public:
 	  return *this;
 	}
 	
+	const Point3f& GetRotate() const & {
+		return rotate;
+	}
+	
 	Node3D& Translate(const Point3f& t) {
 		translate = t;
 	  return *this;
+	}
+	
+	const Point3f& GetTranslate() const & {
+		return translate;
 	}
 	
 	Node3D& SetColor(const Color& c) {
@@ -173,13 +236,17 @@ public:
 	  return *this;
 	}
 	
-	Point3f GetMin() {
+	const Color& GetColor() const & {
+		return color;
+	}
+	
+	Point3f GetMin() const {
 		Point3f res = (min * scale - translate);
 		for (Node3D* node : nodes) res.min(node->GetMin());
 		return res;
 	}
 	
-	Point3f GetMax() {
+	Point3f GetMax() const {
 		Point3f res = (max * scale + translate);
 		for (Node3D* node : nodes) res.min(node->GetMax());
 		return res;
@@ -187,31 +254,45 @@ public:
 	
 	Node3D& Selected(bool isSel = true) {
 		isSelected = isSel;
-		for (Node3D* node : nodes) {
-      node->Selected(isSel);
-    }
+		for (Node3D* node : nodes) node->Selected(isSel);
 	  return *this;
 	}
 	
-	bool IsSelected() {
+	bool IsSelected() const {
 		return isSelected;
 	}
 	
-	int GetId() {
+	int GetId() const {
 		return id;
 	}
 	
-	Node3D* GetNode(int id) {
-		if (id == this->id) return this;
-		Node3D* node = NULL;
-		if (id < 0) return node;
-		for (Node3D* n : nodes) {
-	    if (n->GetId() == id) {
-				return n;
-	    } else if ((node = n->GetNode(id)) != NULL) {
-	      return node;
+	Node3D* GetParent() {
+		return parent;
+	}
+	
+	const Vector<Node3D*>& GetChildren() {
+		return nodes;
+	}
+	
+	template <class T>
+	T* GetNode(int id) {
+		if (id == this->id) return dynamic_cast<T*>(this);
+		if (id < 0) return NULL;
+		T* res = NULL;
+		for (Node3D* node : nodes) {
+	    if (node->GetId() == id) {
+				return dynamic_cast<T*>(node);
+	    } else if ((res = node->GetNode<T>(id)) != NULL) {
+	      return res;
 	    }
 	  }
+		return NULL;
+	}
+	
+	template <class T>
+	T* Create() {
+		T* node = new T();
+		Add(node, true);
 		return node;
 	}
 	
@@ -275,6 +356,12 @@ private:
 };
 
 int Node3D::nextId = 1;
+
+/*
+ * INITBLOCK {
+ * 	Value::Register<Node3D>();
+ * }
+ */
 
 struct Square3D : public Node3D {
 public:

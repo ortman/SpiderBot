@@ -4,10 +4,11 @@ uses
 	plugin/glew;
 
 file
-	Foot3D.hpp,
+	Servo3D.hpp,
 	Node3D.hpp,
 	View3D.hpp,
 	Layouts.lay,
+	RobotEditor.hpp,
 	main.cpp;
 
 mainconfig
