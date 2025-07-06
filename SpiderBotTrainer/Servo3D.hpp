@@ -6,7 +6,8 @@
 class Servo3D : public Node3D {
 private:
 	Node3D stl;
-	float length = 0.0f;
+	float minAngle = 0.0f;
+	float maxAngle = 180.0f;
 	String stlPath;
 	
 public:
@@ -16,7 +17,7 @@ public:
 	
 	Servo3D(const String& stlPath, const Point3f& translationVector, const Point3f& rotationVector, const Color& color) : Node3D() {
 		this->stlPath = stlPath;
-		Add(&stl.LoadSTL(stlPath).Translate(translationVector).Rotate(rotationVector).SetColor(color));
+		Add(&stl.LoadSTL(stlPath).SetTranslate(translationVector).SetRotate(rotationVector).SetColor(color));
 	}
 	
 	virtual Node3D* Duplicate(Node3D* src = NULL, bool uniqIDs = true) override {
@@ -35,56 +36,34 @@ public:
 		return *this;
 	}
 	
-	Servo3D& SetLenght(float len) {
-		//length = len;
-		return *this;
+	float GetMinAngle() {
+		return minAngle;
 	}
 	
-	float GetLength() {
-		return length;
+	void SetMinAngle(float angle) {
+		minAngle = angle;
+	}
+	
+	float GetMaxAngle() {
+		return maxAngle;
+	}
+	
+	void SetMaxAngle(float angle) {
+		maxAngle = angle;
 	}
 	
 	String GetModelPath() {
 		return stlPath;
 	}
 	
-	Servo3D& SetModelPath(const String& path) {
-		stlPath = path;
-		stl.LoadSTL(stlPath);
-	  return *this;
-	}
-	
-	Servo3D& SetModelRotate(const Point3f& p) {
-		stl.Rotate(p);
-	  return *this;
-	}
-	
-	const Point3f& GetModelRotate() const & {
-		return stl.GetRotate();
-	}
-	
-	Servo3D& SetModelTranslate(const Point3f& t) {
-		stl.Translate(t);
-	  return *this;
-	}
-	
-	const Point3f& GetModelTranslate() const & {
-		return stl.GetTranslate();
-	}
-	
-	Servo3D& SetModelColor(const Color& c) {
-		stl.SetColor(c);
-	  return *this;
-	}
-	
-	const Color& GetModelColor() const & {
-		return stl.GetColor();
+	Node3D& GetModel() {
+		return stl;
 	}
 	
 	virtual void GLPaint(bool isSelectMode) override {
 		Node3D::GLPaint(isSelectMode);
 		if (!isSelectMode && isSelected) {
-			//glDisable(GL_LIGHTING); // Отключаем освещение для осей
+			glDisable(GL_LIGHTING); // Отключаем освещение для осей
 			glLineWidth(2.0f);
 			glBegin(GL_LINES);
         // Ось X (красный)
@@ -92,17 +71,28 @@ public:
         glVertex3f(0.0f, 0.0f, 0.0f);
         glVertex3f(100.0f, 0.0f, 0.0f); // Длина оси = 100
 
-        // Ось Y (зеленый)
-        glColor3f(0.0f, 1.0f, 0.0f);
-        glVertex3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(0.0f, 100.0f, 0.0f);
-
         // Ось Z (синий)
         glColor3f(0.0f, 0.0f, 1.0f);
         glVertex3f(0.0f, 0.0f, 0.0f);
         glVertex3f(0.0f, 0.0f, 100.0f);
 			glEnd();
+      
+      //glColor3f(0.0f, 1.0f, 0.0f);
+			//DrawSector(maxAngle, 100.0f);
 		}
+	}
+
+private:
+	void DrawSector(float angle, float radius) {
+		glBegin(GL_TRIANGLE_FAN);
+			glVertex3f(0.0f, 0.0f, 0.0f);
+			int segmants = 101;
+			float a, angleStep = (float)(angle * M_PI / 180.0 / segmants);
+			for (int i = 0; i < segmants; ++i) {
+				a = angleStep * i;
+				glVertex3f(radius * cos(a), radius * sin(a), 0.0f);
+			}
+		glEnd();
 	}
 };
 

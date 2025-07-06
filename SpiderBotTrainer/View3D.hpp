@@ -15,6 +15,8 @@ private:
   
 	Vector<Node3D*> nodes;
 	Point3f cameraPos, cameraCenter, pivotPoint;
+	Bboxf bbox;
+	Point3f grid[40];
   
   // Обновляем позицию камеры на основе углов
   void UpdateCameraPosition() {
@@ -30,8 +32,8 @@ private:
 	// Настройка освещения
 	GLfloat light_position[4] = { 15.0f, 15.0f, 15.0f, 0.0f };
 	GLfloat light_ambient[4] = { 0.2f, 0.2f, 0.2f, 0.1f };
-	GLfloat light_diffuse[4] = { 0.8f, 0.8f, 0.8f, 1.0f };
-	GLfloat light_specular[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	GLfloat light_diffuse[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
+	GLfloat light_specular[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
 	
 	// Настройка материала
 	GLfloat mat_ambient[4] = { 0.2f, 0.4f, 0.7f, 1.0f };
@@ -71,27 +73,24 @@ public:
 	}
 	
 	View3D& ViewAll() {
-	  Point3f min(FLT_MAX, FLT_MAX, FLT_MAX);
-	  Point3f max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-	  
-	  for (Node3D* node : nodes) {
-	    min.min(node->GetMin());
-	    max.max(node->GetMax());
-	  }
-	  float size_x = max.x - min.x;
-    float size_y = max.y - min.y;
-    float size_z = max.z - min.z;
-
-    //pivotPoint = (min + max) / 2.0f;  //TODO uncomment
-    float size = std::max({size_x, size_y, size_z});
-    distance = size * 2.0f; // Автоматический зум
+		RecalcBbox();
     
-    distance *= 4.8f; //TODO remove
+    pivotPoint = (bbox.min + bbox.max) / 2.0f;
+    distance = bbox.GetSize().Length() * 2.0f;
     
-    // Обновляем позицию камеры
     UpdateCameraPosition();
     Refresh();
     return *this;
+	}
+	
+	View3D& RecalcBbox() {
+		Bboxf bbox{{FLT_MAX, FLT_MAX, FLT_MAX}, {-FLT_MAX, -FLT_MAX, -FLT_MAX}};
+	  for (Node3D* node : nodes) {
+	    bbox += node->GetBbox();
+	  }
+    this->bbox = bbox;
+    calcGrid();
+		return *this;
 	}
   
 	View3D& SetScale(float s) {
@@ -138,9 +137,7 @@ public:
       
       // Рисуем модели в режиме выбора
 	    for (Node3D* node : nodes) {
-	      glPushMatrix();
 	      node->GLPaint(true);
-	      glPopMatrix();
 	    }
       glFlush();
       
@@ -155,7 +152,7 @@ public:
       
       // Обработка попаданий
       if (hits <= 0) {
-        selectedId = -1;
+        //selectedId = -1;
         return;
       }
       
@@ -195,14 +192,12 @@ public:
 		return NULL;
 	}
 	
-	void SelectNode(Node3D* node) {
-		//if (node == NULL) return;
-		bool finded = false;
+	void SelectNode(Node3D* node, bool recursive = false) {
 		for (Node3D* n : nodes) {
-	    n->Selected(node == n);
-	    if (node == n) finded = true;
+	    n->Selected(false, true);
 	  }
-	  if (!finded && node != NULL) node->Selected(true);
+	  if (node != NULL) node->Selected(true, recursive);
+    Refresh();
 	}
 	
 	void SelectNode(int id) {
@@ -250,7 +245,6 @@ private:
 	virtual void LeftUp(Point p, dword keyflags) {
     if (p == mouseLeftClickPos) {
       SelectNode(GetNodeId(p));
-      Refresh();
     }
     ReleaseCapture();
 	}
@@ -313,9 +307,37 @@ private:
     glScalef(scale, scale, scale);
     
     for (Node3D* node : nodes) {
-      glPushMatrix();
       node->GLPaint(false);
-      glPopMatrix();
+    }
+      
+/*
+ * 		glDisable(GL_LIGHTING);
+ * 		glLineWidth(1.0f);
+ *     glColor3f(1.0f, 1.0f, 1.0f); // White
+ *     Point3f* p;
+ * 		glBegin(GL_LINES);
+ * 	    for (int i = 0; i < 20; ++i) {
+ * 	      p = &grid[i * 2];
+ * 	      glVertex3f(p->x, p->y, p->z);
+ * 	      p = &grid[i * 2 + 1];
+ * 	      glVertex3f(p->x, p->y, p->z);
+ * 	    }
+ * 		glEnd();
+ */
+  }
+  
+  void calcGrid() {
+    Point3f size = bbox.GetSize();
+    float stepX = size.x / 9.0f;
+    float stepY = size.y / 9.0f;
+    float x, y, z = bbox.min.z;
+    for (int i = 0; i < 10; ++i) {
+      x = bbox.min.x + stepX * i;
+      grid[i * 2]      = {x, bbox.min.y, z};
+      grid[i * 2 + 1]  = {x, bbox.max.y,  z};
+      y = bbox.min.y + stepY * i;
+      grid[i * 2 + 20] = {bbox.min.x, y, z};
+      grid[i * 2 + 21] = {bbox.max.x, y, z};
     }
   }
 };

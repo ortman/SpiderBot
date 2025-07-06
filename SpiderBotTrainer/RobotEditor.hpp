@@ -75,9 +75,7 @@ public:
         }
         if (serv != NULL) {
           int i = tMotors.Find((int64_t)serv);
-          if (i >= 0) {
-            tMotors.SetCursor(i);
-          }
+          if (i >= 0) tMotors.SetCursor(i);
         }
       }
     };
@@ -85,18 +83,32 @@ public:
     bChangeModelPath.WhenPush = [=] {
       if (currentServo != NULL) {
         if (fs.ExecuteOpen(t_("Select 3d model"))) {
-					currentServo->SetModelPath(fs);
+					currentServo->GetModel().LoadSTL(fs);
 					eModelPath <<= (String)fs;
 					viewer.ViewAll();
         }
       }
     };
     
+		eMinAngle.WhenAction = [=] {
+			if (currentServo) {
+				currentServo->SetMinAngle(~eMinAngle);
+				viewer.Refresh();
+			}
+		};
+		
+		eMaxAngle.WhenAction = [=] {
+			if (currentServo) {
+				currentServo->SetMaxAngle(~eMaxAngle);
+				viewer.Refresh();
+			}
+		};
+    
 		ePosX.WhenAction = [=] {
 			if (currentServo) {
 				Point3f p = currentServo->GetTranslate();
 				p.x = (float)~ePosX;
-				currentServo->Translate(p);
+				currentServo->SetTranslate(p);
 				viewer.Refresh();
 			}
 		};
@@ -105,7 +117,7 @@ public:
 			if (currentServo) {
 				Point3f p = currentServo->GetTranslate();
 				p.y = (float)~ePosY;
-				currentServo->Translate(p);
+				currentServo->SetTranslate(p);
 				viewer.Refresh();
 			}
 		};
@@ -114,7 +126,7 @@ public:
 			if (currentServo) {
 				Point3f p = currentServo->GetTranslate();
 				p.z = (float)~ePosZ;
-				currentServo->Translate(p);
+				currentServo->SetTranslate(p);
 				viewer.Refresh();
 			}
 		};
@@ -123,7 +135,7 @@ public:
 			if (currentServo) {
 				Point3f p = currentServo->GetRotate();
 				p.x = (float)~eRotX;
-				currentServo->Rotate(p);
+				currentServo->SetRotate(p);
 				viewer.Refresh();
 			}
 		};
@@ -132,7 +144,7 @@ public:
 			if (currentServo) {
 				Point3f p = currentServo->GetRotate();
 				p.y = (float)~eRotY;
-				currentServo->Rotate(p);
+				currentServo->SetRotate(p);
 				viewer.Refresh();
 			}
 		};
@@ -141,68 +153,75 @@ public:
 			if (currentServo) {
 				Point3f p = currentServo->GetRotate();
 				p.z = (float)~eRotZ;
-				currentServo->Rotate(p);
+				currentServo->SetRotate(p);
 				viewer.Refresh();
 			}
 		};
 		
 		eModelPosX.WhenAction = [=] {
 			if (currentServo) {
-				Point3f p = currentServo->GetModelTranslate();
+				Node3D& model = currentServo->GetModel();
+				Point3f p = model.GetTranslate();
 				p.x = (float)~eModelPosX;
-				currentServo->SetModelTranslate(p);
+				model.SetTranslate(p);
 				viewer.Refresh();
 			}
 		};
 		
 		eModelPosY.WhenAction = [=] {
 			if (currentServo) {
-				Point3f p = currentServo->GetModelTranslate();
+				Node3D& model = currentServo->GetModel();
+				Point3f p = model.GetTranslate();
 				p.y = (float)~eModelPosY;
-				currentServo->SetModelTranslate(p);
+				model.SetTranslate(p);
 				viewer.Refresh();
 			}
 		};
 		
 		eModelPosZ.WhenAction = [=] {
 			if (currentServo) {
-				Point3f p = currentServo->GetModelTranslate();
+				Node3D& model = currentServo->GetModel();
+				Point3f p = model.GetTranslate();
 				p.z = (float)~eModelPosZ;
-				currentServo->SetModelTranslate(p);
+				model.SetTranslate(p);
 				viewer.Refresh();
 			}
 		};
 		
 		eModelRotX.WhenAction = [=] {
 			if (currentServo) {
-				Point3f p = currentServo->GetModelRotate();
+				Node3D& model = currentServo->GetModel();
+				Point3f p = model.GetRotate();
 				p.x = (float)~eModelRotX;
-				currentServo->SetModelRotate(p);
+				model.SetRotate(p);
 				viewer.Refresh();
 			}
 		};
 		
 		eModelRotY.WhenAction = [=] {
 			if (currentServo) {
-				Point3f p = currentServo->GetModelRotate();
+				Node3D& model = currentServo->GetModel();
+				Point3f p = model.GetRotate();
 				p.y = (float)~eModelRotY;
-				currentServo->SetModelRotate(p);
+				model.SetRotate(p);
 				viewer.Refresh();
 			}
 		};
 		
 		eModelRotZ.WhenAction = [=] {
 			if (currentServo) {
-				Point3f p = currentServo->GetModelRotate();
+				Node3D& model = currentServo->GetModel();
+				Point3f p = model.GetRotate();
 				p.z = (float)~eModelRotZ;
-				currentServo->SetModelRotate(p);
+				model.SetRotate(p);
 				viewer.Refresh();
 			}
 		};
 		
 		cColor.WhenAction = [=] {
 			if (currentServo) {
-				currentServo->SetModelColor(~cColor);
+				currentServo->GetModel().SetColor(~cColor);
+				viewer.RecalcBbox();
 				viewer.Refresh();
 			}
 		};
@@ -219,14 +238,16 @@ public:
 private:
 	void SetServo(Servo3D* serv, bool isBody = false) {
 		currentServo = serv;
+		viewer.SelectNode(serv);
 		if (isBody || currentServo == NULL) {
 			DisableCtrls({
 				&lbMotorParams,
-				&eLength,
+				&eMinAngle, &eMaxAngle,
 				&ePosX, &ePosY, &ePosZ,
 				&eRotX, &eRotY, &eRotZ
 			});
-			eLength.Clear();
+			eMinAngle.Clear();
+			eMaxAngle.Clear();
 			ePosX.Clear();
 			ePosY.Clear();
 			ePosZ.Clear();
@@ -236,11 +257,12 @@ private:
 		} else {
 			EnableCtrls({
 				&lbMotorParams,
-				&eLength,
+				&eMinAngle, &eMaxAngle,
 				&ePosX, &ePosY, &ePosZ,
 				&eRotX, &eRotY, &eRotZ
 			});
-			eLength <<= currentServo->GetLength();
+			eMaxAngle <<= currentServo->GetMaxAngle();
+			eMinAngle <<= currentServo->GetMinAngle();
 			ePosX <<= currentServo->GetTranslate().x;
 			ePosY <<= currentServo->GetTranslate().y;
 			ePosZ <<= currentServo->GetTranslate().z;
@@ -267,14 +289,15 @@ private:
 				&eModelPosX, &eModelPosY, &eModelPosZ,
 				&eModelRotX, &eModelRotY, &eModelRotZ
 			});
+			Node3D& model = currentServo->GetModel();
 			eModelPath <<= currentServo->GetModelPath();
-			cColor     <<= currentServo->GetModelColor();
-			eModelPosX <<= currentServo->GetModelTranslate().x;
-			eModelPosY <<= currentServo->GetModelTranslate().y;
-			eModelPosZ <<= currentServo->GetModelTranslate().z;
-			eModelRotX <<= currentServo->GetModelRotate().x;
-			eModelRotY <<= currentServo->GetModelRotate().y;
-			eModelRotZ <<= currentServo->GetModelRotate().z;
+			cColor     <<= model.GetColor();
+			eModelPosX <<= model.GetTranslate().x;
+			eModelPosY <<= model.GetTranslate().y;
+			eModelPosZ <<= model.GetTranslate().z;
+			eModelRotX <<= model.GetRotate().x;
+			eModelRotY <<= model.GetRotate().y;
+			eModelRotZ <<= model.GetRotate().z;
 		}
 	}
 	
