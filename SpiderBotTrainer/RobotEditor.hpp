@@ -8,102 +8,104 @@ using namespace Upp;
 
 class RobotEditor : public WithRobotEditorLayout<TopWindow> {
 private:
-  Servo3D body;
+	Servo3D body;
 	Servo3D* currentServo;
 	FileSel fs;
-	
+
 public:
 	RobotEditor() {
 		CtrlLayout(*this, t_("Robot Editor"));
-    Zoomable().Sizeable();
-    
-    fs.ActiveDir(GetExeFolder());
-    
-    viewer.Add(&body);
-    tMotors.SetRoot(CtrlImg::File(), (int64_t)&body, t_("Body"));
-    
-    bAddMotor.WhenPush = [=] {
-      int parentId = tMotors.GetCursor();
-      if (parentId >= 0) {
-        Servo3D* parentServ = dynamic_cast<Servo3D*>((Node3D*)(int64_t)tMotors[parentId]);
-        if (parentServ) {
-	        int id = tMotors.Add(parentId, CtrlImg::File(), (int64_t)parentServ->Create<Servo3D>(), t_("Servo"));
-	        tMotors.SetCursor(id);
-        }
-      }
-    };
-    
-    bRemoveMotor.WhenPush = [=] {
-      int id = tMotors.GetCursor();
-      if (id > 0) {
-        Node3D* node = (Node3D*)(int64_t)tMotors[id];
-        tMotors.Remove(id);
-        viewer.Remove(node);
-        viewer.Refresh();
-      }
-    };
-    
-    bCopyMotor.WhenPush = [=] {
-      int id = tMotors.GetCursor();
-      if (id > 0) {
-        int parentId = tMotors.GetParent(id);
-        Node3D* node = (Node3D*)(int64_t)tMotors[id];
-        Node3D* parent = (Node3D*)(int64_t)tMotors[parentId];
-        Node3D* duplicate = node->Duplicate();
-        parent->Add(duplicate, true);
-        AddNodeToTree(parentId, duplicate);
-      }
-    };
-    
-    tMotors.WhenSel = [=] {
-      int id = tMotors.GetCursor();
-      if (id == 0) {
-        SetServo(&body, true);
-      } else if (id > 0) {
-        SetServo(dynamic_cast<Servo3D*>((Node3D*)(int64_t)tMotors[id]));
-      } else {
-        SetServo(NULL);
-      }
-    };
-    
-    viewer.WhenSelected = [=](int id, Node3D* node) {
-      if (node != NULL) {
-        Servo3D* serv = dynamic_cast<Servo3D*>(node);
-        while (serv == NULL && node != NULL) {
-          node = node->GetParent();
-          serv = dynamic_cast<Servo3D*>(node);
-        }
-        if (serv != NULL) {
-          int i = tMotors.Find((int64_t)serv);
-          if (i >= 0) tMotors.SetCursor(i);
-        }
-      }
-    };
-    
-    bChangeModelPath.WhenPush = [=] {
-      if (currentServo != NULL) {
-        if (fs.ExecuteOpen(t_("Select 3d model"))) {
+		Zoomable().Sizeable();
+
+		fs.ActiveDir(GetExeFolder());
+
+		viewer.Add(&body);
+		tMotors.SetRoot(CtrlImg::File(), (int64_t)&body, t_("Body"));
+
+		bAddMotor.WhenPush = [=] {
+			int parentId = tMotors.GetCursor();
+			if (parentId >= 0) {
+				Servo3D* parentServ = dynamic_cast<Servo3D*>((Node3D*)(int64_t)tMotors[parentId]);
+				if (parentServ) {
+					Servo3D* serv = new Servo3D();
+					parentServ->Add(serv, true);
+					int id = tMotors.Add(parentId, CtrlImg::File(), (int64_t)serv, t_("Servo"));
+					tMotors.SetCursor(id);
+				}
+			}
+		};
+
+		bRemoveMotor.WhenPush = [=] {
+			int id = tMotors.GetCursor();
+			if (id > 0) {
+				Node3D* node = (Node3D*)(int64_t)tMotors[id];
+				tMotors.Remove(id);
+				viewer.Remove(node);
+				viewer.Refresh();
+			}
+		};
+
+		bCopyMotor.WhenPush = [=] {
+			int id = tMotors.GetCursor();
+			if (id > 0) {
+				int parentId = tMotors.GetParent(id);
+				Node3D* node = (Node3D*)(int64_t)tMotors[id];
+				Node3D* parent = (Node3D*)(int64_t)tMotors[parentId];
+				Node3D* duplicate = node->Duplicate();
+				parent->Add(duplicate, true);
+				AddNodeToTree(parentId, duplicate);
+			}
+		};
+
+		tMotors.WhenSel = [=] {
+			int id = tMotors.GetCursor();
+			if (id == 0) {
+				SetServo(&body, true);
+			} else if (id > 0) {
+				SetServo(dynamic_cast<Servo3D*>((Node3D*)(int64_t)tMotors[id]));
+			} else {
+				SetServo(NULL);
+			}
+		};
+
+		viewer.WhenSelected = [=](int id, Node3D* node) {
+			if (node != NULL) {
+				Servo3D* serv = dynamic_cast<Servo3D*>(node);
+				while (serv == NULL && node != NULL) {
+					node = node->GetParent();
+					serv = dynamic_cast<Servo3D*>(node);
+				}
+				if (serv != NULL) {
+					int i = tMotors.Find((int64_t)serv);
+					if (i >= 0) tMotors.SetCursor(i);
+				}
+			}
+		};
+
+		bChangeModelPath.WhenPush = [=] {
+			if (currentServo != NULL) {
+				if (fs.ExecuteOpen(t_("Select 3d model"))) {
 					currentServo->GetModel().LoadSTL(fs);
 					eModelPath <<= (String)fs;
 					viewer.ViewAll();
-        }
-      }
-    };
-    
+				}
+			}
+		};
+
 		eMinAngle.WhenAction = [=] {
 			if (currentServo) {
 				currentServo->SetMinAngle(~eMinAngle);
 				viewer.Refresh();
 			}
 		};
-		
+
 		eMaxAngle.WhenAction = [=] {
 			if (currentServo) {
 				currentServo->SetMaxAngle(~eMaxAngle);
 				viewer.Refresh();
 			}
 		};
-    
+
 		ePosX.WhenAction = [=] {
 			if (currentServo) {
 				Point3f p = currentServo->GetTranslate();
@@ -112,7 +114,7 @@ public:
 				viewer.Refresh();
 			}
 		};
-		
+
 		ePosY.WhenAction = [=] {
 			if (currentServo) {
 				Point3f p = currentServo->GetTranslate();
@@ -121,7 +123,7 @@ public:
 				viewer.Refresh();
 			}
 		};
-		
+
 		ePosZ.WhenAction = [=] {
 			if (currentServo) {
 				Point3f p = currentServo->GetTranslate();
@@ -130,7 +132,7 @@ public:
 				viewer.Refresh();
 			}
 		};
-		
+
 		eRotX.WhenAction = [=] {
 			if (currentServo) {
 				Point3f p = currentServo->GetRotate();
@@ -139,7 +141,7 @@ public:
 				viewer.Refresh();
 			}
 		};
-		
+
 		eRotY.WhenAction = [=] {
 			if (currentServo) {
 				Point3f p = currentServo->GetRotate();
@@ -148,7 +150,7 @@ public:
 				viewer.Refresh();
 			}
 		};
-		
+
 		eRotZ.WhenAction = [=] {
 			if (currentServo) {
 				Point3f p = currentServo->GetRotate();
@@ -157,7 +159,7 @@ public:
 				viewer.Refresh();
 			}
 		};
-		
+
 		eModelPosX.WhenAction = [=] {
 			if (currentServo) {
 				Node3D& model = currentServo->GetModel();
@@ -167,7 +169,7 @@ public:
 				viewer.Refresh();
 			}
 		};
-		
+
 		eModelPosY.WhenAction = [=] {
 			if (currentServo) {
 				Node3D& model = currentServo->GetModel();
@@ -177,7 +179,7 @@ public:
 				viewer.Refresh();
 			}
 		};
-		
+
 		eModelPosZ.WhenAction = [=] {
 			if (currentServo) {
 				Node3D& model = currentServo->GetModel();
@@ -187,7 +189,7 @@ public:
 				viewer.Refresh();
 			}
 		};
-		
+
 		eModelRotX.WhenAction = [=] {
 			if (currentServo) {
 				Node3D& model = currentServo->GetModel();
@@ -197,7 +199,7 @@ public:
 				viewer.Refresh();
 			}
 		};
-		
+
 		eModelRotY.WhenAction = [=] {
 			if (currentServo) {
 				Node3D& model = currentServo->GetModel();
@@ -207,7 +209,7 @@ public:
 				viewer.Refresh();
 			}
 		};
-		
+
 		eModelRotZ.WhenAction = [=] {
 			if (currentServo) {
 				Node3D& model = currentServo->GetModel();
@@ -217,7 +219,7 @@ public:
 				viewer.Refresh();
 			}
 		};
-		
+
 		cColor.WhenAction = [=] {
 			if (currentServo) {
 				currentServo->GetModel().SetColor(~cColor);
@@ -225,8 +227,8 @@ public:
 				viewer.Refresh();
 			}
 		};
-    
-    SetServo(NULL);
+
+		SetServo(NULL);
 	}
 	
 	~RobotEditor() {
@@ -234,7 +236,7 @@ public:
 		tMotors.Clear();
 		viewer.Clear();
 	}
-	
+
 private:
 	void SetServo(Servo3D* serv, bool isBody = false) {
 		currentServo = serv;
@@ -300,7 +302,7 @@ private:
 			eModelRotZ <<= model.GetRotate().z;
 		}
 	}
-	
+
 	void AddNodeToTree(int parentId, Node3D* node) {
 		int id = tMotors.Add(parentId, CtrlImg::File(), (int64_t)node, t_("Servo"));
 		for (Node3D* n : node->GetChildren()) {

@@ -14,12 +14,12 @@ public:
 	Servo3D() {
 		Add(&stl);
 	}
-	
+
 	Servo3D(const String& stlPath, const Point3f& translationVector, const Point3f& rotationVector, const Color& color) : Node3D() {
 		this->stlPath = stlPath;
 		Add(&stl.LoadSTL(stlPath).SetTranslate(translationVector).SetRotate(rotationVector).SetColor(color));
 	}
-	
+
 	virtual Node3D* Duplicate(Node3D* src = NULL, bool uniqIDs = true) override {
 		if (src == NULL) src = new Servo3D();
 		Node3D* dublicate = Node3D::Duplicate(src, uniqIDs);
@@ -31,54 +31,63 @@ public:
 		}
 		return dublicate;
 	}
-	
+
 	Servo3D& SetAngle(float angle) {
 		return *this;
 	}
-	
+
 	float GetMinAngle() {
 		return minAngle;
 	}
-	
+
 	void SetMinAngle(float angle) {
 		minAngle = angle;
 	}
-	
+
 	float GetMaxAngle() {
 		return maxAngle;
 	}
-	
+
 	void SetMaxAngle(float angle) {
 		maxAngle = angle;
 	}
-	
+
 	String GetModelPath() {
 		return stlPath;
 	}
-	
+
 	Node3D& GetModel() {
 		return stl;
 	}
-	
+
 	virtual void GLPaint(bool isSelectMode) override {
 		Node3D::GLPaint(isSelectMode);
 		if (!isSelectMode && isSelected) {
+			glPushMatrix();
+			// Преобразования модели
+			glScalef(scale.x, scale.y, scale.z);
+			glTranslatef(translate.x, translate.y, translate.z);
+			glRotatef(rotate.x, 1, 0, 0);
+			glRotatef(rotate.y, 0, 1, 0);
+			glRotatef(rotate.z, 0, 0, 1);
+
 			glDisable(GL_LIGHTING); // Отключаем освещение для осей
 			glLineWidth(2.0f);
 			glBegin(GL_LINES);
-        // Ось X (красный)
-        glColor3f(1.0f, 0.0f, 0.0f);
-        glVertex3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(100.0f, 0.0f, 0.0f); // Длина оси = 100
+				// Ось X (красный)
+				glColor3f(1.0f, 0.0f, 0.0f);
+				glVertex3f(0.0f, 0.0f, 0.0f);
+				glVertex3f(100.0f, 0.0f, 0.0f); // Длина оси = 100
 
-        // Ось Z (синий)
-        glColor3f(0.0f, 0.0f, 1.0f);
-        glVertex3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(0.0f, 0.0f, 100.0f);
+				// Ось Z (синий)
+				glColor3f(0.0f, 0.0f, 1.0f);
+				glVertex3f(0.0f, 0.0f, -100.0f);
+				glVertex3f(0.0f, 0.0f, 100.0f);
 			glEnd();
-      
-      //glColor3f(0.0f, 1.0f, 0.0f);
-			//DrawSector(maxAngle, 100.0f);
+
+			glColor3f(0.0f, 1.0f, 0.0f);
+			DrawSector(maxAngle, 50.0f);
+			glPopMatrix();
 		}
 	}
 

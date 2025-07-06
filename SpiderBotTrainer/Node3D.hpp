@@ -6,41 +6,41 @@
 using namespace Upp;
 
 struct Point3f {
-  float x = 0.f, y = 0.f, z = 0.f;
-  Point3f() = default;
-  Point3f(float x, float y, float z) : x(x), y(y), z(z) {}
-  
-  Point3f operator+(const Point3f& p) const { return {x + p.x, y + p.y, z + p.z}; }
-  Point3f& operator+=(const Point3f& p) {x += p.x; y += p.y; z += p.z; return *this;}
-  Point3f operator-(const Point3f& p) const { return {x - p.x, y - p.y, z - p.z}; }
-  Point3f operator*(const Point3f& p) const { return {x * p.x, y * p.y, z * p.z}; }
-  Point3f& operator*=(const Point3f& p) {x *= p.x; y *= p.y; z *= p.z; return *this;}
-  Point3f operator*(float f) const         { return {x * f, y * f, z * f}; }
-  Point3f operator/(float f) const         { return {x / f, y / f, z / f}; }
-  bool operator==(const Point3f& p) { return x == p.x && y == p.y && z == p.z; }
+	float x = 0.f, y = 0.f, z = 0.f;
+	Point3f() = default;
+	Point3f(float x, float y, float z) : x(x), y(y), z(z) {}
+	
+	Point3f operator+(const Point3f& p) const { return {x + p.x, y + p.y, z + p.z}; }
+	Point3f& operator+=(const Point3f& p) {x += p.x; y += p.y; z += p.z; return *this;}
+	Point3f operator-(const Point3f& p) const { return {x - p.x, y - p.y, z - p.z}; }
+	Point3f operator*(const Point3f& p) const { return {x * p.x, y * p.y, z * p.z}; }
+	Point3f& operator*=(const Point3f& p) {x *= p.x; y *= p.y; z *= p.z; return *this;}
+	Point3f operator*(float f) const         { return {x * f, y * f, z * f}; }
+	Point3f operator/(float f) const         { return {x / f, y / f, z / f}; }
+	bool operator==(const Point3f& p) { return x == p.x && y == p.y && z == p.z; }
 
-  float Length() const {
+	float Length() const {
 		return sqrtf(x*x + y*y + z*z);
 	}
-  
-  Point3f Normalize() const {
+
+	Point3f Normalize() const {
 		float len = Length();
 		return len > 0 ? *this / len : *this;
 	}
-	
+
 	void min(const Point3f& p) {
 		if (p.x < x) x = p.x;
 		if (p.y < y) y = p.y;
 		if (p.z < z) z = p.z;
-  }
-  
+	}
+
 	void max(const Point3f& p) {
 		if (p.x > x) x = p.x;
 		if (p.y > y) y = p.y;
 		if (p.z > z) z = p.z;
-  }
-  
-  Point3f Cross(const Point3f& p) {
+	}
+
+	Point3f Cross(const Point3f& p) {
 		return Point3f{
 			y * p.z - z * p.y,
 			z * p.x - x * p.z,
@@ -52,55 +52,56 @@ struct Point3f {
 		if (calcRxyzAngleDeg == angle_deg) return;
 		calcRxyzAngleDeg = angle_deg;
 		float ax = (float)(angle_deg.x * M_PI / 180.0);
-    float ay = (float)(angle_deg.y * M_PI / 180.0);
-    float az = (float)(angle_deg.z * M_PI / 180.0);
-    
-    // Вычисление синусов и косинусов
-    float cx = std::cos(ax), sx = std::sin(ax);
-    float cy = std::cos(ay), sy = std::sin(ay);
-    float cz = std::cos(az), sz = std::sin(az);
-    
-    float Rx[3][3] = {
-        {1,  0,   0},
-        {0, cx, -sx},
-        {0, sx,  cx}
-    };
-    
-    float Ry[3][3] = {
-        { cy, 0, sy},
-        {  0, 1,  0},
-        {-sy, 0, cy}
-    };
-    
-    float Rz[3][3] = {
-        {cz, -sz, 0},
-        {sz,  cz, 0},
-        { 0,   0, 1}
-    };
-    
-    // Вычисление результирующей матрицы: Rz * Ry * Rx
-    for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < 3; ++j) {
-            for (int k = 0; k < 3; ++k) {
-                float RyRx = 0.0f;
-                for (int l = 0; l < 3; ++l) {
-                    RyRx += Ry[k][l] * Rx[l][j];
-                }
-                calcRxyz[i][j] += Rz[i][k] * RyRx;
-            }
-        }
-    }
+		float ay = (float)(angle_deg.y * M_PI / 180.0);
+		float az = (float)(angle_deg.z * M_PI / 180.0);
+
+		// Вычисление синусов и косинусов
+		float cx = std::cos(ax), sx = std::sin(ax);
+		float cy = std::cos(ay), sy = std::sin(ay);
+		float cz = std::cos(az), sz = std::sin(az);
+
+		float Rx[3][3] = {
+			{1,  0,   0},
+			{0, cx, -sx},
+			{0, sx,  cx}
+		};
+
+		float Ry[3][3] = {
+			{ cy, 0, sy},
+			{  0, 1,  0},
+			{-sy, 0, cy}
+		};
+
+		float Rz[3][3] = {
+			{cz, -sz, 0},
+			{sz,  cz, 0},
+			{ 0,   0, 1}
+		};
+
+		// Вычисление результирующей матрицы: Rz * Ry * Rx
+		for (int i = 0; i < 3; ++i) {
+			for (int j = 0; j < 3; ++j) {
+				calcRxyz[i][j] = 0.f;
+				for (int k = 0; k < 3; ++k) {
+					float RyRx = 0.0f;
+					for (int l = 0; l < 3; ++l) {
+						RyRx += Ry[k][l] * Rx[l][j];
+					}
+					calcRxyz[i][j] += Rz[i][k] * RyRx;
+				}
+			}
+		}
 	}
-	
+
 	Point3f Rotate(const Point3f& angle_deg) {
 		CalcRotateMatrix(angle_deg);
-    return Point3f{
-        calcRxyz[0][0] * x + calcRxyz[0][1] * y + calcRxyz[0][2] * z,
-        calcRxyz[1][0] * x + calcRxyz[1][1] * y + calcRxyz[1][2] * z,
-        calcRxyz[2][0] * x + calcRxyz[2][1] * y + calcRxyz[2][2] * z
-    };
+		return Point3f{
+			calcRxyz[0][0] * x + calcRxyz[0][1] * y + calcRxyz[0][2] * z,
+			calcRxyz[1][0] * x + calcRxyz[1][1] * y + calcRxyz[1][2] * z,
+			calcRxyz[2][0] * x + calcRxyz[2][1] * y + calcRxyz[2][2] * z
+		};
 	}
-	
+
 private:
 	static Point3f calcRxyzAngleDeg;
 	static float calcRxyz[3][3];
@@ -108,42 +109,42 @@ private:
 
 Point3f Point3f::calcRxyzAngleDeg = {NAN, NAN, NAN};
 float Point3f::calcRxyz[3][3];
-	
+
 struct Triangle {
-  Point3f normal;
-  Point3f vertices[3];
+	Point3f normal;
+	Point3f vertices[3];
 };
 
 struct Bboxf {
 	Point3f min;
 	Point3f max;
-	
-  Bboxf& operator+=(const Bboxf& b) {
-    min.min(b.min);
-    min.min(b.max);
-    max.max(b.min);
-    max.max(b.max);
+
+	Bboxf& operator+=(const Bboxf& b) {
+		min.min(b.min);
+		min.min(b.max);
+		max.max(b.min);
+		max.max(b.max);
 		return *this;
 	}
-	
+
 	Bboxf& operator+=(const Point3f& p) {
 		min.min(p);
 		max.max(p);
 		return *this;
 	}
-	
-  Bboxf operator*(float f) const {
+
+	Bboxf operator*(float f) const {
 		return {min * f, max * f};
 	}
-	
+
 	Bboxf operator*(const Point3f& p) const {
 		return {min * p, max * p};
 	}
-	
+
 	Bboxf Translate(const Point3f& p) {
 		return Bboxf{min + p, max + p};
 	}
-	
+
 	Bboxf Rotate(const Point3f& angleDeg) {
 		if (angleDeg.Length() > 0.01) {
 			Point3f rMin = min.Rotate(angleDeg);
@@ -166,7 +167,7 @@ struct Bboxf {
 		}
 		return *this;
 	}
-	
+
 	Point3f GetSize() {
 		return Point3f {
 			std::abs(min.x - max.x),
@@ -174,7 +175,7 @@ struct Bboxf {
 			std::abs(min.z - max.z)
 		};
 	}
-	
+
 	bool isEmpty() const {
 		return (min + max).Length() < 0.001;
 	}
@@ -183,26 +184,26 @@ struct Bboxf {
 class Node3D {
 private:
 	Vector<Node3D*> createdNodes;
-	
+
 protected:
-  static int nextId;
+	static int nextId;
 	int id;
-  Point3f scale = {1.0f, 1.0f, 1.0f};
-  Point3f rotate;
-  Point3f translate;
-  Color color = LtGray;
-  bool isSelected = false;
-  Bboxf bbox;
+	Point3f scale = {1.0f, 1.0f, 1.0f};
+	Point3f rotate;
+	Point3f translate;
+	Color color = LtGray;
+	bool isSelected = false;
+	Bboxf bbox;
 	Vector<Triangle> triangles;
-  
+
 	Vector<Node3D*> nodes;
 	Node3D* parent = NULL;
-	
+
 public:
 	Node3D() {
 		id = nextId++;
 	}
-	
+
 	virtual Node3D* Duplicate(Node3D* src = NULL, bool uniqIDs = true) {
 		if (src == NULL) src = new Node3D();
 		if (!uniqIDs) src->id = id;
@@ -221,7 +222,7 @@ public:
 		}
 		return src;
 	}
-	
+
 	virtual ~Node3D() {
 		for (Node3D* node : createdNodes) {
 			delete node;
@@ -229,16 +230,16 @@ public:
 		createdNodes.Clear();
 		nodes.Clear();
 	}
-	
+
 	Node3D& Add(Node3D* node, bool autoFree = false) {
 		if (node != NULL) {
 			nodes.Add(node);
 			node->parent = this;
 			if (autoFree) createdNodes.Add(node);
 		}
-	  return *this;
+		return *this;
 	}
-	
+
 	bool Remove(Node3D* node) {
 		if (node == NULL) return false;
 		for (int i = 0; i < nodes.GetCount(); ++i) {
@@ -260,7 +261,7 @@ public:
 		}
 		return false;
 	}
-	
+
 	virtual Node3D& LoadSTL(const String& filepath) {
 		triangles.Clear();
 		FileIn in(filepath);
@@ -268,18 +269,18 @@ public:
 			LOG("Ошибка открытия файла: " + filepath);
 			return *this;
 		}
-		
+
 		// Проверка формата
 		String header = in.Get(80);
 		bool is_ascii = header.StartsWith("solid") && header.Find("endsolid") < 0;
 		in.Seek(0);
-		
+
 		if (is_ascii) {
 			LoadAsciiSTL(in);
 		} else {
 			LoadBinarySTL(in);
 		}
-		
+
 		if (!triangles.IsEmpty()) {
 			bbox = {{FLT_MAX, FLT_MAX, FLT_MAX}, {-FLT_MAX, -FLT_MAX, -FLT_MAX}};
 			for (const Triangle& t : triangles) {
@@ -290,10 +291,9 @@ public:
 		}
 		return *this;
 	}
-	
+
 	virtual void GLPaint(bool isSelectMode) {
-    glPushMatrix();
-    DrawBbox();
+		glPushMatrix();
 		// Преобразования модели
 		glScalef(scale.x, scale.y, scale.z);
 		glTranslatef(translate.x, translate.y, translate.z);
@@ -301,9 +301,9 @@ public:
 		glRotatef(rotate.y, 0, 1, 0);
 		glRotatef(rotate.z, 0, 0, 1);
 		
-    for (Node3D* node : nodes) {
-      node->GLPaint(isSelectMode);
-    }
+		for (Node3D* node : nodes) {
+			node->GLPaint(isSelectMode);
+		}
 		
 		if (triangles.GetCount() > 0) {
 			if (isSelectMode) {
@@ -326,41 +326,46 @@ public:
 			}
 			glEnd();
 		}
-    glPopMatrix();
+		glPopMatrix();
 	}
-	
+
 	Node3D& SetScale(const Point3f& s) {
 		scale = s;
-	  return *this;
+		return *this;
 	}
 	
+	Node3D& SetScale(const float s) {
+		scale = {s, s, s};
+		return *this;
+	}
+
 	Node3D& SetRotate(const Point3f& p) {
 		rotate = p;
-	  return *this;
+		return *this;
 	}
-	
+
 	const Point3f& GetRotate() const & {
 		return rotate;
 	}
-	
+
 	Node3D& SetTranslate(const Point3f& t) {
 		translate = t;
-	  return *this;
+		return *this;
 	}
-	
+
 	const Point3f& GetTranslate() const & {
 		return translate;
 	}
-	
+
 	Node3D& SetColor(const Color& c) {
 		color = c;
-	  return *this;
+		return *this;
 	}
-	
+
 	const Color& GetColor() const & {
 		return color;
 	}
-	
+
 	const Bboxf GetBbox() const {
 		Bboxf res{{FLT_MAX, FLT_MAX, FLT_MAX}, {-FLT_MAX, -FLT_MAX, -FLT_MAX}};
 		for (Node3D* node : nodes) {
@@ -369,49 +374,72 @@ public:
 		if (!bbox.isEmpty() || nodes.GetCount() == 0) res += bbox;
 		return res.Rotate(rotate).Translate(translate) * scale;
 	}
-	
+
 	Node3D& Selected(bool isSel = true, bool recursive = false) {
 		isSelected = isSel;
 		if (recursive) for (Node3D* node : nodes) node->Selected(isSel, recursive);
 	  return *this;
 	}
-	
+
 	bool IsSelected() const {
 		return isSelected;
 	}
-	
+
 	int GetId() const {
 		return id;
 	}
-	
+
 	Node3D* GetParent() {
 		return parent;
 	}
-	
+
 	const Vector<Node3D*>& GetChildren() {
 		return nodes;
 	}
-	
+
 	template <class T>
 	T* GetNode(int id) {
 		if (id == this->id) return dynamic_cast<T*>(this);
 		if (id < 0) return NULL;
 		T* res = NULL;
 		for (Node3D* node : nodes) {
-	    if (node->GetId() == id) {
+			if (node->GetId() == id) {
 				return dynamic_cast<T*>(node);
-	    } else if ((res = node->GetNode<T>(id)) != NULL) {
-	      return res;
-	    }
-	  }
+			} else if ((res = node->GetNode<T>(id)) != NULL) {
+				return res;
+			}
+		}
 		return NULL;
 	}
 	
-	template <class T>
-	T* Create() {
-		T* node = new T();
-		Add(node, true);
-		return node;
+	void DrawBbox() {
+		for (Node3D* node : nodes) {
+			node->DrawBbox();
+		}
+		const Bboxf bbx = GetBbox();
+		glBegin(GL_LINE_STRIP);
+			glVertex3f(bbx.min.x, bbx.min.y, bbx.min.z);
+			glVertex3f(bbx.min.x, bbx.max.y, bbx.min.z);
+			glVertex3f(bbx.max.x, bbx.max.y, bbx.min.z);
+			glVertex3f(bbx.max.x, bbx.min.y, bbx.min.z);
+			glVertex3f(bbx.min.x, bbx.min.y, bbx.min.z);
+			
+			glVertex3f(bbx.min.x, bbx.min.y, bbx.max.z);
+			glVertex3f(bbx.min.x, bbx.max.y, bbx.max.z);
+			glVertex3f(bbx.max.x, bbx.max.y, bbx.max.z);
+			glVertex3f(bbx.max.x, bbx.min.y, bbx.max.z);
+			glVertex3f(bbx.min.x, bbx.min.y, bbx.max.z);
+		glEnd();
+		glBegin(GL_LINES);
+			glVertex3f(bbx.max.x, bbx.min.y, bbx.min.z);
+			glVertex3f(bbx.max.x, bbx.min.y, bbx.max.z);
+			
+			glVertex3f(bbx.min.x, bbx.max.y, bbx.min.z);
+			glVertex3f(bbx.min.x, bbx.max.y, bbx.max.z);
+			
+			glVertex3f(bbx.max.x, bbx.max.y, bbx.min.z);
+			glVertex3f(bbx.max.x, bbx.max.y, bbx.max.z);
+		glEnd();
 	}
 	
 private:
@@ -419,7 +447,7 @@ private:
 		String line;
 		Triangle current;
 		int vertex_index = 0;
-		
+
 		while (!in.IsEof()) {
 			line = in.GetLine();
 			if (line.StartsWith("facet normal")) {
@@ -471,37 +499,6 @@ private:
 		}
 	}
 	
-	void DrawBbox() {
-		glDisable(GL_LIGHTING);
-		glLineWidth(1.0f);
-    glColor3f(1.0f, 1.0f, 1.0f); // White
-    const Bboxf bbx = GetBbox();
-		glBegin(GL_LINE_STRIP);
-	    glVertex3f(bbx.min.x, bbx.min.y, bbx.min.z);
-	    glVertex3f(bbx.min.x, bbx.max.y, bbx.min.z);
-	    glVertex3f(bbx.max.x, bbx.max.y, bbx.min.z);
-	    glVertex3f(bbx.max.x, bbx.min.y, bbx.min.z);
-	    glVertex3f(bbx.min.x, bbx.min.y, bbx.min.z);
-	    
-	    glVertex3f(bbx.min.x, bbx.min.y, bbx.max.z);
-	    glVertex3f(bbx.min.x, bbx.max.y, bbx.max.z);
-	    glVertex3f(bbx.max.x, bbx.max.y, bbx.max.z);
-	    glVertex3f(bbx.max.x, bbx.min.y, bbx.max.z);
-	    glVertex3f(bbx.min.x, bbx.min.y, bbx.max.z);
-		glEnd();
-	  glBegin(GL_LINES);
-	    glVertex3f(bbx.max.x, bbx.min.y, bbx.min.z);
-	    glVertex3f(bbx.max.x, bbx.min.y, bbx.max.z);
-	    
-	    glVertex3f(bbx.min.x, bbx.max.y, bbx.min.z);
-	    glVertex3f(bbx.min.x, bbx.max.y, bbx.max.z);
-	    
-	    glVertex3f(bbx.max.x, bbx.max.y, bbx.min.z);
-	    glVertex3f(bbx.max.x, bbx.max.y, bbx.max.z);
-		glEnd();
-		glEnable(GL_LIGHTING);
-	}
-	
 };
 
 int Node3D::nextId = 1;
@@ -512,26 +509,26 @@ public:
 		float c2x = cx / 2.0f;
 		float c2y = cy / 2.0f;
 		float c2z = cz / 2.0f;
-		
+
 		triangles.Add({{0.0f, 0.0f, -c2z}, {{-c2x, -c2y, -c2z}, {c2x, -c2y, -c2z}, {c2x, c2y, -c2z}}});
 		triangles.Add({{0.0f, 0.0f, -c2z}, {{-c2x, -c2y, -c2z}, {-c2x,  c2y, -c2z}, {c2x, c2y, -c2z}}});
 
 		triangles.Add({{-c2x, 0.0f, 0.0f}, {{-c2x, -c2y, -c2z}, {-c2x,  -c2y,  c2z}, {-c2x, c2y, -c2z}}});
 		triangles.Add({{-c2x, 0.0f, 0.0f}, {{-c2x, c2y, c2z}, {-c2x,  -c2y,  c2z}, {-c2x, c2y, -c2z}}});
-                                
+
 		triangles.Add({{0.0f, 0.0f, c2z}, {{-c2x, -c2y, c2z}, {c2x, -c2y, c2z}, {c2x, c2y, c2z}}});
 		triangles.Add({{0.0f, 0.0f, c2z}, {{-c2x, -c2y, c2z}, {-c2x,  c2y, c2z}, {c2x, c2y, c2z}}});
-                                
+
 		triangles.Add({{c2x, 0.0f, 0.0f}, {{c2x, -c2y, -c2z}, {c2x,  -c2y,  c2z}, {c2x, c2y, -c2z}}});
 		triangles.Add({{c2x, 0.0f, 0.0f}, {{c2x, c2y, c2z}, {c2x,  -c2y,  c2z}, {c2x, c2y, -c2z}}});
-                                
+
 		triangles.Add({{0.0f, c2y, 0.0f}, {{c2x, c2y, c2z}, {-c2x,  c2y,  c2z}, {c2x, c2y, -c2z}}});
 		triangles.Add({{0.0f, c2y, 0.0f}, {{-c2x, c2y, c2z}, {-c2x,  c2y,  -c2z}, {c2x, c2y, -c2z}}});
-                                
+
 		triangles.Add({{0.0f, -c2y, 0.0f}, {{c2x, -c2y, c2z}, {-c2x,  -c2y,  c2z}, {c2x, -c2y, -c2z}}});
 		triangles.Add({{0.0f, -c2y, 0.0f}, {{-c2x, -c2y, c2z}, {-c2x,  -c2y,  -c2z}, {c2x, -c2y, -c2z}}});
-		
-	  bbox = {{-c2x, -c2y, -c2z}, {c2x, c2y, c2z}};
+
+		bbox = {{-c2x, -c2y, -c2z}, {c2x, c2y, c2z}};
 	}
 private:
 	virtual Node3D& LoadSTL(const String& filepath) { return *this; };
