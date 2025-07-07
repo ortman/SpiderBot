@@ -32,7 +32,7 @@ public:
 		segment2->Add(segment3, true);
 
 		Servo3D* foot2 = (Servo3D*)foot1->Duplicate();
-		foot1->SetTranslate({-36.5f,  0.0f, 20.5f}).SetRotate({0.0f, 0.0f, 180.0f});
+		foot2->SetTranslate({-36.5f,  0.0f, 20.5f}).SetRotate({0.0f, 0.0f, 180.0f});
 
 		Servo3D* foot3 = (Servo3D*)foot1->Duplicate();
 		foot3->SetTranslate({-25.f,  67.0f, 20.5f}).SetRotate({0.0f, 0.0f, 150.0f});

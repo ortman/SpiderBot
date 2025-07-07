@@ -8,7 +8,9 @@ private:
 	Node3D stl;
 	float minAngle = 0.0f;
 	float maxAngle = 180.0f;
+	float angle = 0.0f;
 	String stlPath;
+	Point3f servoRotation;
 	
 public:
 	Servo3D() {
@@ -32,7 +34,13 @@ public:
 		return dublicate;
 	}
 
-	Servo3D& SetAngle(float angle) {
+	Servo3D& SetAngle(float a) {
+		angle = a;
+		if (angle > maxAngle) angle = maxAngle;
+		if (angle < minAngle) angle = minAngle;
+		Point3f rot = servoRotation;
+		rot.z += angle;
+		Node3D::SetRotate(rot);
 		return *this;
 	}
 
@@ -40,16 +48,18 @@ public:
 		return minAngle;
 	}
 
-	void SetMinAngle(float angle) {
+	Servo3D& SetMinAngle(float angle) {
 		minAngle = angle;
+		return *this;
 	}
 
 	float GetMaxAngle() {
 		return maxAngle;
 	}
 
-	void SetMaxAngle(float angle) {
+	Servo3D& SetMaxAngle(float angle) {
 		maxAngle = angle;
+		return *this;
 	}
 
 	String GetModelPath() {
@@ -58,6 +68,16 @@ public:
 
 	Node3D& GetModel() {
 		return stl;
+	}
+	
+	virtual Node3D& SetRotate(const Point3f& p) override {
+		Point3f rot = servoRotation = p;
+		rot.z += angle;
+		return Node3D::SetRotate(rot);
+	}
+
+	virtual Point3f GetRotate() const override {
+		return servoRotation;
 	}
 
 	virtual void GLPaint(bool isSelectMode) override {

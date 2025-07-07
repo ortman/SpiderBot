@@ -60,37 +60,27 @@ struct Point3f {
 		float cy = std::cos(ay), sy = std::sin(ay);
 		float cz = std::cos(az), sz = std::sin(az);
 
-		float Rx[3][3] = {
-			{1,  0,   0},
-			{0, cx, -sx},
-			{0, sx,  cx}
-		};
-
-		float Ry[3][3] = {
-			{ cy, 0, sy},
-			{  0, 1,  0},
-			{-sy, 0, cy}
-		};
-
-		float Rz[3][3] = {
-			{cz, -sz, 0},
-			{sz,  cz, 0},
-			{ 0,   0, 1}
-		};
-
-		// Вычисление результирующей матрицы: Rz * Ry * Rx
-		for (int i = 0; i < 3; ++i) {
-			for (int j = 0; j < 3; ++j) {
-				calcRxyz[i][j] = 0.f;
-				for (int k = 0; k < 3; ++k) {
-					float RyRx = 0.0f;
-					for (int l = 0; l < 3; ++l) {
-						RyRx += Ry[k][l] * Rx[l][j];
-					}
-					calcRxyz[i][j] += Rz[i][k] * RyRx;
-				}
-			}
-		}
+		// X -> Y -> Z
+		// calcRxyz[0][0] = cy * cz;
+		// calcRxyz[0][1] = sx * sy * cz - cx * sz;
+		// calcRxyz[0][2] = cx * sy * cz + sx * sz;
+		// calcRxyz[1][0] = cy * sz;
+		// calcRxyz[1][1] = sx * sy * sz + cx * cz;
+		// calcRxyz[1][2] = cx * sy * sz - sx * cz;
+		// calcRxyz[2][0] = -sy;
+		// calcRxyz[2][1] = sx * cy;
+		// calcRxyz[2][2] = cx * cy;
+		
+		// Z -> Y -> X
+		calcRxyz[0][0] = cy * cz;
+		calcRxyz[0][1] = -cy*sz;
+		calcRxyz[0][2] = sy;
+		calcRxyz[1][0] = cx*sz + sx*sy*cz;
+		calcRxyz[1][1] = cx*cz - sx*sy*sz;
+		calcRxyz[1][2] = -sx*cy;
+		calcRxyz[2][0] = sx*sz - cx*sy*cz;
+		calcRxyz[2][1] = sx*cz + cx*sy*sz;
+		calcRxyz[2][2] = cx*cy;
 	}
 
 	Point3f Rotate(const Point3f& angle_deg) {
@@ -339,12 +329,12 @@ public:
 		return *this;
 	}
 
-	Node3D& SetRotate(const Point3f& p) {
+	virtual Node3D& SetRotate(const Point3f& p) {
 		rotate = p;
 		return *this;
 	}
 
-	const Point3f& GetRotate() const & {
+	virtual Point3f GetRotate() const {
 		return rotate;
 	}
 
