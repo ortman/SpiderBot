@@ -12,6 +12,50 @@ private:
 	Servo3D body;
 
 public:
+
+	MainWindow() {
+		//SetDarkThemeEnabled(false);
+		CtrlLayout(*this, t_("SpiderBot Trainer"));
+		Zoomable().Sizeable();
+
+		AddFrame(menu);
+		menu.Set([=](Bar& bar) { MainMenu(bar); });
+
+		clSteps.Add("Step1");
+
+		tFoots.WhenSel = [=] {
+			int id = tFoots.GetCursor();
+			if (id != 0) body.Selected(false);
+			Servo3D* serv = dynamic_cast<Servo3D*>((Node3D*)(int64_t)tFoots[id]);
+			if (serv != NULL && id >= 0) viewer.SelectNode(serv);
+			viewer.Refresh();
+		};
+
+		//GLCtrl::SetDoubleBuffering();
+		GLCtrl::SetMSAA(); // Anti-aliasing on
+
+		viewer.WhenSelected = [=](int id, Node3D* node) {
+			if (node != NULL) {
+				Servo3D* serv = dynamic_cast<Servo3D*>(node);
+				while (serv == NULL && node != NULL) {
+					node = node->GetParent();
+					serv = dynamic_cast<Servo3D*>(node);
+				}
+				if (serv != NULL && serv != &body) {
+					int i = tFoots.Find((int64_t)serv);
+					if (i >= 0) tFoots.SetCursor(i);
+				}
+			}
+		};
+
+		bUnits.WhenPush = [=] {
+		};
+	}
+
+	~MainWindow() {
+	}
+
+private:
 	void LoadRobot() {
 		viewer.Clear();
 		tFoots.Clear();
@@ -62,50 +106,7 @@ public:
 		AddNodeToTree(0, foot5);
 		AddNodeToTree(0, foot6);
 	}
-
-	MainWindow() {
-		//SetDarkThemeEnabled(false);
-		CtrlLayout(*this, t_("SpiderBot Trainer"));
-		Zoomable().Sizeable();
-
-		AddFrame(menu);
-		menu.Set([=](Bar& bar) { MainMenu(bar); });
-
-		clSteps.Add("Step1");
-
-		tFoots.WhenSel = [=] {
-			int id = tFoots.GetCursor();
-			if (id != 0) body.Selected(false);
-			Servo3D* serv = dynamic_cast<Servo3D*>((Node3D*)(int64_t)tFoots[id]);
-			if (serv != NULL && id >= 0) viewer.SelectNode(serv);
-			viewer.Refresh();
-		};
-
-		//GLCtrl::SetDoubleBuffering();
-		GLCtrl::SetMSAA();
-
-		viewer.WhenSelected = [=](int id, Node3D* node) {
-			if (node != NULL) {
-				Servo3D* serv = dynamic_cast<Servo3D*>(node);
-				while (serv == NULL && node != NULL) {
-					node = node->GetParent();
-					serv = dynamic_cast<Servo3D*>(node);
-				}
-				if (serv != NULL && serv != &body) {
-					int i = tFoots.Find((int64_t)serv);
-					if (i >= 0) tFoots.SetCursor(i);
-				}
-			}
-		};
-
-		bUnits.WhenPush = [=] {
-		};
-	}
-
-	~MainWindow() {
-	}
-
-private:
+	
 	void MainMenu(Bar& bar) {
 		bar.Sub(t_("File"), [=](Bar& bar) {
 			bar.Add(t_("Exit"), [=] {
