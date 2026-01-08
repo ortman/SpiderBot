@@ -100,11 +100,6 @@ private:
 Point3f Point3f::calcRxyzAngleDeg = {NAN, NAN, NAN};
 float Point3f::calcRxyz[3][3];
 
-struct Triangle {
-	Point3f normal;
-	Point3f vertices[3];
-};
-
 struct Bboxf {
 	Point3f min;
 	Point3f max;
@@ -174,6 +169,8 @@ struct Bboxf {
 class Node3D {
 private:
 	Vector<Node3D*> createdNodes;
+	GLuint vao = 0;
+	GLuint vbo = 0;
 
 protected:
 	static int nextId;
@@ -184,7 +181,7 @@ protected:
 	Color color = LtGray;
 	bool isSelected = false;
 	Bboxf bbox;
-	Vector<Triangle> triangles;
+	Vector<Point3f> points; // XYZ, normal XYZ
 
 	Vector<Node3D*> nodes;
 	Node3D* parent = NULL;
@@ -203,7 +200,7 @@ public:
 		src->translate = translate;
 		src->color = color;
 		src->isSelected = isSelected;
-		src->triangles = clone(triangles);
+		src->points = clone(points);
 		Node3D* tmp;
 		for (Node3D* n : nodes) {
 			tmp = n->Duplicate(NULL, uniqIDs);
@@ -219,6 +216,7 @@ public:
 		}
 		createdNodes.Clear();
 		nodes.Clear();
+		GLDeinit();
 	}
 
 	Node3D& Add(Node3D* node, bool autoFree = false) {
@@ -253,7 +251,7 @@ public:
 	}
 
 	virtual Node3D& LoadSTL(const String& filepath) {
-		triangles.Clear();
+		points.Clear();
 		FileIn in(filepath);
 		if (!in) {
 			LOG("Ошибка открытия файла: " + filepath);
@@ -271,18 +269,19 @@ public:
 			LoadBinarySTL(in);
 		}
 
-		if (!triangles.IsEmpty()) {
+		if (!points.IsEmpty()) {
 			bbox = {{FLT_MAX, FLT_MAX, FLT_MAX}, {-FLT_MAX, -FLT_MAX, -FLT_MAX}};
-			for (const Triangle& t : triangles) {
-				for (const Point3f& p : t.vertices) {
-					bbox += p;
-				}
+			int pointsCount = points.GetCount();
+			for (int i = 0; i < pointsCount; ++i) {
+				bbox += points[i++];
 			}
 		}
+		
 		return *this;
 	}
 
 	virtual void GLPaint(bool isSelectMode) {
+		if (!vao) GLInit();
 		glPushMatrix();
 		// Преобразования модели
 		glScalef(scale.x, scale.y, scale.z);
@@ -295,7 +294,7 @@ public:
 			node->GLPaint(isSelectMode);
 		}
 		
-		if (triangles.GetCount() > 0) {
+		if (points.GetCount() > 0) {
 			if (isSelectMode) {
 				glLoadName(id);
 			} else {
@@ -306,15 +305,24 @@ public:
 					glColor3ub(color.GetR(), color.GetG(), color.GetB());
 				}
 			}
-			// Отрисовка модели с нормалями
-			glBegin(GL_TRIANGLES);
-			for (const Triangle& tri : triangles) {
-				glNormal3f(tri.normal.x, tri.normal.y, tri.normal.z);
-				for (const Point3f& p : tri.vertices) {
-					glVertex3f(p.x, p.y, p.z);
-				}
+			
+			if (vao && vbo) {
+				glBindVertexArray(vao);
+				
+				glEnableClientState(GL_VERTEX_ARRAY);
+				glEnableClientState(GL_NORMAL_ARRAY);
+				
+				glBindBuffer(GL_ARRAY_BUFFER, vbo);
+				glVertexPointer(3, GL_FLOAT, sizeof(Point3f) * 2, (void*)0);
+				glNormalPointer(GL_FLOAT, sizeof(Point3f) * 2, (void*)(3 * sizeof(float)));
+				
+				glDrawArrays(GL_TRIANGLES, 0, points.GetCount() / 2);
+				
+				glDisableClientState(GL_NORMAL_ARRAY);
+				glDisableClientState(GL_VERTEX_ARRAY);
+				
+				glBindVertexArray(0);
 			}
-			glEnd();
 		}
 		glPopMatrix();
 	}
@@ -433,31 +441,54 @@ public:
 	}
 	
 private:
+	virtual void GLInit() {
+		int pointsCount = points.GetCount();
+		if (pointsCount == 0) return;
+		
+		if (!vao) glGenVertexArrays(1, &vao);
+    if (!vbo) glGenBuffers(1, &vbo);
+    
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    
+    glBufferData(GL_ARRAY_BUFFER, pointsCount * sizeof(Point3f), points.begin(), GL_STATIC_DRAW);
+
+    // Атрибут 0: Координаты (3 float)
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Point3f) * 2, (void*)0);
+
+    // Атрибут 1: Нормали (3 float). Смещение 3 float (т.к. сначала идет x,y,z)
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Point3f) * 2, (void*)(sizeof(Point3f)));
+
+    glBindVertexArray(0);
+	}
+	
+	virtual void GLDeinit() {
+		glDeleteVertexArrays(1, &vao);
+		glDeleteBuffers(1, &vbo);
+	}
+	
 	void LoadAsciiSTL(FileIn& in) {
 		String line;
-		Triangle current;
-		int vertex_index = 0;
-
+		Point3f normal(0, 0, 0), p;
 		while (!in.IsEof()) {
-			line = in.GetLine();
-			if (line.StartsWith("facet normal")) {
-				Vector<String> parts = Split(line, ' ', false);
-				if (parts.GetCount() >= 5) {
-					current.normal.x = ScanFloat(parts[2]);
-					current.normal.y = ScanFloat(parts[3]);
-					current.normal.z = ScanFloat(parts[4]);
-				}
-			} else if (line.StartsWith("vertex")) {
-				Vector<String> parts = Split(line, ' ', false);
-				if (parts.GetCount() >= 4 && vertex_index < 3) {
-					current.vertices[vertex_index].x = ScanFloat(parts[1]);
-					current.vertices[vertex_index].y = ScanFloat(parts[2]);
-					current.vertices[vertex_index].z = ScanFloat(parts[3]);
-					vertex_index++;
-				}
-			} else if (line.StartsWith("endfacet")) {
-				if (vertex_index == 3) triangles.Add(current);
-				vertex_index = 0;
+			line = TrimBoth(in.GetLine());
+			Vector<String> tokens = Split(line, ' ', true);
+			if (tokens.IsEmpty()) continue;
+			if (tokens[0] == "facet" && tokens.GetCount() >= 5) {
+				// facet normal ni nj nk
+				normal.x = (float)ScanDouble(tokens[2]);
+				normal.y = (float)ScanDouble(tokens[3]);
+				normal.z = (float)ScanDouble(tokens[4]);
+			}	else if (tokens[0] == "vertex" && tokens.GetCount() >= 4) {
+				// vertex x y z
+				p.x = (float)ScanDouble(tokens[1]);
+				p.y = (float)ScanDouble(tokens[2]);
+				p.z = (float)ScanDouble(tokens[3]);
+
+				points.Add(p);
+				points.Add(normal);
 			}
 		}
 	}
@@ -465,30 +496,29 @@ private:
 	void LoadBinarySTL(FileIn& in) {
 		// Пропускаем 80-байтовый заголовок
 		in.SeekCur(80);
-		
+		Point3f normal, p;
 		// Читаем количество треугольников
 		uint32 triCount;
 		in.Get(&triCount, sizeof(triCount));
 		for (uint32 i = 0; i < triCount; i++) {
-			Triangle tri;
 			// Читаем нормаль
-			in.Get(&tri.normal.x, sizeof(float));
-			in.Get(&tri.normal.y, sizeof(float));
-			in.Get(&tri.normal.z, sizeof(float));
+			in.Get(&normal.x, sizeof(float));
+			in.Get(&normal.y, sizeof(float));
+			in.Get(&normal.z, sizeof(float));
 			
 			// Читаем вершины
-			for (Point3f& p : tri.vertices) {
+			for (int i = 0; i < 3; ++i) {
 				in.Get(&p.x, sizeof(float));
 				in.Get(&p.y, sizeof(float));
 				in.Get(&p.z, sizeof(float));
+				points.Add(p);
+				points.Add(normal);
 			}
-			triangles.Add(tri);
 			
 			// Пропускаем атрибуты
 			in.SeekCur(2);
 		}
 	}
-	
 };
 
 int Node3D::nextId = 1;
@@ -496,29 +526,29 @@ int Node3D::nextId = 1;
 struct Square3D : public Node3D {
 public:
 	Square3D(float cx, float cy, float cz) : Node3D() {
-		float c2x = cx / 2.0f;
-		float c2y = cy / 2.0f;
-		float c2z = cz / 2.0f;
+		float x = cx / 2.0f;
+		float y = cy / 2.0f;
+		float z = cz / 2.0f;
+		
+    auto AddTriangle = [&](Point3f p1, Point3f p2, Point3f p3, Point3f n) {
+        points.Add(p1); points.Add(n);
+        points.Add(p2); points.Add(n);
+        points.Add(p3); points.Add(n);
+    };
 
-		triangles.Add({{0.0f, 0.0f, -c2z}, {{-c2x, -c2y, -c2z}, {c2x, -c2y, -c2z}, {c2x, c2y, -c2z}}});
-		triangles.Add({{0.0f, 0.0f, -c2z}, {{-c2x, -c2y, -c2z}, {-c2x,  c2y, -c2z}, {c2x, c2y, -c2z}}});
+    auto AddFace = [&](Point3f p1, Point3f p2, Point3f p3, Point3f p4, Point3f n) {
+        AddTriangle(p1, p2, p3, n);
+        AddTriangle(p1, p3, p4, n);
+    };
 
-		triangles.Add({{-c2x, 0.0f, 0.0f}, {{-c2x, -c2y, -c2z}, {-c2x,  -c2y,  c2z}, {-c2x, c2y, -c2z}}});
-		triangles.Add({{-c2x, 0.0f, 0.0f}, {{-c2x, c2y, c2z}, {-c2x,  -c2y,  c2z}, {-c2x, c2y, -c2z}}});
+    AddFace({-x, -y,  z}, { x, -y,  z}, { x,  y,  z}, {-x,  y,  z}, {0, 0, 1});
+    AddFace({ x, -y, -z}, {-x, -y, -z}, {-x,  y, -z}, { x,  y, -z}, {0, 0, -1});
+    AddFace({-x,  y,  z}, { x,  y,  z}, { x,  y, -z}, {-x,  y, -z}, {0, 1, 0});
+    AddFace({-x, -y, -z}, { x, -y, -z}, { x, -y,  z}, {-x, -y,  z}, {0, -1, 0});
+    AddFace({ x, -y,  z}, { x, -y, -z}, { x,  y, -z}, { x,  y,  z}, {1, 0, 0});
+    AddFace({-x, -y, -z}, {-x, -y,  z}, {-x,  y,  z}, {-x,  y, -z}, {-1, 0, 0});
 
-		triangles.Add({{0.0f, 0.0f, c2z}, {{-c2x, -c2y, c2z}, {c2x, -c2y, c2z}, {c2x, c2y, c2z}}});
-		triangles.Add({{0.0f, 0.0f, c2z}, {{-c2x, -c2y, c2z}, {-c2x,  c2y, c2z}, {c2x, c2y, c2z}}});
-
-		triangles.Add({{c2x, 0.0f, 0.0f}, {{c2x, -c2y, -c2z}, {c2x,  -c2y,  c2z}, {c2x, c2y, -c2z}}});
-		triangles.Add({{c2x, 0.0f, 0.0f}, {{c2x, c2y, c2z}, {c2x,  -c2y,  c2z}, {c2x, c2y, -c2z}}});
-
-		triangles.Add({{0.0f, c2y, 0.0f}, {{c2x, c2y, c2z}, {-c2x,  c2y,  c2z}, {c2x, c2y, -c2z}}});
-		triangles.Add({{0.0f, c2y, 0.0f}, {{-c2x, c2y, c2z}, {-c2x,  c2y,  -c2z}, {c2x, c2y, -c2z}}});
-
-		triangles.Add({{0.0f, -c2y, 0.0f}, {{c2x, -c2y, c2z}, {-c2x,  -c2y,  c2z}, {c2x, -c2y, -c2z}}});
-		triangles.Add({{0.0f, -c2y, 0.0f}, {{-c2x, -c2y, c2z}, {-c2x,  -c2y,  -c2z}, {c2x, -c2y, -c2z}}});
-
-		bbox = {{-c2x, -c2y, -c2z}, {c2x, c2y, c2z}};
+		bbox = {{-x, -y, -z}, {x, y, z}};
 	}
 private:
 	virtual Node3D& LoadSTL(const String& filepath) { return *this; };
