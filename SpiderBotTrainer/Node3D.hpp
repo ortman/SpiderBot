@@ -185,6 +185,7 @@ protected:
 
 	Vector<Node3D*> nodes;
 	Node3D* parent = NULL;
+	String stlPath;
 
 public:
 	Node3D() {
@@ -276,8 +277,20 @@ public:
 				bbox += points[i++];
 			}
 		}
-		
+		stlPath = filepath;
 		return *this;
+	}
+	
+	const String& GetSTLPath() {
+		return stlPath;
+	}
+	
+	void Jsonize(JsonIO& json) {
+		String c = ColorToHtml(color);
+		json("STL", stlPath)("Color", c);
+		if (nodes.GetCount()) {
+			//json("nodes", nodes);
+		}
 	}
 
 	virtual void GLPaint(bool isSelectMode) {
@@ -471,7 +484,7 @@ private:
 	
 	void LoadAsciiSTL(FileIn& in) {
 		String line;
-		Point3f normal(0, 0, 0), p;
+		Point3f normal, p;
 		while (!in.IsEof()) {
 			line = TrimBoth(in.GetLine());
 			Vector<String> tokens = Split(line, ' ', true);

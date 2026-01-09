@@ -9,7 +9,7 @@ class MainWindow : public WithMainlayout<TopWindow> {
 private:
 	MenuBar menu;
 	RobotEditor robotEditor;
-	Servo3D body;
+	Node3D body;
 
 public:
 
@@ -31,7 +31,7 @@ public:
 			viewer.Refresh();
 		};
 
-		//GLCtrl::SetDoubleBuffering();
+		GLCtrl::SetDoubleBuffering();
 		GLCtrl::SetMSAA(); // Anti-aliasing on
 
 		viewer.WhenSelected = [=](int id, Node3D* node) {
@@ -41,7 +41,7 @@ public:
 					node = node->GetParent();
 					serv = dynamic_cast<Servo3D*>(node);
 				}
-				if (serv != NULL && serv != &body) {
+				if (serv != NULL) {
 					int i = tFoots.Find((int64_t)serv);
 					if (i >= 0) tFoots.SetCursor(i);
 				}
@@ -61,10 +61,8 @@ private:
 		tFoots.Clear();
 
 		for (Node3D* node : body.GetChildren()) body.Remove(node);
-		Node3D& bodyStr = body.GetModel();
-		body.Add(&bodyStr);
 
-		bodyStr.LoadSTL("models/Body.stl").SetColor(Yellow);
+		body.LoadSTL("models/Body.stl").SetColor(Yellow);
 
 		Servo3D* foot1 = new Servo3D("models/Segment1.stl", {96.4f, -1.8f, -81.f}, {-90.0f, 0.0f, 0.0f}, LtBlue);
 		foot1->SetAngle(90.0f).SetTranslate({36.f, 0.0f, 20.5f});
@@ -107,6 +105,10 @@ private:
 		AddNodeToTree(0, foot6);
 	}
 	
+	void SaveRobot() {
+		StoreAsJsonFile(body, "robot.json", true);
+	}
+	
 	void MainMenu(Bar& bar) {
 		bar.Sub(t_("File"), [=](Bar& bar) {
 			bar.Add(t_("Exit"), [=] {
@@ -118,6 +120,9 @@ private:
 		});
 		bar.Add(t_("Load robot"), [=] {
 			LoadRobot();
+		});
+		bar.Add(t_("Save robot"), [=] {
+			SaveRobot();
 		});
 	}
 
