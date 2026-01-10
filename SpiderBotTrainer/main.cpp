@@ -56,28 +56,29 @@ private:
 		body.LoadSTL("models/Body.stl").SetColor(Yellow);
 
 		Servo3D& segment1 = body.Create<Servo3D>();
-		segment1.LoadSTL("models/Segment1.stl")
-		        .SetTranslate({96.4f, -1.8f, -81.f})
-		        .SetRotate({-90.0f, 0.0f, 0.0f})
+		segment1.LoadSTL("models/Segment1.stl");
+		segment1.SetModelTranslate({96.4f, -1.8f, -81.f})
+		        .SetModelRotate({-90.0f, 0.0f, 0.0f})
 		        .SetColor(LtBlue);
-		//segment1.SetAngle(90.0f).SetTranslate({36.f, 0.0f, 20.5f});
+		segment1.SetAngle(90.0f).SetTranslate({36.f, 0.0f, 20.5f});
 		
 		Servo3D& segment2 = segment1.Create<Servo3D>();
-		segment2.LoadSTL("models/Segment2.stl")
-		        .SetTranslate({38.f, -93.0f, 1.5f})
-		        .SetRotate({180.0f, 0.0f, 13.5f})
+		segment2.LoadSTL("models/Segment2.stl");
+		segment2.SetModelTranslate({38.f, -93.0f, 1.5f})
+		        .SetModelRotate({180.0f, 0.0f, 13.5f})
 		        .SetColor(LtCyan);
-		//segment2.SetAngle(90.0f).SetTranslate({37.6f, 0.f, 0.4f}).SetRotate({90.f, 0.f, 21.5f});
+		segment2.SetAngle(90.0f).SetTranslate({37.6f, 0.f, 0.4f}).SetRotate({90.f, 0.f, 21.5f});
 		
 		Servo3D& segment3 = segment2.Create<Servo3D>();
-		segment3.LoadSTL("models/Segment3.stl")
-        .SetTranslate({93.f, 7.5f, 2.f})
-        .SetRotate({180.0f, 0.0f, -85.5f})
-        .SetColor(LtMagenta);
-		//segment3.SetAngle(90.0f).SetTranslate({45.f, 0.f, 0.f}).SetRotate({0.f, 0.f, -100.5f});
+		segment3.LoadSTL("models/Segment3.stl");
+    segment3.SetModelTranslate({93.f, 7.5f, 2.f})
+            .SetRotate({180.0f, 0.0f, -85.5f})
+            .SetColor(LtMagenta);
+		segment3.SetAngle(90.0f).SetTranslate({45.f, 0.f, 0.f}).SetRotate({0.f, 0.f, -100.5f});
+
 
 		Servo3D& foot2 = body.Create<Servo3D>(segment1);
-		foot2.SetNextId(true).SetTranslate({-25.f,  67.0f, 20.5f}).SetRotate({0.0f, 0.0f, 150.0f});
+		foot2.SetNextId(true).SetTranslate({-36.5f,  0.0f, 20.5f}).SetRotate({0.0f, 0.0f, 180.0f});
 		
 		Servo3D& foot3 = body.Create<Servo3D>(segment1);
 		foot3.SetNextId(true).SetTranslate({-25.f,  67.0f, 20.5f}).SetRotate({0.0f, 0.0f, 150.0f});

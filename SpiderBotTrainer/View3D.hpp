@@ -18,7 +18,6 @@ private:
 	Bboxf bbox;
 	Point3f grid[40];
 
-	// Обновляем позицию камеры на основе углов
 	void UpdateCameraPosition() {
 		Point3f cameraVector = {
 			distance * cos(elevation) * sin(azimuth),
@@ -200,21 +199,20 @@ public:
 
 private:
 	virtual void MouseMove(Point p, dword keyflags) {
-		if (keyflags & K_MOUSELEFT) { // Вращение ЛКМ
+		if (keyflags & K_MOUSELEFT) {
 			float dx = (float)(p.x - mouseLeftStart.x) * 0.01f;
 			float dy = (float)(p.y - mouseLeftStart.y) * 0.01f;
 
 			azimuth += dx;
 			elevation += dy;
 
-			// Ограничиваем вертикальный угол
 			const float maxElevation = (float)M_PI_2 - 0.01f;
-			elevation = std::max(-maxElevation, std::min(elevation, maxElevation));
+			elevation = clamp(elevation, -maxElevation, maxElevation);
 			
 			UpdateCameraPosition();
 			mouseLeftStart = p;
 			Refresh();
-		} else if (keyflags & K_MOUSERIGHT) { // Панорамирование ПКМ
+		} else if (keyflags & K_MOUSERIGHT) {
 			float dx = (float)(p.x - mouseRightStart.x) * -0.001f;
 			float dy = (float)(p.y - mouseRightStart.y) * 0.001f;
 
@@ -251,12 +249,8 @@ private:
 	}
 	
 	virtual void MouseWheel(Point p, int zdelta, dword keyflags) {
-		float factor = (zdelta > 0) ? 0.9f : 1.1f;
-		distance *= factor;
-		
-		// Ограничиваем расстояние
-		distance = std::max(0.1f, std::min(distance, 1000.0f));
-		
+		distance *= (zdelta > 0) ? 0.9f : 1.1f;
+		distance = clamp(distance, 0.1f, 1000.0f);
 		UpdateCameraPosition();
 		Refresh();
 	}
