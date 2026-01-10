@@ -57,17 +57,17 @@ public:
 	}
 
 	bool Remove(Node3D* node) {
-		if (node == NULL) return false;
-		for (int i = 0; i < nodes.GetCount(); ++i) {
-			if (node == nodes[i]) {
-				nodes.Remove(i);
-				return true;
-			} else {
-				if (nodes[i]->Remove(node)) {
-					return true;
-				}
-			}
-		}
+//		if (node == NULL) return false;
+//		for (int i = 0; i < nodes.GetCount(); ++i) {
+//			if (node == nodes[i]) {
+//				nodes.Remove(i);
+//				return true;
+//			} else {
+//				if (nodes[i]->Remove(node)) {
+//					return true;
+//				}
+//			}
+//		}
 		return false;
 	}
 
@@ -192,9 +192,9 @@ public:
 		Refresh();
 	}
 
-	void SelectNode(int id) {
+	void SelectNode(int id, bool recursive = false) {
 		Node3D* selectedNode = GetNode<Node3D>(id);
-		SelectNode(selectedNode);
+		SelectNode(selectedNode, recursive);
 		WhenSelected(id, selectedNode);
 	}
 
@@ -208,7 +208,7 @@ private:
 			elevation += dy;
 
 			// Ограничиваем вертикальный угол
-			const float maxElevation = (float)M_PI/2 - 0.01f;
+			const float maxElevation = (float)M_PI_2 - 0.01f;
 			elevation = std::max(-maxElevation, std::min(elevation, maxElevation));
 			
 			UpdateCameraPosition();

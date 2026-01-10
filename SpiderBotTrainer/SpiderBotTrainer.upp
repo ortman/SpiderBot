@@ -5,6 +5,8 @@ uses
 
 file
 	Servo3D.hpp,
+	Point3f.hpp,
+	Primitives3D.hpp,
 	Node3D.hpp,
 	View3D.hpp,
 	Layouts.lay,

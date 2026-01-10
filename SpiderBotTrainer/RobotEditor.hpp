@@ -8,8 +8,8 @@ using namespace Upp;
 
 class RobotEditor : public WithRobotEditorLayout<TopWindow> {
 private:
-	Servo3D body;
-	Servo3D* currentServo;
+	Node3D body;
+	Node3D* currentNode;
 	FileSel fs;
 
 public:
@@ -25,11 +25,10 @@ public:
 		bAddMotor.WhenPush = [=] {
 			int parentId = tMotors.GetCursor();
 			if (parentId >= 0) {
-				Servo3D* parentServ = dynamic_cast<Servo3D*>((Node3D*)(int64_t)tMotors[parentId]);
-				if (parentServ) {
-					Servo3D* serv = new Servo3D();
-					parentServ->Add(serv, true);
-					int id = tMotors.Add(parentId, CtrlImg::File(), (int64_t)serv, t_("Servo"));
+				Node3D* parent = (Node3D*)(int64_t)tMotors[parentId];
+				if (parent) {
+					Servo3D& serv	= parent->Create<Servo3D>();
+					int id = tMotors.Add(parentId, CtrlImg::File(), (int64_t)&serv, t_("Servo"));
 					tMotors.SetCursor(id);
 				}
 			}
@@ -51,20 +50,20 @@ public:
 				int parentId = tMotors.GetParent(id);
 				Node3D* node = (Node3D*)(int64_t)tMotors[id];
 				Node3D* parent = (Node3D*)(int64_t)tMotors[parentId];
-				Node3D* duplicate = node->Duplicate();
-				parent->Add(duplicate, true);
-				AddNodeToTree(parentId, duplicate);
+//				Servo3D& serv = parent->Create<Servo3D>(node);
+//				int id = tMotors.Add(parentId, CtrlImg::File(), (int64_t)&serv, t_("Servo"));
+//				tMotors.SetCursor(id);
 			}
 		};
 
 		tMotors.WhenSel = [=] {
 			int id = tMotors.GetCursor();
 			if (id == 0) {
-				SetServo(&body, true);
+				SetNode(&body);
 			} else if (id > 0) {
 				SetServo(dynamic_cast<Servo3D*>((Node3D*)(int64_t)tMotors[id]));
 			} else {
-				SetServo(NULL);
+				SetNoNode();
 			}
 		};
 
@@ -81,11 +80,20 @@ public:
 				}
 			}
 		};
+		
+		bSave.WhenPush = [=] {
+			StoreAsJsonFile(body, "RobotEditor.json", true);
+		};
+		
+		bLoad.WhenPush = [=] {
+			LoadFromJsonFile(body, "RobotEditor.json");
+			viewer.Refresh();
+		};
 
 		bChangeModelPath.WhenPush = [=] {
-			if (currentServo != NULL) {
-				if (fs.ExecuteOpen(t_("Select 3d model"))) {
-					currentServo->GetModel().LoadSTL(fs);
+			if (currentNode != NULL) {
+				if (fs.ExecuteOpen(t_("Select a 3D model"))) {
+					currentNode->LoadSTL(fs);
 					eModelPath <<= (String)fs;
 					viewer.ViewAll();
 				}
@@ -93,136 +101,148 @@ public:
 		};
 
 		eMinAngle.WhenAction = [=] {
-			if (currentServo) {
-				currentServo->SetMinAngle(~eMinAngle);
+			if (currentNode) {
+				//currentServo->SetMinAngle(~eMinAngle);
 				viewer.Refresh();
 			}
 		};
 
 		eMaxAngle.WhenAction = [=] {
-			if (currentServo) {
-				currentServo->SetMaxAngle(~eMaxAngle);
+			if (currentNode) {
+				//currentServo->SetMaxAngle(~eMaxAngle);
 				viewer.Refresh();
 			}
 		};
 
 		ePosX.WhenAction = [=] {
-			if (currentServo) {
-				Point3f p = currentServo->GetTranslate();
+			if (currentNode) {
+				Point3f p = currentNode->GetTranslate();
 				p.x = (float)~ePosX;
-				currentServo->SetTranslate(p);
+				currentNode->SetTranslate(p);
 				viewer.Refresh();
 			}
 		};
 
 		ePosY.WhenAction = [=] {
-			if (currentServo) {
-				Point3f p = currentServo->GetTranslate();
+			if (currentNode) {
+				Point3f p = currentNode->GetTranslate();
 				p.y = (float)~ePosY;
-				currentServo->SetTranslate(p);
+				currentNode->SetTranslate(p);
 				viewer.Refresh();
 			}
 		};
 
 		ePosZ.WhenAction = [=] {
-			if (currentServo) {
-				Point3f p = currentServo->GetTranslate();
+			if (currentNode) {
+				Point3f p = currentNode->GetTranslate();
 				p.z = (float)~ePosZ;
-				currentServo->SetTranslate(p);
+				currentNode->SetTranslate(p);
 				viewer.Refresh();
 			}
 		};
 
 		eRotX.WhenAction = [=] {
-			if (currentServo) {
-				Point3f p = currentServo->GetRotate();
+			if (currentNode) {
+				Point3f p = currentNode->GetRotate();
 				p.x = (float)~eRotX;
-				currentServo->SetRotate(p);
+				currentNode->SetRotate(p);
 				viewer.Refresh();
 			}
 		};
 
 		eRotY.WhenAction = [=] {
-			if (currentServo) {
-				Point3f p = currentServo->GetRotate();
+			if (currentNode) {
+				Point3f p = currentNode->GetRotate();
 				p.y = (float)~eRotY;
-				currentServo->SetRotate(p);
+				currentNode->SetRotate(p);
 				viewer.Refresh();
 			}
 		};
 
 		eRotZ.WhenAction = [=] {
-			if (currentServo) {
-				Point3f p = currentServo->GetRotate();
+			if (currentNode) {
+				Point3f p = currentNode->GetRotate();
 				p.z = (float)~eRotZ;
-				currentServo->SetRotate(p);
+				currentNode->SetRotate(p);
 				viewer.Refresh();
 			}
 		};
 
 		eModelPosX.WhenAction = [=] {
-			if (currentServo) {
-				Node3D& model = currentServo->GetModel();
-				Point3f p = model.GetTranslate();
-				p.x = (float)~eModelPosX;
-				model.SetTranslate(p);
-				viewer.Refresh();
+			if (currentNode) {
+				Servo3D* serv = dynamic_cast<Servo3D*>(currentNode);
+				if (serv) {
+					Point3f p = serv->GetModelTranslate();
+					p.x = (float)~eModelPosX;
+					serv->SetModelTranslate(p);
+					viewer.Refresh();
+				}
 			}
 		};
 
 		eModelPosY.WhenAction = [=] {
-			if (currentServo) {
-				Node3D& model = currentServo->GetModel();
-				Point3f p = model.GetTranslate();
-				p.y = (float)~eModelPosY;
-				model.SetTranslate(p);
-				viewer.Refresh();
+			if (currentNode) {
+				Servo3D* serv = dynamic_cast<Servo3D*>(currentNode);
+				if (serv) {
+					Point3f p = serv->GetModelTranslate();
+					p.y = (float)~eModelPosY;
+					serv->SetModelTranslate(p);
+					viewer.Refresh();
+				}
 			}
 		};
 
 		eModelPosZ.WhenAction = [=] {
-			if (currentServo) {
-				Node3D& model = currentServo->GetModel();
-				Point3f p = model.GetTranslate();
-				p.z = (float)~eModelPosZ;
-				model.SetTranslate(p);
-				viewer.Refresh();
+			if (currentNode) {
+				Servo3D* serv = dynamic_cast<Servo3D*>(currentNode);
+				if (serv) {
+					Point3f p = serv->GetModelTranslate();
+					p.z = (float)~eModelPosZ;
+					serv->SetModelTranslate(p);
+					viewer.Refresh();
+				}
 			}
 		};
 
 		eModelRotX.WhenAction = [=] {
-			if (currentServo) {
-				Node3D& model = currentServo->GetModel();
-				Point3f p = model.GetRotate();
-				p.x = (float)~eModelRotX;
-				model.SetRotate(p);
-				viewer.Refresh();
+			if (currentNode) {
+				Servo3D* serv = dynamic_cast<Servo3D*>(currentNode);
+				if (serv) {
+					Point3f p = serv->GetModelRotate();
+					p.x = (float)~eModelRotX;
+					serv->SetModelRotate(p);
+					viewer.Refresh();
+				}
 			}
 		};
 
 		eModelRotY.WhenAction = [=] {
-			if (currentServo) {
-				Node3D& model = currentServo->GetModel();
-				Point3f p = model.GetRotate();
-				p.y = (float)~eModelRotY;
-				model.SetRotate(p);
-				viewer.Refresh();
+			if (currentNode) {
+				Servo3D* serv = dynamic_cast<Servo3D*>(currentNode);
+				if (serv) {
+					Point3f p = serv->GetModelRotate();
+					p.y = (float)~eModelRotY;
+					serv->SetModelRotate(p);
+					viewer.Refresh();
+				}
 			}
 		};
 
 		eModelRotZ.WhenAction = [=] {
-			if (currentServo) {
-				Node3D& model = currentServo->GetModel();
-				Point3f p = model.GetRotate();
-				p.z = (float)~eModelRotZ;
-				model.SetRotate(p);
-				viewer.Refresh();
+			if (currentNode) {
+				Servo3D* serv = dynamic_cast<Servo3D*>(currentNode);
+				if (serv) {
+					Point3f p = serv->GetModelRotate();
+					p.z = (float)~eModelRotZ;
+					serv->SetModelRotate(p);
+					viewer.Refresh();
+				}
 			}
 		};
 
 		cColor.WhenAction = [=] {
-			if (currentServo) {
-				currentServo->GetModel().SetColor(~cColor);
+			if (currentNode) {
+				currentNode->SetColor(~cColor);
 				viewer.RecalcBbox();
 				viewer.Refresh();
 			}
@@ -232,85 +252,113 @@ public:
 	}
 	
 	~RobotEditor() {
-		currentServo = NULL;
+		currentNode = NULL;
 		tMotors.Clear();
 		viewer.Clear();
 	}
 
 private:
-	void SetServo(Servo3D* serv, bool isBody = false) {
-		currentServo = serv;
+	void SetNoNode() {
+		currentNode = NULL;
+		DisableCtrls({
+			&lbMotorParams,
+			&eMinAngle, &eMaxAngle,
+			&ePosX, &ePosY, &ePosZ,
+			&eRotX, &eRotY, &eRotZ,
+			&lbModel, &eModelPath, &bChangeModelPath, &cColor,
+			&eModelPosX, &eModelPosY, &eModelPosZ,
+			&eModelRotX, &eModelRotY, &eModelRotZ
+		});
+		eMinAngle.Clear();
+		eMaxAngle.Clear();
+		ePosX.Clear();
+		ePosY.Clear();
+		ePosZ.Clear();
+		eRotX.Clear();
+		eRotY.Clear();
+		eRotZ.Clear();
+		eModelPath.Clear();
+		eModelPosX.Clear();
+		eModelPosY.Clear();
+		eModelPosZ.Clear();
+		eModelRotX.Clear();
+		eModelRotY.Clear();
+		eModelRotZ.Clear();
+	}
+	
+	void SetNode(Node3D* node) {
+		if (node == NULL) return;
+		currentNode = node;
+		DisableCtrls({
+			&lbMotorParams,
+			&eMinAngle, &eMaxAngle,
+			&ePosX, &ePosY, &ePosZ,
+			&eRotX, &eRotY, &eRotZ
+		});
+		eMinAngle.Clear();
+		eMaxAngle.Clear();
+		ePosX.Clear();
+		ePosY.Clear();
+		ePosZ.Clear();
+		eRotX.Clear();
+		eRotY.Clear();
+		eRotZ.Clear();
+		
+		EnableCtrls({
+			&lbModel, &eModelPath, &bChangeModelPath, &cColor,
+			&eModelPosX, &eModelPosY, &eModelPosZ,
+			&eModelRotX, &eModelRotY, &eModelRotZ
+		});
+		eModelPath <<= node->GetSTLPath();
+		cColor     <<= node->GetColor();
+		eModelPosX <<= node->GetTranslate().x;
+		eModelPosY <<= node->GetTranslate().y;
+		eModelPosZ <<= node->GetTranslate().z;
+		eModelRotX <<= node->GetRotate().x;
+		eModelRotY <<= node->GetRotate().y;
+		eModelRotZ <<= node->GetRotate().z;
+	}
+	
+	void SetServo(Servo3D* serv) {
+		if (serv == NULL) return;
+		currentNode = serv;
 		viewer.SelectNode(serv);
-		if (isBody || currentServo == NULL) {
-			DisableCtrls({
-				&lbMotorParams,
-				&eMinAngle, &eMaxAngle,
-				&ePosX, &ePosY, &ePosZ,
-				&eRotX, &eRotY, &eRotZ
-			});
-			eMinAngle.Clear();
-			eMaxAngle.Clear();
-			ePosX.Clear();
-			ePosY.Clear();
-			ePosZ.Clear();
-			eRotX.Clear();
-			eRotY.Clear();
-			eRotZ.Clear();
-		} else {
-			EnableCtrls({
-				&lbMotorParams,
-				&eMinAngle, &eMaxAngle,
-				&ePosX, &ePosY, &ePosZ,
-				&eRotX, &eRotY, &eRotZ
-			});
-			eMaxAngle <<= currentServo->GetMaxAngle();
-			eMinAngle <<= currentServo->GetMinAngle();
-			ePosX <<= currentServo->GetTranslate().x;
-			ePosY <<= currentServo->GetTranslate().y;
-			ePosZ <<= currentServo->GetTranslate().z;
-			eRotX <<= currentServo->GetRotate().x;
-			eRotY <<= currentServo->GetRotate().y;
-			eRotZ <<= currentServo->GetRotate().z;
-		}
-		if (currentServo == NULL) {
-			DisableCtrls({
-				&lbModel, &eModelPath, &bChangeModelPath, &cColor,
-				&eModelPosX, &eModelPosY, &eModelPosZ,
-				&eModelRotX, &eModelRotY, &eModelRotZ
-			});
-			eModelPath.Clear();
-			eModelPosX.Clear();
-			eModelPosY.Clear();
-			eModelPosZ.Clear();
-			eModelRotX.Clear();
-			eModelRotY.Clear();
-			eModelRotZ.Clear();
-		} else {
-			EnableCtrls({
-				&lbModel, &eModelPath, &bChangeModelPath, &cColor,
-				&eModelPosX, &eModelPosY, &eModelPosZ,
-				&eModelRotX, &eModelRotY, &eModelRotZ
-			});
-			Node3D& model = currentServo->GetModel();
-			eModelPath <<= currentServo->GetModelPath();
-			cColor     <<= model.GetColor();
-			eModelPosX <<= model.GetTranslate().x;
-			eModelPosY <<= model.GetTranslate().y;
-			eModelPosZ <<= model.GetTranslate().z;
-			eModelRotX <<= model.GetRotate().x;
-			eModelRotY <<= model.GetRotate().y;
-			eModelRotZ <<= model.GetRotate().z;
-		}
+		EnableCtrls({
+			&lbMotorParams,
+			&eMinAngle, &eMaxAngle,
+			&ePosX, &ePosY, &ePosZ,
+			&eRotX, &eRotY, &eRotZ,
+			&lbModel, &eModelPath, &bChangeModelPath, &cColor,
+			&eModelPosX, &eModelPosY, &eModelPosZ,
+			&eModelRotX, &eModelRotY, &eModelRotZ
+		});
+		eMaxAngle <<= serv->GetMaxAngle();
+		eMinAngle <<= serv->GetMinAngle();
+		ePosX <<= serv->GetTranslate().x;
+		ePosY <<= serv->GetTranslate().y;
+		ePosZ <<= serv->GetTranslate().z;
+		eRotX <<= serv->GetRotate().x;
+		eRotY <<= serv->GetRotate().y;
+		eRotZ <<= serv->GetRotate().z;
+
+		eModelPath <<= serv->GetSTLPath();
+		cColor     <<= serv->GetColor();
+		eModelPosX <<= serv->GetModelTranslate().x;
+		eModelPosY <<= serv->GetModelTranslate().y;
+		eModelPosZ <<= serv->GetModelTranslate().z;
+		eModelRotX <<= serv->GetModelRotate().x;
+		eModelRotY <<= serv->GetModelRotate().y;
+		eModelRotZ <<= serv->GetModelRotate().z;
 	}
 
-	void AddNodeToTree(int parentId, Node3D* node) {
-		int id = tMotors.Add(parentId, CtrlImg::File(), (int64_t)node, t_("Servo"));
-		for (Node3D* n : node->GetChildren()) {
-			if (dynamic_cast<Servo3D*>(n)) {
-				AddNodeToTree(id, n);
-			}
-		}
-	}
+//	void AddNodeToTree(int parentId, Node3D* node) {
+//		int id = tMotors.Add(parentId, CtrlImg::File(), (int64_t)node, t_("Servo"));
+//		for (const Node3D& n : node->GetChildren()) {
+//			if (dynamic_cast<Servo3D*>(&n)) {
+//				AddNodeToTree(id, n);
+//			}
+//		}
+//	}
 };
 
 #endif

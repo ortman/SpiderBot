@@ -1,95 +1,92 @@
-#ifndef _SERVO3D_HPP_
-#define _SERVO3D_HPP_
+#ifndef _SERVO_3D_HPP_
+#define _SERVO_3D_HPP_
 
 #include "Node3D.hpp"
 
 class Servo3D : public Node3D {
 private:
-	Node3D stl;
 	float minAngle = 0.0f;
 	float maxAngle = 180.0f;
 	float angle = 0.0f;
-	String stlPath;
-	Point3f servoRotation;
+	//Point3f servoRotation;
+	
+	Point3f servoScale = {1.0f, 1.0f, 1.0f};
+	Point3f servoRotate;
+	Point3f servoTranslate;
 	
 public:
-	Servo3D() {
-		Add(&stl);
+	Servo3D() = default;
+	
+	Servo3D(const Servo3D& node) {
+		id = node.id;
+		bbox = node.bbox;
+		scale = node.scale;
+		rotate = node.rotate;
+		translate = node.translate;
+		color = node.color;
+		isSelected = node.isSelected;
+		points = clone(node.points);
+		stlPath = node.stlPath;
+		nodes = clone(node.nodes);
+		//for (const Node3D& n : node.nodes) {
+		//	nodes.Add(n);
+		//}
+	}
+	
+	Servo3D& operator=(const Servo3D& node) {
+		id = node.id;
+		bbox = node.bbox;
+		scale = node.scale;
+		rotate = node.rotate;
+		translate = node.translate;
+		color = node.color;
+		isSelected = node.isSelected;
+		points = clone(node.points);
+		stlPath = node.stlPath;
+		nodes = clone(node.nodes);
+		//for (const Node3D& n : node.nodes) {
+		//	nodes.Add(n);
+		//}
+		return *this;
 	}
 
 	Servo3D(const String& stlPath, const Point3f& translationVector, const Point3f& rotationVector, const Color& color) : Node3D() {
-		this->stlPath = stlPath;
-		Add(&stl.LoadSTL(stlPath).SetTranslate(translationVector).SetRotate(rotationVector).SetColor(color));
-	}
-
-	virtual Node3D* Duplicate(Node3D* src = NULL, bool uniqIDs = true) override {
-		if (src == NULL) src = new Servo3D();
-		Node3D* dublicate = Node3D::Duplicate(src, uniqIDs);
-		Servo3D* serv = dynamic_cast<Servo3D*>(src);
-		if (serv) {
-			if (serv->nodes.GetCount() > 1) serv->nodes.Remove(1); // remove Old STL.
-			serv->stlPath = stlPath;
-			stl.Duplicate(&serv->stl);
-		}
-		return dublicate;
+		LoadSTL(stlPath).SetTranslate(translationVector).SetRotate(rotationVector).SetColor(color);
 	}
 
 	Servo3D& SetAngle(float a) {
-		angle = a;
-		if (angle > maxAngle) angle = maxAngle;
-		if (angle < minAngle) angle = minAngle;
-		Point3f rot = servoRotation;
-		rot.z += angle;
-		Node3D::SetRotate(rot);
+		angle = clamp(a, minAngle, maxAngle);
+		//Point3f rot = servoRotation;
+		//rot.z += angle;
+		//Node3D::SetRotate(rot);
 		return *this;
 	}
 
-	float GetMinAngle() {
-		return minAngle;
-	}
-
-	Servo3D& SetMinAngle(float angle) {
-		minAngle = angle;
-		return *this;
-	}
-
-	float GetMaxAngle() {
-		return maxAngle;
-	}
-
-	Servo3D& SetMaxAngle(float angle) {
-		maxAngle = angle;
-		return *this;
-	}
-
-	String GetModelPath() {
-		return stlPath;
-	}
-
-	Node3D& GetModel() {
-		return stl;
-	}
+	float GetMinAngle() { return minAngle; }
+	Servo3D& SetMinAngle(float angle) { minAngle = angle; return *this; }
+	float GetMaxAngle() { return maxAngle; }
+	Servo3D& SetMaxAngle(float angle) { maxAngle = angle; return *this; }
 	
-	virtual Node3D& SetRotate(const Point3f& p) override {
-		Point3f rot = servoRotation = p;
-		rot.z += angle;
-		return Node3D::SetRotate(rot);
-	}
+	//virtual Node3D& SetRotate(const Point3f& p) override {
+	//	Point3f rot = servoRotation = p;
+	//	rot.z += angle;
+	//	return Node3D::SetRotate(rot);
+	//}
 
-	virtual Point3f GetRotate() const override {
-		return servoRotation;
-	}
+	//virtual Point3f GetRotate() const override {
+	//	return servoRotation;
+	//}
 
 	virtual void GLPaint(bool isSelectMode) override {
+		glPushMatrix();
+		// Преобразования модели
+		glScalef(servoScale.x, servoScale.y, servoScale.z);
+		glTranslatef(servoTranslate.x, servoTranslate.y, servoTranslate.z);
+		glRotatef(servoRotate.x, 1, 0, 0);
+		glRotatef(servoRotate.y, 0, 1, 0);
+		glRotatef(servoRotate.z, 0, 0, 1);
 		Node3D::GLPaint(isSelectMode);
 		if (!isSelectMode && isSelected) {
-			glPushMatrix();
-			// Преобразования модели
-			glScalef(scale.x, scale.y, scale.z);
-			glTranslatef(translate.x, translate.y, translate.z);
-			glRotatef(rotate.x, 1, 0, 0);
-			glRotatef(rotate.y, 0, 1, 0);
-			glRotatef(rotate.z, 0, 0, 1);
 
 			glDisable(GL_LIGHTING); // Отключаем освещение для осей
 			glLineWidth(2.0f);
@@ -105,10 +102,32 @@ public:
 				glVertex3f(0.0f, 0.0f, 100.0f);
 			glEnd();
 
-			glColor3f(0.0f, 1.0f, 0.0f);
+			glColor4f(0.0f, 1.0f, 0.0f, 0.5f);
 			DrawSector(maxAngle, 50.0f);
-			glPopMatrix();
 		}
+		glPopMatrix();
+	}
+	
+	Node3D& SetScale(const Point3f& s) override { servoScale = s; return *this; }
+	Node3D& SetScale(const float s) override { servoScale = {s, s, s}; return *this; }
+	Node3D& SetRotate(const Point3f& p) override { servoRotate = p; return *this; }
+	Point3f GetRotate() const override { return servoRotate; }
+	Node3D& SetTranslate(const Point3f& t) override { servoTranslate = t; return *this; }
+	const Point3f& GetTranslate() const & override { return servoTranslate; }
+	//Node3D& SetColor(const Color& c) override { color = c; return *this; }
+	//const Color& GetColor() const & override { return color; }
+	
+	Servo3D& SetModelScale(const Point3f& s) { scale = s; return *this; }
+	Servo3D& SetModelScale(const float s) { scale = {s, s, s}; return *this; }
+	virtual Servo3D& SetModelRotate(const Point3f& p) { rotate = p; return *this; }
+	virtual Point3f GetModelRotate() const { return rotate; }
+	Servo3D& SetModelTranslate(const Point3f& t) { translate = t; return *this; }
+	const Point3f& GetModelTranslate() const & { return translate; }
+	
+	virtual void Jsonize(JsonIO& json) override {
+		json("Angle", angle);
+		json("servoScale", servoScale)("servoRotate", servoRotate)("servoTranslate", servoTranslate);
+		Node3D::Jsonize(json);
 	}
 
 private:
