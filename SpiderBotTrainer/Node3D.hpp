@@ -119,11 +119,16 @@ public:
 	}
 	
 	virtual void Jsonize(JsonIO& json) {
-		String c = ColorToHtml(color);
-		json("STL", stlPath)("Color", c);
+		json("STL", stlPath);
 		json("scale", scale)("rotate", rotate)("translate", translate);
-		if (nodes.GetCount()) {
+		json("Color", color);
+		if (json.IsLoading()) {
+			if (!stlPath.IsEmpty()) LoadSTL(stlPath);
 			json("nodes", nodes);
+		} else {
+			if (nodes.GetCount()) {
+				json("nodes", nodes);
+			}
 		}
 	}
 

@@ -17,37 +17,13 @@ private:
 public:
 	Servo3D() = default;
 	
-	Servo3D(const Servo3D& node) {
-		id = node.id;
-		bbox = node.bbox;
-		scale = node.scale;
-		rotate = node.rotate;
-		translate = node.translate;
-		color = node.color;
-		isSelected = node.isSelected;
-		points = clone(node.points);
-		stlPath = node.stlPath;
-		nodes = clone(node.nodes);
-		//for (const Node3D& n : node.nodes) {
-		//	nodes.Add(n);
-		//}
-	}
-	
-	Servo3D& operator=(const Servo3D& node) {
-		id = node.id;
-		bbox = node.bbox;
-		scale = node.scale;
-		rotate = node.rotate;
-		translate = node.translate;
-		color = node.color;
-		isSelected = node.isSelected;
-		points = clone(node.points);
-		stlPath = node.stlPath;
-		nodes = clone(node.nodes);
-		//for (const Node3D& n : node.nodes) {
-		//	nodes.Add(n);
-		//}
-		return *this;
+	Servo3D(const Servo3D& node) : Node3D(node) {
+		minAngle = node.minAngle;
+		maxAngle = node.maxAngle;
+		angle = node.angle;
+		servoScale = node.servoScale;
+		servoRotate = node.servoRotate;
+		servoTranslate = node.servoTranslate;
 	}
 
 	Servo3D(const String& stlPath, const Point3f& translationVector, const Point3f& rotationVector, const Color& color) : Node3D() {
