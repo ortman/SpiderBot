@@ -8,7 +8,6 @@ private:
 	float minAngle = 0.0f;
 	float maxAngle = 180.0f;
 	float angle = 0.0f;
-	//Point3f servoRotation;
 	
 	Point3f servoScale = {1.0f, 1.0f, 1.0f};
 	Point3f servoRotate;
@@ -17,13 +16,26 @@ private:
 public:
 	Servo3D() = default;
 	
-	Servo3D(const Servo3D& node) : Node3D(node) {
-		minAngle = node.minAngle;
-		maxAngle = node.maxAngle;
-		angle = node.angle;
-		servoScale = node.servoScale;
-		servoRotate = node.servoRotate;
-		servoTranslate = node.servoTranslate;
+	virtual Servo3D* Copy() const override {
+		Servo3D* node = new Servo3D();
+		node->bbox = bbox;
+		node->scale = scale;
+		node->rotate = rotate;
+		node->translate = translate;
+		node->isSelected = isSelected;
+		node->color = color;
+		node->stlPath = stlPath;
+		node->points = clone(points);
+		for (const Node3D& n : nodes) {
+			node->nodes.Add(n.Copy());
+		}
+		node->minAngle = minAngle;
+		node->maxAngle = maxAngle;
+		node->angle = angle;
+		node->servoScale = servoScale;
+		node->servoRotate = servoRotate;
+		node->servoTranslate = servoTranslate;
+		return node;
 	}
 
 	Servo3D(const String& stlPath, const Point3f& translationVector, const Point3f& rotationVector, const Color& color) : Node3D() {
@@ -32,9 +44,6 @@ public:
 
 	Servo3D& SetAngle(float a) {
 		angle = clamp(a, minAngle, maxAngle);
-		//Point3f rot = servoRotation;
-		//rot.z += angle;
-		//Node3D::SetRotate(rot);
 		return *this;
 	}
 
@@ -42,16 +51,6 @@ public:
 	Servo3D& SetMinAngle(float angle) { minAngle = angle; return *this; }
 	float GetMaxAngle() { return maxAngle; }
 	Servo3D& SetMaxAngle(float angle) { maxAngle = angle; return *this; }
-	
-	//virtual Node3D& SetRotate(const Point3f& p) override {
-	//	Point3f rot = servoRotation = p;
-	//	rot.z += angle;
-	//	return Node3D::SetRotate(rot);
-	//}
-
-	//virtual Point3f GetRotate() const override {
-	//	return servoRotation;
-	//}
 
 	virtual void GLPaint(bool isSelectMode) override {
 		glPushMatrix();
@@ -90,8 +89,6 @@ public:
 	Point3f GetRotate() const override { return servoRotate; }
 	Node3D& SetTranslate(const Point3f& t) override { servoTranslate = t; return *this; }
 	const Point3f& GetTranslate() const & override { return servoTranslate; }
-	//Node3D& SetColor(const Color& c) override { color = c; return *this; }
-	//const Color& GetColor() const & override { return color; }
 	
 	Servo3D& SetModelScale(const Point3f& s) { scale = s; return *this; }
 	Servo3D& SetModelScale(const float s) { scale = {s, s, s}; return *this; }
@@ -119,5 +116,9 @@ private:
 		glEnd();
 	}
 };
+
+INITBLOCK {
+	Node3D::Register<Servo3D>();
+}
 
 #endif

@@ -11,6 +11,7 @@ class Node3D {
 private:
 	GLuint vao = 0;
 	GLuint vbo = 0;
+	static ArrayMap<String, Node3D*> nodeTypes;
 
 protected:
 	static int nextId;
@@ -32,32 +33,37 @@ public:
 		id = nextId++;
 	}
 	
-	Node3D(const Node3D& node) {
-		id = node.id;
-		//id = nextId++;
-		bbox = node.bbox;
-		scale = node.scale;
-		rotate = node.rotate;
-		translate = node.translate;
-		color = node.color;
-		isSelected = node.isSelected;
-		points = clone(node.points);
-		stlPath = node.stlPath;
-		for (const Node3D& n : node.nodes) {
-			nodes.Add(n);
+	template <class T>
+	static void Register() {
+		T* n = new T();
+		String type = typeid(*n).name();
+		nodeTypes.FindAdd(type, n);
+	}
+
+	virtual Node3D* Copy() const {
+		Node3D* node = new Node3D();
+		node->bbox = bbox;
+		node->scale = scale;
+		node->rotate = rotate;
+		node->translate = translate;
+		node->isSelected = isSelected;
+		node->color = color;
+		node->stlPath = stlPath;
+		node->points = clone(points);
+		for (const Node3D& n : nodes) {
+			node->nodes.Add(n.Copy());
 		}
+		return node;
 	}
 
 	virtual ~Node3D() {
 		nodes.Clear();
 		GLDeinit();
 	}
-
-	template <class T, class... Args>
-	T& Create(Args&&... args) {
-		T& node = nodes.Create<T>(std::forward<Args>(args)...);
-		node.parent = this;
-		return node;
+	
+	void Add(Node3D* node) {
+		node->parent = this;
+		nodes.Add(node);
 	}
 
 //	bool Remove(Node3D* node) {
@@ -119,12 +125,29 @@ public:
 	}
 	
 	virtual void Jsonize(JsonIO& json) {
+		String type = typeid(*this).name();
+		json("type", type);
 		json("STL", stlPath);
 		json("scale", scale)("rotate", rotate)("translate", translate);
 		json("Color", color);
 		if (json.IsLoading()) {
 			if (!stlPath.IsEmpty()) LoadSTL(stlPath);
-			json("nodes", nodes);
+
+			const Value& va = json.Get("nodes");
+			nodes.Clear();
+			for(int i = 0; i < va.GetCount(); i++) {
+				JsonIO jio(va[i]);
+				String t = jio.Get("type");
+				Node3D* node = nodeTypes.Get(t, NULL);
+				if (node) {
+					node = node->Copy();
+					node->Jsonize(jio);
+					nodes.Add(node);
+				} else {
+					nodes[i].Jsonize(jio);
+				}
+			}
+
 		} else {
 			if (nodes.GetCount()) {
 				json("nodes", nodes);
@@ -205,11 +228,6 @@ public:
 	bool IsSelected() const { return isSelected; }
 	int GetId() const { return id; }
 	Node3D& SetId(int id) { this->id = id; return *this; }
-	Node3D& SetNextId(bool recursive = false) {
-		id = nextId++;
-		if (recursive) for (Node3D& node : nodes) node.SetNextId(recursive);
-		return *this;
-	}
 	Node3D* GetParent() { return parent; }
 	const Array<Node3D>& GetChildren() const { return nodes; }
 
@@ -336,5 +354,10 @@ private:
 };
 
 int Node3D::nextId = 1;
+ArrayMap<String, Node3D*> Node3D::nodeTypes;
+
+INITBLOCK {
+	Node3D::Register<Node3D>();
+}
 
 #endif

@@ -27,7 +27,8 @@ public:
 			if (parentId >= 0) {
 				Node3D* parent = (Node3D*)(int64_t)tMotors[parentId];
 				if (parent) {
-					Servo3D& serv	= parent->Create<Servo3D>();
+					Servo3D* serv	= new Servo3D();
+					parent->Add(serv);
 					int id = AddNodeToTree(parentId, serv);
 					tMotors.SetCursor(id);
 				}
@@ -52,8 +53,8 @@ public:
 				Node3D* parent = (Node3D*)(int64_t)tMotors[parentId];
 				Servo3D* servo = dynamic_cast<Servo3D*>(node);
 				if (servo) {
-					Servo3D& serv = parent->Create<Servo3D>(*servo);
-					serv.SetNextId(true);
+					Servo3D* serv = servo->Copy();
+					parent->Add(serv);
 					int id = AddNodeToTree(parentId, serv);
 					tMotors.SetCursor(id);
 				}
@@ -99,7 +100,7 @@ public:
 			LoadFromJsonFile(body, "RobotEditor.json");
 			viewer.ViewAll();
 			tMotors.Clear();
-			AddNodeToTree(-1, body);
+			AddNodeToTree(-1, &body);
 		};
 
 		bChangeModelPath.WhenPush = [=] {
@@ -365,15 +366,15 @@ private:
 		eModelRotZ <<= serv->GetModelRotate().z;
 	}
 
-	int AddNodeToTree(int parentId, const Node3D& node) {
+	int AddNodeToTree(int parentId, const Node3D* node) {
 		int id = 0;
 		if (parentId < 0) {
-			tMotors.SetRoot(CtrlImg::File(), (int64_t)&body, t_("Body"));
+			tMotors.SetRoot(CtrlImg::File(), (int64_t)node, t_("Body"));
 		} else {
-		 id = tMotors.Add(parentId, CtrlImg::File(), (int64_t)&node, t_("Servo"));
+		 id = tMotors.Add(parentId, CtrlImg::File(), (int64_t)node, t_("Servo"));
 		}
-		for (const Node3D& n : node.GetChildren()) {
-			AddNodeToTree(id, n);
+		for (const Node3D& n : node->GetChildren()) {
+			AddNodeToTree(id, &n);
 		}
 		return id;
 	}

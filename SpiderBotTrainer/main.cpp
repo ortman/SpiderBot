@@ -55,42 +55,50 @@ private:
 
 		body.LoadSTL("models/Body.stl").SetColor(Yellow);
 
-		Servo3D& segment1 = body.Create<Servo3D>();
-		segment1.LoadSTL("models/Segment1.stl");
-		segment1.SetModelTranslate({96.4f, -1.8f, -81.f})
-		        .SetModelRotate({-90.0f, 0.0f, 0.0f})
-		        .SetColor(LtBlue);
-		segment1.SetAngle(90.0f).SetTranslate({36.f, 0.0f, 20.5f});
+		Servo3D* foot1 = new Servo3D();
+		foot1->LoadSTL("models/Segment1.stl");
+		foot1->SetModelTranslate({96.4f, -1.8f, -81.f})
+		      .SetModelRotate({-90.0f, 0.0f, 0.0f})
+		      .SetColor(LtBlue);
+		foot1->SetAngle(90.0f).SetTranslate({36.f, 0.0f, 20.5f});
 		
-		Servo3D& segment2 = segment1.Create<Servo3D>();
-		segment2.LoadSTL("models/Segment2.stl");
-		segment2.SetModelTranslate({38.f, -93.0f, 1.5f})
+		Servo3D* segment2 = new Servo3D();
+		segment2->LoadSTL("models/Segment2.stl");
+		segment2->SetModelTranslate({38.f, -93.0f, 1.5f})
 		        .SetModelRotate({180.0f, 0.0f, 13.5f})
 		        .SetColor(LtCyan);
-		segment2.SetAngle(90.0f).SetTranslate({37.6f, 0.f, 0.4f}).SetRotate({90.f, 0.f, 21.5f});
+		segment2->SetAngle(90.0f).SetTranslate({37.6f, 0.f, 0.4f}).SetRotate({90.f, 0.f, 21.5f});
+		foot1->Add(segment2);
 		
-		Servo3D& segment3 = segment2.Create<Servo3D>();
-		segment3.LoadSTL("models/Segment3.stl");
-    segment3.SetModelTranslate({93.f, 7.5f, 2.f})
+		Servo3D* segment3 = new Servo3D();
+		segment3->LoadSTL("models/Segment3.stl");
+    segment3->SetModelTranslate({93.f, 7.5f, 2.f})
             .SetRotate({180.0f, 0.0f, -85.5f})
             .SetColor(LtMagenta);
-		segment3.SetAngle(90.0f).SetTranslate({45.f, 0.f, 0.f}).SetRotate({0.f, 0.f, -100.5f});
+		segment3->SetAngle(90.0f).SetTranslate({45.f, 0.f, 0.f}).SetRotate({0.f, 0.f, -100.5f});
+		segment2->Add(segment3);
 
+		body.Add(foot1);
 
-		Servo3D& foot2 = body.Create<Servo3D>(segment1);
-		foot2.SetNextId(true).SetTranslate({-36.5f,  0.0f, 20.5f}).SetRotate({0.0f, 0.0f, 180.0f});
+		Servo3D* foot2 = foot1->Copy();
+		foot2->SetTranslate({-36.5f,  0.0f, 20.5f}).SetRotate({0.0f, 0.0f, 180.0f});
+		body.Add(foot2);
 		
-		Servo3D& foot3 = body.Create<Servo3D>(segment1);
-		foot3.SetNextId(true).SetTranslate({-25.f,  67.0f, 20.5f}).SetRotate({0.0f, 0.0f, 150.0f});
+		Servo3D* foot3 = foot1->Copy();
+		foot3->SetTranslate({-25.f,  67.0f, 20.5f}).SetRotate({0.0f, 0.0f, 150.0f});
+		body.Add(foot3);
 		
-		Servo3D& foot4 = body.Create<Servo3D>(segment1);
-		foot4.SetNextId(true).SetTranslate({25.f,   67.0f, 20.5f}).SetRotate({0.0f, 0.0f, 30.0f});
+		Servo3D* foot4 = foot1->Copy();
+		foot4->SetTranslate({25.f,   67.0f, 20.5f}).SetRotate({0.0f, 0.0f, 30.0f});
+		body.Add(foot4);
 		
-		Servo3D& foot5 = body.Create<Servo3D>(segment1);
-		foot5.SetNextId(true).SetTranslate({-25.f, -67.0f, 20.5f}).SetRotate({0.0f, 0.0f, 210.0f});
+		Servo3D* foot5 = foot1->Copy();
+		foot5->SetTranslate({-25.f, -67.0f, 20.5f}).SetRotate({0.0f, 0.0f, 210.0f});
+		body.Add(foot5);
 		
-		Servo3D& foot6 = body.Create<Servo3D>(segment1);
-		foot6.SetNextId(true).SetTranslate({25.f,  -67.0f, 20.5f}).SetRotate({0.0f, 0.0f, -30.0f});
+		Servo3D* foot6 = foot1->Copy();
+		foot6->SetTranslate({25.f,  -67.0f, 20.5f}).SetRotate({0.0f, 0.0f, -30.0f});
+		body.Add(foot6);
 
 		viewer.Add(&body).ViewAll();
 		AddNodeToTree(body);
