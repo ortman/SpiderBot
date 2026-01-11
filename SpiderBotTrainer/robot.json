@@ -1,0 +1,770 @@
+{
+	"type": "class Node3D",
+	"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Body.stl",
+	"scale": {
+		"x": 1,
+		"y": 1,
+		"z": 1
+	},
+	"rotate": {
+		"x": 0,
+		"y": 0,
+		"z": 0
+	},
+	"translate": {
+		"x": 0,
+		"y": 0,
+		"z": 0
+	},
+	"Color": {
+		"red": 255,
+		"green": 255,
+		"blue": 0
+	},
+	"nodes": [
+		{
+			"Angle": 0,
+			"servoScale": {
+				"x": 1,
+				"y": 1,
+				"z": 1
+			},
+			"servoRotate": {
+				"x": 0,
+				"y": 0,
+				"z": 90
+			},
+			"servoTranslate": {
+				"x": -37,
+				"y": 0,
+				"z": 21
+			},
+			"type": "class Servo3D",
+			"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment1.stl",
+			"scale": {
+				"x": 1,
+				"y": 1,
+				"z": 1
+			},
+			"rotate": {
+				"x": -90,
+				"y": -90,
+				"z": 0
+			},
+			"translate": {
+				"x": 1.5,
+				"y": 96,
+				"z": -81.5
+			},
+			"Color": {
+				"red": 255,
+				"green": 0,
+				"blue": 0
+			},
+			"nodes": [
+				{
+					"Angle": 0,
+					"servoScale": {
+						"x": 1,
+						"y": 1,
+						"z": 1
+					},
+					"servoRotate": {
+						"x": 0,
+						"y": 0,
+						"z": -98.5
+					},
+					"servoTranslate": {
+						"x": -59,
+						"y": -81.5,
+						"z": 0
+					},
+					"type": "class Servo3D",
+					"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment2.stl",
+					"scale": {
+						"x": 1,
+						"y": 1,
+						"z": 1
+					},
+					"rotate": {
+						"x": 0,
+						"y": 0,
+						"z": 98.5
+					},
+					"translate": {
+						"x": -89.5,
+						"y": 46.5,
+						"z": 0
+					},
+					"Color": {
+						"red": 0,
+						"green": 255,
+						"blue": 0
+					},
+					"nodes": [
+						{
+							"Angle": 0,
+							"servoScale": {
+								"x": 1,
+								"y": 1,
+								"z": 1
+							},
+							"servoRotate": {
+								"x": 0,
+								"y": 0,
+								"z": -106.5
+							},
+							"servoTranslate": {
+								"x": -15.5,
+								"y": -92,
+								"z": 0
+							},
+							"type": "class Servo3D",
+							"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment3.stl",
+							"scale": {
+								"x": 1,
+								"y": 1,
+								"z": 1
+							},
+							"rotate": {
+								"x": 0,
+								"y": 0,
+								"z": 106.5
+							},
+							"translate": {
+								"x": -92.5,
+								"y": -11,
+								"z": 0
+							},
+							"Color": {
+								"red": 0,
+								"green": 0,
+								"blue": 255
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"Angle": 0,
+			"servoScale": {
+				"x": 1,
+				"y": 1,
+				"z": 1
+			},
+			"servoRotate": {
+				"x": 0,
+				"y": 0,
+				"z": -90
+			},
+			"servoTranslate": {
+				"x": 37,
+				"y": 0,
+				"z": 21
+			},
+			"type": "class Servo3D",
+			"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment1.stl",
+			"scale": {
+				"x": 1,
+				"y": 1,
+				"z": 1
+			},
+			"rotate": {
+				"x": -90,
+				"y": -90,
+				"z": 0
+			},
+			"translate": {
+				"x": 1.5,
+				"y": 96,
+				"z": -81.5
+			},
+			"Color": {
+				"red": 255,
+				"green": 0,
+				"blue": 0
+			},
+			"nodes": [
+				{
+					"Angle": 0,
+					"servoScale": {
+						"x": 1,
+						"y": 1,
+						"z": 1
+					},
+					"servoRotate": {
+						"x": 0,
+						"y": 0,
+						"z": -98.5
+					},
+					"servoTranslate": {
+						"x": -59,
+						"y": -81.5,
+						"z": 0
+					},
+					"type": "class Servo3D",
+					"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment2.stl",
+					"scale": {
+						"x": 1,
+						"y": 1,
+						"z": 1
+					},
+					"rotate": {
+						"x": 0,
+						"y": 0,
+						"z": 98.5
+					},
+					"translate": {
+						"x": -89.5,
+						"y": 46.5,
+						"z": 0
+					},
+					"Color": {
+						"red": 0,
+						"green": 255,
+						"blue": 0
+					},
+					"nodes": [
+						{
+							"Angle": 0,
+							"servoScale": {
+								"x": 1,
+								"y": 1,
+								"z": 1
+							},
+							"servoRotate": {
+								"x": 0,
+								"y": 0,
+								"z": -106.5
+							},
+							"servoTranslate": {
+								"x": -15.5,
+								"y": -92,
+								"z": 0
+							},
+							"type": "class Servo3D",
+							"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment3.stl",
+							"scale": {
+								"x": 1,
+								"y": 1,
+								"z": 1
+							},
+							"rotate": {
+								"x": 0,
+								"y": 0,
+								"z": 106.5
+							},
+							"translate": {
+								"x": -92.5,
+								"y": -11,
+								"z": 0
+							},
+							"Color": {
+								"red": 0,
+								"green": 0,
+								"blue": 255
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"Angle": 0,
+			"servoScale": {
+				"x": 1,
+				"y": 1,
+				"z": 1
+			},
+			"servoRotate": {
+				"x": 0,
+				"y": 0,
+				"z": -60
+			},
+			"servoTranslate": {
+				"x": 23,
+				"y": 68.5,
+				"z": 21
+			},
+			"type": "class Servo3D",
+			"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment1.stl",
+			"scale": {
+				"x": 1,
+				"y": 1,
+				"z": 1
+			},
+			"rotate": {
+				"x": -90,
+				"y": -90,
+				"z": 0
+			},
+			"translate": {
+				"x": 1.5,
+				"y": 96,
+				"z": -81.5
+			},
+			"Color": {
+				"red": 255,
+				"green": 0,
+				"blue": 0
+			},
+			"nodes": [
+				{
+					"Angle": 0,
+					"servoScale": {
+						"x": 1,
+						"y": 1,
+						"z": 1
+					},
+					"servoRotate": {
+						"x": 0,
+						"y": 0,
+						"z": -98.5
+					},
+					"servoTranslate": {
+						"x": -59,
+						"y": -81.5,
+						"z": 0
+					},
+					"type": "class Servo3D",
+					"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment2.stl",
+					"scale": {
+						"x": 1,
+						"y": 1,
+						"z": 1
+					},
+					"rotate": {
+						"x": 0,
+						"y": 0,
+						"z": 98.5
+					},
+					"translate": {
+						"x": -89.5,
+						"y": 46.5,
+						"z": 0
+					},
+					"Color": {
+						"red": 0,
+						"green": 255,
+						"blue": 0
+					},
+					"nodes": [
+						{
+							"Angle": 0,
+							"servoScale": {
+								"x": 1,
+								"y": 1,
+								"z": 1
+							},
+							"servoRotate": {
+								"x": 0,
+								"y": 0,
+								"z": -106.5
+							},
+							"servoTranslate": {
+								"x": -15.5,
+								"y": -92,
+								"z": 0
+							},
+							"type": "class Servo3D",
+							"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment3.stl",
+							"scale": {
+								"x": 1,
+								"y": 1,
+								"z": 1
+							},
+							"rotate": {
+								"x": 0,
+								"y": 0,
+								"z": 106.5
+							},
+							"translate": {
+								"x": -92.5,
+								"y": -11,
+								"z": 0
+							},
+							"Color": {
+								"red": 0,
+								"green": 0,
+								"blue": 255
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"Angle": 0,
+			"servoScale": {
+				"x": 1,
+				"y": 1,
+				"z": 1
+			},
+			"servoRotate": {
+				"x": 0,
+				"y": 0,
+				"z": 60
+			},
+			"servoTranslate": {
+				"x": -23.5,
+				"y": 68.5,
+				"z": 21
+			},
+			"type": "class Servo3D",
+			"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment1.stl",
+			"scale": {
+				"x": 1,
+				"y": 1,
+				"z": 1
+			},
+			"rotate": {
+				"x": -90,
+				"y": -90,
+				"z": 0
+			},
+			"translate": {
+				"x": 1.5,
+				"y": 96,
+				"z": -81.5
+			},
+			"Color": {
+				"red": 255,
+				"green": 0,
+				"blue": 0
+			},
+			"nodes": [
+				{
+					"Angle": 0,
+					"servoScale": {
+						"x": 1,
+						"y": 1,
+						"z": 1
+					},
+					"servoRotate": {
+						"x": 0,
+						"y": 0,
+						"z": -98.5
+					},
+					"servoTranslate": {
+						"x": -59,
+						"y": -81.5,
+						"z": 0
+					},
+					"type": "class Servo3D",
+					"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment2.stl",
+					"scale": {
+						"x": 1,
+						"y": 1,
+						"z": 1
+					},
+					"rotate": {
+						"x": 0,
+						"y": 0,
+						"z": 98.5
+					},
+					"translate": {
+						"x": -89.5,
+						"y": 46.5,
+						"z": 0
+					},
+					"Color": {
+						"red": 0,
+						"green": 255,
+						"blue": 0
+					},
+					"nodes": [
+						{
+							"Angle": 0,
+							"servoScale": {
+								"x": 1,
+								"y": 1,
+								"z": 1
+							},
+							"servoRotate": {
+								"x": 0,
+								"y": 0,
+								"z": -106.5
+							},
+							"servoTranslate": {
+								"x": -15.5,
+								"y": -92,
+								"z": 0
+							},
+							"type": "class Servo3D",
+							"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment3.stl",
+							"scale": {
+								"x": 1,
+								"y": 1,
+								"z": 1
+							},
+							"rotate": {
+								"x": 0,
+								"y": 0,
+								"z": 106.5
+							},
+							"translate": {
+								"x": -92.5,
+								"y": -11,
+								"z": 0
+							},
+							"Color": {
+								"red": 0,
+								"green": 0,
+								"blue": 255
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"Angle": 0,
+			"servoScale": {
+				"x": 1,
+				"y": 1,
+				"z": 1
+			},
+			"servoRotate": {
+				"x": 0,
+				"y": 0,
+				"z": 120
+			},
+			"servoTranslate": {
+				"x": -23.5,
+				"y": -68.5,
+				"z": 21
+			},
+			"type": "class Servo3D",
+			"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment1.stl",
+			"scale": {
+				"x": 1,
+				"y": 1,
+				"z": 1
+			},
+			"rotate": {
+				"x": -90,
+				"y": -90,
+				"z": 0
+			},
+			"translate": {
+				"x": 1.5,
+				"y": 96,
+				"z": -81.5
+			},
+			"Color": {
+				"red": 255,
+				"green": 0,
+				"blue": 0
+			},
+			"nodes": [
+				{
+					"Angle": 0,
+					"servoScale": {
+						"x": 1,
+						"y": 1,
+						"z": 1
+					},
+					"servoRotate": {
+						"x": 0,
+						"y": 0,
+						"z": -98.5
+					},
+					"servoTranslate": {
+						"x": -59,
+						"y": -81.5,
+						"z": 0
+					},
+					"type": "class Servo3D",
+					"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment2.stl",
+					"scale": {
+						"x": 1,
+						"y": 1,
+						"z": 1
+					},
+					"rotate": {
+						"x": 0,
+						"y": 0,
+						"z": 98.5
+					},
+					"translate": {
+						"x": -89.5,
+						"y": 46.5,
+						"z": 0
+					},
+					"Color": {
+						"red": 0,
+						"green": 255,
+						"blue": 0
+					},
+					"nodes": [
+						{
+							"Angle": 0,
+							"servoScale": {
+								"x": 1,
+								"y": 1,
+								"z": 1
+							},
+							"servoRotate": {
+								"x": 0,
+								"y": 0,
+								"z": -106.5
+							},
+							"servoTranslate": {
+								"x": -15.5,
+								"y": -92,
+								"z": 0
+							},
+							"type": "class Servo3D",
+							"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment3.stl",
+							"scale": {
+								"x": 1,
+								"y": 1,
+								"z": 1
+							},
+							"rotate": {
+								"x": 0,
+								"y": 0,
+								"z": 106.5
+							},
+							"translate": {
+								"x": -92.5,
+								"y": -11,
+								"z": 0
+							},
+							"Color": {
+								"red": 0,
+								"green": 0,
+								"blue": 255
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"Angle": 0,
+			"servoScale": {
+				"x": 1,
+				"y": 1,
+				"z": 1
+			},
+			"servoRotate": {
+				"x": 0,
+				"y": 0,
+				"z": -120
+			},
+			"servoTranslate": {
+				"x": 23,
+				"y": -68.5,
+				"z": 21
+			},
+			"type": "class Servo3D",
+			"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment1.stl",
+			"scale": {
+				"x": 1,
+				"y": 1,
+				"z": 1
+			},
+			"rotate": {
+				"x": -90,
+				"y": -90,
+				"z": 0
+			},
+			"translate": {
+				"x": 1.5,
+				"y": 96,
+				"z": -81.5
+			},
+			"Color": {
+				"red": 255,
+				"green": 0,
+				"blue": 0
+			},
+			"nodes": [
+				{
+					"Angle": 0,
+					"servoScale": {
+						"x": 1,
+						"y": 1,
+						"z": 1
+					},
+					"servoRotate": {
+						"x": 0,
+						"y": 0,
+						"z": -98.5
+					},
+					"servoTranslate": {
+						"x": -59,
+						"y": -81.5,
+						"z": 0
+					},
+					"type": "class Servo3D",
+					"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment2.stl",
+					"scale": {
+						"x": 1,
+						"y": 1,
+						"z": 1
+					},
+					"rotate": {
+						"x": 0,
+						"y": 0,
+						"z": 98.5
+					},
+					"translate": {
+						"x": -89.5,
+						"y": 46.5,
+						"z": 0
+					},
+					"Color": {
+						"red": 0,
+						"green": 255,
+						"blue": 0
+					},
+					"nodes": [
+						{
+							"Angle": 0,
+							"servoScale": {
+								"x": 1,
+								"y": 1,
+								"z": 1
+							},
+							"servoRotate": {
+								"x": 0,
+								"y": 0,
+								"z": -106.5
+							},
+							"servoTranslate": {
+								"x": -15.5,
+								"y": -92,
+								"z": 0
+							},
+							"type": "class Servo3D",
+							"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment3.stl",
+							"scale": {
+								"x": 1,
+								"y": 1,
+								"z": 1
+							},
+							"rotate": {
+								"x": 0,
+								"y": 0,
+								"z": 106.5
+							},
+							"translate": {
+								"x": -92.5,
+								"y": -11,
+								"z": 0
+							},
+							"Color": {
+								"red": 0,
+								"green": 0,
+								"blue": 255
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}
