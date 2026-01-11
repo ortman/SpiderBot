@@ -103,6 +103,11 @@ public:
 		Node3D::Jsonize(json);
 	}
 
+	virtual const Bboxf GetBbox() const override {
+		Bboxf res = Node3D::GetBbox();
+		return res.Rotate(servoRotate).Translate(servoTranslate) * servoScale;
+	}
+
 private:
 	void DrawSector(float angle, float radius) {
 		glBegin(GL_TRIANGLE_FAN);

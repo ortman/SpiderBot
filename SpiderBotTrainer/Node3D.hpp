@@ -98,7 +98,6 @@ public:
 			return *this;
 		}
 
-		// Проверка формата
 		String header = in.Get(80);
 		bool is_ascii = header.StartsWith("solid") && header.Find("endsolid") < 0;
 		in.Seek(0);
