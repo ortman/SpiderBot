@@ -115,7 +115,12 @@ public:
 				bbox += points[i++];
 			}
 		}
-		stlPath = filepath;
+		String appFolder = GetExeFolder();
+		if (filepath.StartsWith(appFolder)) {
+			stlPath = filepath.Mid(appFolder.GetLength() + 1);
+		} else {
+			stlPath = filepath;
+		}
 		return *this;
 	}
 	

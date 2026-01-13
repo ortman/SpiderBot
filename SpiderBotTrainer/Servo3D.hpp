@@ -66,7 +66,7 @@ public:
 			glColor4f(0.f, 0.5f, 0.f, 0.5f);
 			glEnable(GL_BLEND);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-				DrawSector(90. - angle, maxAngle - minAngle, 40.0f);
+				DrawSector(90.f - angle, maxAngle - minAngle, 40.0f);
 			glDisable(GL_BLEND);
 		}
 		glPopMatrix();

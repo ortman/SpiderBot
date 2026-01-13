@@ -1,6 +1,6 @@
 {
 	"type": "class Node3D",
-	"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Body.stl",
+	"STL": "models\\Body.stl",
 	"scale": {
 		"x": 1,
 		"y": 1,
@@ -42,7 +42,7 @@
 				"z": 21
 			},
 			"type": "class Servo3D",
-			"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment1.stl",
+			"STL": "models\\Segment1.stl",
 			"scale": {
 				"x": 1,
 				"y": 1,
@@ -84,7 +84,7 @@
 						"z": 0
 					},
 					"type": "class Servo3D",
-					"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment2.stl",
+					"STL": "models\\Segment2.stl",
 					"scale": {
 						"x": 1,
 						"y": 1,
@@ -126,7 +126,7 @@
 								"z": 0
 							},
 							"type": "class Servo3D",
-							"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment3.stl",
+							"STL": "models\\Segment3.stl",
 							"scale": {
 								"x": 1,
 								"y": 1,
@@ -172,7 +172,7 @@
 				"z": 21
 			},
 			"type": "class Servo3D",
-			"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment1.stl",
+			"STL": "models\\Segment1.stl",
 			"scale": {
 				"x": 1,
 				"y": 1,
@@ -214,7 +214,7 @@
 						"z": 0
 					},
 					"type": "class Servo3D",
-					"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment2.stl",
+					"STL": "models\\Segment2.stl",
 					"scale": {
 						"x": 1,
 						"y": 1,
@@ -256,7 +256,7 @@
 								"z": 0
 							},
 							"type": "class Servo3D",
-							"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment3.stl",
+							"STL": "models\\Segment3.stl",
 							"scale": {
 								"x": 1,
 								"y": 1,
@@ -302,7 +302,7 @@
 				"z": 21
 			},
 			"type": "class Servo3D",
-			"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment1.stl",
+			"STL": "models\\Segment1.stl",
 			"scale": {
 				"x": 1,
 				"y": 1,
@@ -344,7 +344,7 @@
 						"z": 0
 					},
 					"type": "class Servo3D",
-					"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment2.stl",
+					"STL": "models\\Segment2.stl",
 					"scale": {
 						"x": 1,
 						"y": 1,
@@ -386,7 +386,7 @@
 								"z": 0
 							},
 							"type": "class Servo3D",
-							"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment3.stl",
+							"STL": "models\\Segment3.stl",
 							"scale": {
 								"x": 1,
 								"y": 1,
@@ -432,7 +432,7 @@
 				"z": 21
 			},
 			"type": "class Servo3D",
-			"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment1.stl",
+			"STL": "models\\Segment1.stl",
 			"scale": {
 				"x": 1,
 				"y": 1,
@@ -474,7 +474,7 @@
 						"z": 0
 					},
 					"type": "class Servo3D",
-					"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment2.stl",
+					"STL": "models\\Segment2.stl",
 					"scale": {
 						"x": 1,
 						"y": 1,
@@ -516,7 +516,7 @@
 								"z": 0
 							},
 							"type": "class Servo3D",
-							"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment3.stl",
+							"STL": "models\\Segment3.stl",
 							"scale": {
 								"x": 1,
 								"y": 1,
@@ -562,7 +562,7 @@
 				"z": 21
 			},
 			"type": "class Servo3D",
-			"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment1.stl",
+			"STL": "models\\Segment1.stl",
 			"scale": {
 				"x": 1,
 				"y": 1,
@@ -604,7 +604,7 @@
 						"z": 0
 					},
 					"type": "class Servo3D",
-					"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment2.stl",
+					"STL": "models\\Segment2.stl",
 					"scale": {
 						"x": 1,
 						"y": 1,
@@ -646,7 +646,7 @@
 								"z": 0
 							},
 							"type": "class Servo3D",
-							"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment3.stl",
+							"STL": "models\\Segment3.stl",
 							"scale": {
 								"x": 1,
 								"y": 1,
@@ -692,7 +692,7 @@
 				"z": 21
 			},
 			"type": "class Servo3D",
-			"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment1.stl",
+			"STL": "models\\Segment1.stl",
 			"scale": {
 				"x": 1,
 				"y": 1,
@@ -734,7 +734,7 @@
 						"z": 0
 					},
 					"type": "class Servo3D",
-					"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment2.stl",
+					"STL": "models\\Segment2.stl",
 					"scale": {
 						"x": 1,
 						"y": 1,
@@ -776,7 +776,7 @@
 								"z": 0
 							},
 							"type": "class Servo3D",
-							"STL": "C:\\PROJECTS\\UPP\\out\\SpiderBot\\MSVS22x64.Debug.Debug_Full.Gui\\models\\Segment3.stl",
+							"STL": "models\\Segment3.stl",
 							"scale": {
 								"x": 1,
 								"y": 1,
