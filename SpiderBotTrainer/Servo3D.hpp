@@ -7,7 +7,7 @@ class Servo3D : public Node3D {
 private:
 	float minAngle = 0.0f;
 	float maxAngle = 180.0f;
-	float angle = 0.0f;
+	float angle = 90.0f;
 	
 	Point3f servoScale = {1.0f, 1.0f, 1.0f};
 	Point3f servoRotate;
@@ -46,7 +46,7 @@ public:
 		angle = clamp(a, minAngle, maxAngle);
 		return *this;
 	}
-
+	float GetAngle() { return angle; }
 	float GetMinAngle() { return minAngle; }
 	Servo3D& SetMinAngle(float angle) { minAngle = angle; return *this; }
 	float GetMaxAngle() { return maxAngle; }
@@ -57,28 +57,17 @@ public:
 		// Преобразования модели
 		glScalef(servoScale.x, servoScale.y, servoScale.z);
 		glTranslatef(servoTranslate.x, servoTranslate.y, servoTranslate.z);
-		glRotatef(servoRotate.x, 1, 0, 0);
-		glRotatef(servoRotate.y, 0, 1, 0);
-		glRotatef(servoRotate.z, 0, 0, 1);
+		glRotatef(servoRotate.x, 1.f, 0.f, 0.f);
+		glRotatef(servoRotate.y, 0.f, 1.f, 0.f);
+		glRotatef(servoRotate.z + angle, 0.f, 0.f, 1.f);
 		Node3D::GLPaint(isSelectMode);
 		if (!isSelectMode && isSelected) {
-
 			glDisable(GL_LIGHTING); // Отключаем освещение для осей
-			glLineWidth(2.0f);
-			glBegin(GL_LINES);
-				// Ось X (красный)
-				glColor3f(1.0f, 0.0f, 0.0f);
-				glVertex3f(0.0f, 0.0f, 0.0f);
-				glVertex3f(100.0f, 0.0f, 0.0f); // Длина оси = 100
-
-				// Ось Z (синий)
-				glColor3f(0.0f, 0.0f, 1.0f);
-				glVertex3f(0.0f, 0.0f, -100.0f);
-				glVertex3f(0.0f, 0.0f, 100.0f);
-			glEnd();
-
-			glColor4f(0.0f, 1.0f, 0.0f, 0.5f);
-			DrawSector(maxAngle, 50.0f);
+			glColor4f(0.f, 0.5f, 0.f, 0.5f);
+			glEnable(GL_BLEND);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+				DrawSector(90. - angle, maxAngle - minAngle, 40.0f);
+			glDisable(GL_BLEND);
 		}
 		glPopMatrix();
 	}
@@ -98,7 +87,7 @@ public:
 	const Point3f& GetModelTranslate() const & { return translate; }
 	
 	virtual void Jsonize(JsonIO& json) override {
-		json("Angle", angle);
+		json("Angle", angle)("minAngle", minAngle)("maxAngle", maxAngle);
 		json("servoScale", servoScale)("servoRotate", servoRotate)("servoTranslate", servoTranslate);
 		Node3D::Jsonize(json);
 	}
@@ -109,13 +98,14 @@ public:
 	}
 
 private:
-	void DrawSector(float angle, float radius) {
+	void DrawSector(float startAngle, float angle, float radius) {
 		glBegin(GL_TRIANGLE_FAN);
 			glVertex3f(0.0f, 0.0f, 0.0f);
-			int segmants = 101;
-			float a, angleStep = (float)(angle * M_PI / 180.0 / segmants);
-			for (int i = 0; i < segmants; ++i) {
-				a = angleStep * i;
+			int segments = 50;
+			startAngle *= (float)(M_PI / 180.0);
+			float a, angleStep = (float)(angle * M_PI / 180.0 / segments);
+			for (int i = 0; i < segments; ++i) {
+				a = startAngle + angleStep * i;
 				glVertex3f(radius * cos(a), radius * sin(a), 0.0f);
 			}
 		glEnd();

@@ -23,7 +23,9 @@
 	},
 	"nodes": [
 		{
-			"Angle": 0,
+			"Angle": 90,
+			"minAngle": 0,
+			"maxAngle": 180,
 			"servoScale": {
 				"x": 1,
 				"y": 1,
@@ -32,7 +34,7 @@
 			"servoRotate": {
 				"x": 0,
 				"y": 0,
-				"z": 90
+				"z": 0
 			},
 			"servoTranslate": {
 				"x": -37,
@@ -63,7 +65,9 @@
 			},
 			"nodes": [
 				{
-					"Angle": 0,
+					"Angle": 90,
+					"minAngle": 0,
+					"maxAngle": 180,
 					"servoScale": {
 						"x": 1,
 						"y": 1,
@@ -72,7 +76,7 @@
 					"servoRotate": {
 						"x": 0,
 						"y": 0,
-						"z": -98.5
+						"z": -188.5
 					},
 					"servoTranslate": {
 						"x": -59,
@@ -103,7 +107,9 @@
 					},
 					"nodes": [
 						{
-							"Angle": 0,
+							"Angle": 90,
+							"minAngle": 0,
+							"maxAngle": 180,
 							"servoScale": {
 								"x": 1,
 								"y": 1,
@@ -112,7 +118,7 @@
 							"servoRotate": {
 								"x": 0,
 								"y": 0,
-								"z": -106.5
+								"z": -196.5
 							},
 							"servoTranslate": {
 								"x": -15.5,
@@ -147,7 +153,9 @@
 			]
 		},
 		{
-			"Angle": 0,
+			"Angle": 90,
+			"minAngle": 0,
+			"maxAngle": 180,
 			"servoScale": {
 				"x": 1,
 				"y": 1,
@@ -156,7 +164,7 @@
 			"servoRotate": {
 				"x": 0,
 				"y": 0,
-				"z": -90
+				"z": -180
 			},
 			"servoTranslate": {
 				"x": 37,
@@ -187,7 +195,9 @@
 			},
 			"nodes": [
 				{
-					"Angle": 0,
+					"Angle": 90,
+					"minAngle": 0,
+					"maxAngle": 180,
 					"servoScale": {
 						"x": 1,
 						"y": 1,
@@ -196,7 +206,7 @@
 					"servoRotate": {
 						"x": 0,
 						"y": 0,
-						"z": -98.5
+						"z": -188.5
 					},
 					"servoTranslate": {
 						"x": -59,
@@ -227,7 +237,9 @@
 					},
 					"nodes": [
 						{
-							"Angle": 0,
+							"Angle": 90,
+							"minAngle": 0,
+							"maxAngle": 180,
 							"servoScale": {
 								"x": 1,
 								"y": 1,
@@ -236,7 +248,7 @@
 							"servoRotate": {
 								"x": 0,
 								"y": 0,
-								"z": -106.5
+								"z": -196.5
 							},
 							"servoTranslate": {
 								"x": -15.5,
@@ -271,7 +283,9 @@
 			]
 		},
 		{
-			"Angle": 0,
+			"Angle": 90,
+			"minAngle": 0,
+			"maxAngle": 180,
 			"servoScale": {
 				"x": 1,
 				"y": 1,
@@ -280,7 +294,7 @@
 			"servoRotate": {
 				"x": 0,
 				"y": 0,
-				"z": -60
+				"z": -150
 			},
 			"servoTranslate": {
 				"x": 23,
@@ -311,7 +325,9 @@
 			},
 			"nodes": [
 				{
-					"Angle": 0,
+					"Angle": 90,
+					"minAngle": 0,
+					"maxAngle": 180,
 					"servoScale": {
 						"x": 1,
 						"y": 1,
@@ -320,7 +336,7 @@
 					"servoRotate": {
 						"x": 0,
 						"y": 0,
-						"z": -98.5
+						"z": -188.5
 					},
 					"servoTranslate": {
 						"x": -59,
@@ -351,7 +367,9 @@
 					},
 					"nodes": [
 						{
-							"Angle": 0,
+							"Angle": 90,
+							"minAngle": 0,
+							"maxAngle": 180,
 							"servoScale": {
 								"x": 1,
 								"y": 1,
@@ -360,7 +378,7 @@
 							"servoRotate": {
 								"x": 0,
 								"y": 0,
-								"z": -106.5
+								"z": -196.5
 							},
 							"servoTranslate": {
 								"x": -15.5,
@@ -395,7 +413,9 @@
 			]
 		},
 		{
-			"Angle": 0,
+			"Angle": 90,
+			"minAngle": 0,
+			"maxAngle": 170,
 			"servoScale": {
 				"x": 1,
 				"y": 1,
@@ -404,7 +424,7 @@
 			"servoRotate": {
 				"x": 0,
 				"y": 0,
-				"z": 60
+				"z": -30
 			},
 			"servoTranslate": {
 				"x": -23.5,
@@ -435,7 +455,9 @@
 			},
 			"nodes": [
 				{
-					"Angle": 0,
+					"Angle": 90,
+					"minAngle": 0,
+					"maxAngle": 180,
 					"servoScale": {
 						"x": 1,
 						"y": 1,
@@ -444,7 +466,7 @@
 					"servoRotate": {
 						"x": 0,
 						"y": 0,
-						"z": -98.5
+						"z": -188.5
 					},
 					"servoTranslate": {
 						"x": -59,
@@ -475,7 +497,9 @@
 					},
 					"nodes": [
 						{
-							"Angle": 0,
+							"Angle": 90,
+							"minAngle": 0,
+							"maxAngle": 180,
 							"servoScale": {
 								"x": 1,
 								"y": 1,
@@ -484,7 +508,7 @@
 							"servoRotate": {
 								"x": 0,
 								"y": 0,
-								"z": -106.5
+								"z": -196.5
 							},
 							"servoTranslate": {
 								"x": -15.5,
@@ -519,7 +543,9 @@
 			]
 		},
 		{
-			"Angle": 0,
+			"Angle": 90,
+			"minAngle": 0,
+			"maxAngle": 180,
 			"servoScale": {
 				"x": 1,
 				"y": 1,
@@ -528,7 +554,7 @@
 			"servoRotate": {
 				"x": 0,
 				"y": 0,
-				"z": 120
+				"z": 30
 			},
 			"servoTranslate": {
 				"x": -23.5,
@@ -559,7 +585,9 @@
 			},
 			"nodes": [
 				{
-					"Angle": 0,
+					"Angle": 90,
+					"minAngle": 0,
+					"maxAngle": 180,
 					"servoScale": {
 						"x": 1,
 						"y": 1,
@@ -568,7 +596,7 @@
 					"servoRotate": {
 						"x": 0,
 						"y": 0,
-						"z": -98.5
+						"z": -188.5
 					},
 					"servoTranslate": {
 						"x": -59,
@@ -599,7 +627,9 @@
 					},
 					"nodes": [
 						{
-							"Angle": 0,
+							"Angle": 90,
+							"minAngle": 0,
+							"maxAngle": 180,
 							"servoScale": {
 								"x": 1,
 								"y": 1,
@@ -608,7 +638,7 @@
 							"servoRotate": {
 								"x": 0,
 								"y": 0,
-								"z": -106.5
+								"z": -196.5
 							},
 							"servoTranslate": {
 								"x": -15.5,
@@ -643,7 +673,9 @@
 			]
 		},
 		{
-			"Angle": 0,
+			"Angle": 90,
+			"minAngle": 0,
+			"maxAngle": 180,
 			"servoScale": {
 				"x": 1,
 				"y": 1,
@@ -652,7 +684,7 @@
 			"servoRotate": {
 				"x": 0,
 				"y": 0,
-				"z": -120
+				"z": -210
 			},
 			"servoTranslate": {
 				"x": 23,
@@ -683,7 +715,9 @@
 			},
 			"nodes": [
 				{
-					"Angle": 0,
+					"Angle": 90,
+					"minAngle": 0,
+					"maxAngle": 180,
 					"servoScale": {
 						"x": 1,
 						"y": 1,
@@ -692,7 +726,7 @@
 					"servoRotate": {
 						"x": 0,
 						"y": 0,
-						"z": -98.5
+						"z": -188.5
 					},
 					"servoTranslate": {
 						"x": -59,
@@ -723,7 +757,9 @@
 					},
 					"nodes": [
 						{
-							"Angle": 0,
+							"Angle": 90,
+							"minAngle": 0,
+							"maxAngle": 180,
 							"servoScale": {
 								"x": 1,
 								"y": 1,
@@ -732,7 +768,7 @@
 							"servoRotate": {
 								"x": 0,
 								"y": 0,
-								"z": -106.5
+								"z": -196.5
 							},
 							"servoTranslate": {
 								"x": -15.5,

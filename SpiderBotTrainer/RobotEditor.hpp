@@ -93,11 +93,11 @@ public:
 		};
 		
 		bSave.WhenPush = [=] {
-			StoreAsJsonFile(body, "RobotEditor.json", true);
+			StoreAsJsonFile(body, "robot.json", true);
 		};
 		
 		bLoad.WhenPush = [=] {
-			LoadFromJsonFile(body, "RobotEditor.json");
+			LoadFromJsonFile(body, "robot.json");
 			viewer.ViewAll();
 			tMotors.Clear();
 			AddNodeToTree(-1, &body);
@@ -113,17 +113,33 @@ public:
 			}
 		};
 
+		eAngle.WhenAction = [=] {
+			if (currentNode) {
+				Servo3D* serv = dynamic_cast<Servo3D*>(currentNode);
+				if (serv) {
+					serv->SetAngle(~eAngle);
+					viewer.Refresh();
+				}
+			}
+		};
+
 		eMinAngle.WhenAction = [=] {
 			if (currentNode) {
-				//currentServo->SetMinAngle(~eMinAngle);
-				viewer.Refresh();
+				Servo3D* serv = dynamic_cast<Servo3D*>(currentNode);
+				if (serv) {
+					serv->SetMinAngle(~eMinAngle);
+					viewer.Refresh();
+				}
 			}
 		};
 
 		eMaxAngle.WhenAction = [=] {
 			if (currentNode) {
-				//currentServo->SetMaxAngle(~eMaxAngle);
-				viewer.Refresh();
+				Servo3D* serv = dynamic_cast<Servo3D*>(currentNode);
+				if (serv) {
+					serv->SetMaxAngle(~eMaxAngle);
+					viewer.Refresh();
+				}
 			}
 		};
 
@@ -276,13 +292,14 @@ private:
 		viewer.SelectNode(NULL);
 		DisableCtrls({
 			&lbMotorParams,
-			&eMinAngle, &eMaxAngle,
+			&eAngle, &eMinAngle, &eMaxAngle,
 			&ePosX, &ePosY, &ePosZ,
 			&eRotX, &eRotY, &eRotZ,
 			&lbModel, &eModelPath, &bChangeModelPath, &cColor,
 			&eModelPosX, &eModelPosY, &eModelPosZ,
 			&eModelRotX, &eModelRotY, &eModelRotZ
 		});
+		eAngle.Clear();
 		eMinAngle.Clear();
 		eMaxAngle.Clear();
 		ePosX.Clear();
@@ -306,10 +323,11 @@ private:
 		viewer.SelectNode(node);
 		DisableCtrls({
 			&lbMotorParams,
-			&eMinAngle, &eMaxAngle,
+			&eAngle, &eMinAngle, &eMaxAngle,
 			&ePosX, &ePosY, &ePosZ,
 			&eRotX, &eRotY, &eRotZ
 		});
+		eAngle.Clear();
 		eMinAngle.Clear();
 		eMaxAngle.Clear();
 		ePosX.Clear();
@@ -340,15 +358,16 @@ private:
 		viewer.SelectNode(serv);
 		EnableCtrls({
 			&lbMotorParams,
-			&eMinAngle, &eMaxAngle,
+			&eAngle, &eMinAngle, &eMaxAngle,
 			&ePosX, &ePosY, &ePosZ,
 			&eRotX, &eRotY, &eRotZ,
 			&lbModel, &eModelPath, &bChangeModelPath, &cColor,
 			&eModelPosX, &eModelPosY, &eModelPosZ,
 			&eModelRotX, &eModelRotY, &eModelRotZ
 		});
-		eMaxAngle <<= serv->GetMaxAngle();
+		eAngle <<= serv->GetAngle();
 		eMinAngle <<= serv->GetMinAngle();
+		eMaxAngle <<= serv->GetMaxAngle();
 		ePosX <<= serv->GetTranslate().x;
 		ePosY <<= serv->GetTranslate().y;
 		ePosZ <<= serv->GetTranslate().z;

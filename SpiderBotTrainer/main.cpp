@@ -24,7 +24,7 @@ public:
 
 		tFoots.WhenSel = [=] {
 			int idx = tFoots.GetCursor();
-			if (idx >= 0) viewer.SelectNode(tFoots[idx], true);
+			if (idx >= 0) viewer.SelectNode(tFoots[idx]);
 		};
 
 		GLCtrl::SetDoubleBuffering();
@@ -41,12 +41,43 @@ public:
 
 		bUnits.WhenPush = [=] {
 		};
+		
+		bPlay.WhenPush = [=] {
+			if (ExistsTimeCallback(0)) {
+				KillTimeCallback(0);
+				bPlay.SetLabel("▶");
+			} else {
+				SetTimeCallback(-1000 / 25, [=] {
+					const Array<Node3D>& foots = body.GetChildren();
+					if (foots.GetCount() != 6) return;
+					Servo3D* foot3 = (Servo3D*)&foots[3];
+					Servo3D* segment2 = (Servo3D*)&foot3->GetChildren()[0];
+					if (segment2 == NULL || foot3 == NULL) return;
+					
+					float angle1 = foot3->GetAngle() + testDelta2;
+					if (angle1 > foot3->GetMaxAngle()) testDelta2 = -1.f;
+					if (angle1 < foot3->GetMinAngle()) testDelta2 = 1.f;
+					foot3->SetAngle(angle1);
+					
+					float angle2 = segment2->GetAngle() + testDelta;
+					if (angle2 > segment2->GetMaxAngle()) testDelta = -1.f;
+					if (angle2 < segment2->GetMinAngle()) testDelta = 1.f;
+					segment2->SetAngle(angle2);
+					
+					viewer.Refresh();
+				}, 0);
+				bPlay.SetLabel("||");
+			}
+		};
 	}
 
 	~MainWindow() {
 	}
 
 private:
+	float testDelta = 1.f;
+	float testDelta2 = 1.f;
+	
 	void LoadRobot() {
 		viewer.Clear();
 		tFoots.Clear();
