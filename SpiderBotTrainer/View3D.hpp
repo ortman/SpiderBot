@@ -46,6 +46,8 @@ private:
 
 public:
 	Event<int, Node3D*> WhenSelected; // id, node
+	Event<Point, int, dword> WhenWeel;
+	
 	View3D() {
 		UpdateCameraPosition();
 	}
@@ -249,10 +251,14 @@ private:
 	}
 	
 	virtual void MouseWheel(Point p, int zdelta, dword keyflags) {
-		distance *= (zdelta > 0) ? 0.9f : 1.1f;
-		distance = clamp(distance, 0.1f, 1000.0f);
-		UpdateCameraPosition();
-		Refresh();
+		if (keyflags) {
+			WhenWeel(p, zdelta, keyflags);
+		} else {
+			distance *= (zdelta > 0) ? 0.9f : 1.1f;
+			distance = clamp(distance, 0.1f, 1000.0f);
+			UpdateCameraPosition();
+			Refresh();
+		}
 	}
 
 	virtual void GLPaint() {

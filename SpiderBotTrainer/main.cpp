@@ -38,6 +38,18 @@ public:
 				tFoots.KillCursor();
 			}
 		};
+		viewer.WhenWeel = [=](Point p, int zdelta, dword keyflags) {
+			int i = tFoots.GetCursor();
+			if (keyflags & (K_CTRL | K_SHIFT) && i >= 0) {
+				Servo3D* serv = viewer.GetNode<Servo3D>(tFoots[i]);
+				if (serv) {
+					float delta = zdelta > 0 ? 1.f : -1.f;
+					if (keyflags & K_SHIFT) delta *= 10.f;
+					serv->SetAngle(serv->GetAngle() + delta);
+					viewer.Refresh();
+				}
+			}
+		};
 
 		bUnits.WhenPush = [=] {
 		};
