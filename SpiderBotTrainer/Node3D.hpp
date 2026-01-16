@@ -2,10 +2,11 @@
 #define _NODE_3D_HPP_
 
 #include <GLCtrl/GLCtrl.h>
+#include <plugin/glm/glm.hpp>
 
 using namespace Upp;
-
-#include "Point3f.hpp"
+using namespace glm;
+#include "Bboxf.hpp"
 
 class Node3D {
 private:
@@ -16,13 +17,13 @@ private:
 protected:
 	static int nextId;
 	int id;
-	Point3f scale = {1.0f, 1.0f, 1.0f};
-	Point3f rotate;
-	Point3f translate;
+	vec3 scale = {1.0f, 1.0f, 1.0f};
+	vec3 rotate;
+	vec3 translate;
 	Color color = LtGray;
 	bool isSelected = false;
 	Bboxf bbox;
-	Vector<Point3f> points; // XYZ, normal XYZ
+	Vector<vec3> points; // XYZ, normal XYZ
 
 	Array<Node3D> nodes;
 	Node3D* parent = NULL;
@@ -151,11 +152,30 @@ public:
 					nodes[i].Jsonize(jio);
 				}
 			}
-
 		} else {
 			if (nodes.GetCount()) {
 				json("nodes", nodes);
 			}
+		}
+	}
+	
+	void DrawObject() {
+		if (vao && vbo) {
+			glBindVertexArray(vao);
+			
+			glEnableClientState(GL_VERTEX_ARRAY);
+			glEnableClientState(GL_NORMAL_ARRAY);
+			
+			glBindBuffer(GL_ARRAY_BUFFER, vbo);
+			glVertexPointer(3, GL_FLOAT, sizeof(float) * 6, (void*)0);
+			glNormalPointer(GL_FLOAT, sizeof(float) * 6, (void*)(3 * sizeof(float)));
+			
+			glDrawArrays(GL_TRIANGLES, 0, points.GetCount() / 2);
+			
+			glDisableClientState(GL_NORMAL_ARRAY);
+			glDisableClientState(GL_VERTEX_ARRAY);
+			
+			glBindVertexArray(0);
 		}
 	}
 
@@ -177,41 +197,35 @@ public:
 			if (isSelectMode) {
 				glLoadName(id);
 			} else {
-				glEnable(GL_LIGHTING);
 				if (isSelected) {
 					glColor3ub(255, 0, 0);
 				} else {
 					glColor3ub(color.GetR(), color.GetG(), color.GetB());
 				}
 			}
-			
-			if (vao && vbo) {
-				glBindVertexArray(vao);
-				
-				glEnableClientState(GL_VERTEX_ARRAY);
-				glEnableClientState(GL_NORMAL_ARRAY);
-				
-				glBindBuffer(GL_ARRAY_BUFFER, vbo);
-				glVertexPointer(3, GL_FLOAT, sizeof(Point3f) * 2, (void*)0);
-				glNormalPointer(GL_FLOAT, sizeof(Point3f) * 2, (void*)(3 * sizeof(float)));
-				
-				glDrawArrays(GL_TRIANGLES, 0, points.GetCount() / 2);
-				
-				glDisableClientState(GL_NORMAL_ARRAY);
-				glDisableClientState(GL_VERTEX_ARRAY);
-				
-				glBindVertexArray(0);
-			}
+			DrawObject();
 		}
 		glPopMatrix();
 	}
 
-	virtual Node3D& SetScale(const Point3f& s) { scale = s; return *this; }
-	virtual Node3D& SetScale(const float s) { scale = {s, s, s}; return *this; }
-	virtual Node3D& SetRotate(const Point3f& p) { rotate = p; return *this; }
-	virtual Point3f GetRotate() const { return rotate; }
-	virtual Node3D& SetTranslate(const Point3f& t) { translate = t; return *this; }
-	virtual const Point3f& GetTranslate() const & { return translate; }
+	virtual Node3D& SetScale(const vec3& s) {
+		scale = s;
+		// TODO
+		return *this;
+	}
+	virtual Node3D& SetScale(const float s) { return SetScale({s, s, s}); }
+	virtual Node3D& SetRotate(const vec3& p) {
+		rotate = p;
+		//TODO
+		return *this;
+	}
+	virtual vec3 GetRotate() const { return rotate; }
+	virtual Node3D& SetTranslate(const vec3& t) {
+		translate = t;
+		//TODO
+		return *this;
+	}
+	virtual const vec3& GetTranslate() const & { return translate; }
 	virtual Node3D& SetColor(const Color& c) { color = c; return *this; }
 	virtual const Color& GetColor() const & { return color; }
 	virtual const Bboxf GetBbox() const {
@@ -287,15 +301,15 @@ private:
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     
-    glBufferData(GL_ARRAY_BUFFER, pointsCount * sizeof(Point3f), points.begin(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, pointsCount * sizeof(vec3), points.begin(), GL_STATIC_DRAW);
 
     // Атрибут 0: Координаты (3 float)
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Point3f) * 2, (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 2, (void*)0);
 
     // Атрибут 1: Нормали (3 float). Смещение 3 float (т.к. сначала идет x,y,z)
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Point3f) * 2, (void*)(sizeof(Point3f)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 2, (void*)(sizeof(vec3)));
 
     glBindVertexArray(0);
 	}
@@ -307,7 +321,7 @@ private:
 	
 	void LoadAsciiSTL(FileIn& in) {
 		String line;
-		Point3f normal, p;
+		vec3 normal, p;
 		while (!in.IsEof()) {
 			line = TrimBoth(in.GetLine());
 			Vector<String> tokens = Split(line, ' ', true);
@@ -332,11 +346,11 @@ private:
 	void LoadBinarySTL(FileIn& in) {
 		// Пропускаем 80-байтовый заголовок
 		in.SeekCur(80);
-		Point3f normal, p;
+		vec3 normal, p;
 		// Читаем количество треугольников
-		uint32 triCount;
+		uint32_t triCount;
 		in.Get(&triCount, sizeof(triCount));
-		for (uint32 i = 0; i < triCount; i++) {
+		for (uint32_t i = 0; i < triCount; i++) {
 			// Читаем нормаль
 			in.Get(&normal.x, sizeof(float));
 			in.Get(&normal.y, sizeof(float));
@@ -362,6 +376,18 @@ ArrayMap<String, Node3D*> Node3D::nodeTypes;
 
 INITBLOCK {
 	Node3D::Register<Node3D>();
+}
+
+namespace Upp {
+    void Jsonize(JsonIO& io, glm::vec3& v) {
+        double x = v.x, y = v.y, z = v.z;
+        io("x", x)("y", y)("z", z);
+        if(io.IsLoading()) {
+            v.x = (float)x;
+            v.y = (float)y;
+            v.z = (float)z;
+        }
+    }
 }
 
 #endif

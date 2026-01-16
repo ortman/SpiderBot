@@ -145,7 +145,7 @@ public:
 
 		ePosX.WhenAction = [=] {
 			if (currentNode) {
-				Point3f p = currentNode->GetTranslate();
+				vec3 p = currentNode->GetTranslate();
 				p.x = (float)~ePosX;
 				currentNode->SetTranslate(p);
 				viewer.Refresh();
@@ -154,7 +154,7 @@ public:
 
 		ePosY.WhenAction = [=] {
 			if (currentNode) {
-				Point3f p = currentNode->GetTranslate();
+				vec3 p = currentNode->GetTranslate();
 				p.y = (float)~ePosY;
 				currentNode->SetTranslate(p);
 				viewer.Refresh();
@@ -163,7 +163,7 @@ public:
 
 		ePosZ.WhenAction = [=] {
 			if (currentNode) {
-				Point3f p = currentNode->GetTranslate();
+				vec3 p = currentNode->GetTranslate();
 				p.z = (float)~ePosZ;
 				currentNode->SetTranslate(p);
 				viewer.Refresh();
@@ -172,7 +172,7 @@ public:
 
 		eRotX.WhenAction = [=] {
 			if (currentNode) {
-				Point3f p = currentNode->GetRotate();
+				vec3 p = currentNode->GetRotate();
 				p.x = (float)~eRotX;
 				currentNode->SetRotate(p);
 				viewer.Refresh();
@@ -181,7 +181,7 @@ public:
 
 		eRotY.WhenAction = [=] {
 			if (currentNode) {
-				Point3f p = currentNode->GetRotate();
+				vec3 p = currentNode->GetRotate();
 				p.y = (float)~eRotY;
 				currentNode->SetRotate(p);
 				viewer.Refresh();
@@ -190,7 +190,7 @@ public:
 
 		eRotZ.WhenAction = [=] {
 			if (currentNode) {
-				Point3f p = currentNode->GetRotate();
+				vec3 p = currentNode->GetRotate();
 				p.z = (float)~eRotZ;
 				currentNode->SetRotate(p);
 				viewer.Refresh();
@@ -201,7 +201,7 @@ public:
 			if (currentNode) {
 				Servo3D* serv = dynamic_cast<Servo3D*>(currentNode);
 				if (serv) {
-					Point3f p = serv->GetModelTranslate();
+					vec3 p = serv->GetModelTranslate();
 					p.x = (float)~eModelPosX;
 					serv->SetModelTranslate(p);
 					viewer.Refresh();
@@ -213,7 +213,7 @@ public:
 			if (currentNode) {
 				Servo3D* serv = dynamic_cast<Servo3D*>(currentNode);
 				if (serv) {
-					Point3f p = serv->GetModelTranslate();
+					vec3 p = serv->GetModelTranslate();
 					p.y = (float)~eModelPosY;
 					serv->SetModelTranslate(p);
 					viewer.Refresh();
@@ -225,7 +225,7 @@ public:
 			if (currentNode) {
 				Servo3D* serv = dynamic_cast<Servo3D*>(currentNode);
 				if (serv) {
-					Point3f p = serv->GetModelTranslate();
+					vec3 p = serv->GetModelTranslate();
 					p.z = (float)~eModelPosZ;
 					serv->SetModelTranslate(p);
 					viewer.Refresh();
@@ -237,7 +237,7 @@ public:
 			if (currentNode) {
 				Servo3D* serv = dynamic_cast<Servo3D*>(currentNode);
 				if (serv) {
-					Point3f p = serv->GetModelRotate();
+					vec3 p = serv->GetModelRotate();
 					p.x = (float)~eModelRotX;
 					serv->SetModelRotate(p);
 					viewer.Refresh();
@@ -249,7 +249,7 @@ public:
 			if (currentNode) {
 				Servo3D* serv = dynamic_cast<Servo3D*>(currentNode);
 				if (serv) {
-					Point3f p = serv->GetModelRotate();
+					vec3 p = serv->GetModelRotate();
 					p.y = (float)~eModelRotY;
 					serv->SetModelRotate(p);
 					viewer.Refresh();
@@ -261,7 +261,7 @@ public:
 			if (currentNode) {
 				Servo3D* serv = dynamic_cast<Servo3D*>(currentNode);
 				if (serv) {
-					Point3f p = serv->GetModelRotate();
+					vec3 p = serv->GetModelRotate();
 					p.z = (float)~eModelRotZ;
 					serv->SetModelRotate(p);
 					viewer.Refresh();

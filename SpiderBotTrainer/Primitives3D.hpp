@@ -5,13 +5,13 @@
 
 struct Square3D : public Node3D {
 private:
-	void AddTriangle(Point3f p1, Point3f p2, Point3f p3, Point3f n) {
+	void AddTriangle(vec3 p1, vec3 p2, vec3 p3, vec3 n) {
 		points.Add(p1); points.Add(n);
 		points.Add(p2); points.Add(n);
 		points.Add(p3); points.Add(n);
 	}
 	
-	void AddFace(Point3f p1, Point3f p2, Point3f p3, Point3f p4, Point3f n) {
+	void AddFace(vec3 p1, vec3 p2, vec3 p3, vec3 p4, vec3 n) {
 		AddTriangle(p1, p2, p3, n);
 		AddTriangle(p1, p3, p4, n);
 	}

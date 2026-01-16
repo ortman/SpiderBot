@@ -3,8 +3,6 @@
 
 #include "Node3D.hpp"
 
-using namespace Upp;
-
 class View3D : public GLCtrl {
 private:
 	Point mouseLeftStart, mouseRightStart, mouseLeftClickPos;
@@ -14,19 +12,22 @@ private:
 	float elevation = (float)(M_PI / 6.0);
 
 	Vector<Node3D*> nodes;
-	Point3f cameraPos, cameraCenter, pivotPoint;
+	vec3 cameraPos, cameraCenter, pivotPoint;
 	Bboxf bbox;
-	Point3f grid[40];
+	vec3 grid[40];
 
 	void UpdateCameraPosition() {
-		Point3f cameraVector = {
+		vec3 cameraVector = {
 			distance * cos(elevation) * sin(azimuth),
 			distance * cos(elevation) * cos(azimuth),
 			distance * sin(elevation)
 		};
 		cameraPos = pivotPoint + cameraVector;
 		cameraCenter = pivotPoint;
-		Point3f lp = pivotPoint + cameraVector.Rotate({10.f, 30., 0.});
+		
+		vec3 eulerAngles(10.f, 30., 0.);
+		quat q(radians(eulerAngles));
+		vec3 lp = pivotPoint + q * cameraVector;
 		light_position[0] = lp.x;
 		light_position[1] = lp.y;
 		light_position[2] = lp.z;
@@ -81,7 +82,7 @@ public:
 		RecalcBbox();
 
 		pivotPoint = (bbox.min + bbox.max) / 2.0f;
-		distance = bbox.GetSize().Length() * 1.5f;
+		distance = glm::length(bbox.GetSize()) * 1.5f;
 
 		UpdateCameraPosition();
 		Refresh();
@@ -209,7 +210,7 @@ private:
 			elevation += dy;
 
 			const float maxElevation = (float)M_PI_2 - 0.01f;
-			elevation = clamp(elevation, -maxElevation, maxElevation);
+			elevation = UPP::clamp(elevation, -maxElevation, maxElevation);
 			
 			UpdateCameraPosition();
 			mouseLeftStart = p;
@@ -218,9 +219,9 @@ private:
 			float dx = (float)(p.x - mouseRightStart.x) * -0.001f;
 			float dy = (float)(p.y - mouseRightStart.y) * 0.001f;
 
-			Point3f dir = (cameraCenter - cameraPos).Normalize();
-			Point3f right = dir.Cross(Point3f(0.0f, 0.0f, 1.0f)).Normalize();
-			Point3f up = right.Cross(dir).Normalize();
+			vec3 dir = glm::normalize(cameraCenter - cameraPos);
+			vec3 right = glm::normalize(glm::cross(dir, vec3(0.0f, 0.0f, 1.0f)));
+			vec3 up = glm::normalize(glm::cross(right, dir));
 
 			pivotPoint = pivotPoint + right * dx * distance + up * dy * distance;
 			UpdateCameraPosition();
@@ -255,14 +256,14 @@ private:
 			WhenWeel(p, zdelta, keyflags);
 		} else {
 			distance *= (zdelta > 0) ? 0.9f : 1.1f;
-			distance = clamp(distance, 0.1f, 1000.0f);
+			distance = UPP::clamp(distance, 0.1f, 1000.0f);
 			UpdateCameraPosition();
 			Refresh();
 		}
 	}
 
 	virtual void GLPaint() {
-		Point3f bgColor = {(float)SColorFace().GetR() / 255.0f, (float)SColorFace().GetG() / 255.0f, (float)SColorFace().GetB() / 255.0f};
+		vec3 bgColor((float)SColorFace().GetR() / 255.0f, (float)SColorFace().GetG() / 255.0f, (float)SColorFace().GetB() / 255.0f);
 		glClearColor(bgColor.x, bgColor.y, bgColor.z, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -311,7 +312,7 @@ private:
 		glDisable(GL_LIGHTING);
 		glLineWidth(1.0f);
 		glColor3f(1.0f, 1.0f, 1.0f); // White
-		Point3f* p;
+		vec3* p;
 		glBegin(GL_LINES);
 		for (int i = 0; i < 20; ++i) {
 				p = &grid[i * 2];
@@ -323,7 +324,7 @@ private:
 	}
 
 	void calcGrid() {
-		Point3f size = bbox.GetSize();
+		vec3 size = bbox.GetSize();
 		float stepX = size.x / 9.0f;
 		float stepY = size.y / 9.0f;
 		float x, y, z = bbox.min.z;
