@@ -16,26 +16,20 @@ private:
 public:
 	Servo3D() = default;
 	
-	virtual Servo3D* Copy() const override {
-		Servo3D* node = new Servo3D();
-		node->bbox = bbox;
-		node->scale = scale;
-		node->rotate = rotate;
-		node->translate = translate;
-		node->isSelected = isSelected;
-		node->color = color;
-		node->stlPath = stlPath;
-		node->points = clone(points);
-		for (const Node3D& n : nodes) {
-			node->nodes.Add(n.Copy());
+	virtual Servo3D* Copy(Node3D* node = NULL) const override {
+		Servo3D* serv = node ? dynamic_cast<Servo3D*>(node) : new Servo3D();
+		if (serv) {
+			Node3D::Copy(serv);
+			serv->minAngle = minAngle;
+			serv->maxAngle = maxAngle;
+			serv->angle = angle;
+			serv->servoScale = servoScale;
+			serv->servoRotate = servoRotate;
+			serv->servoTranslate = servoTranslate;
+			return serv;
+		} else {
+			return NULL;
 		}
-		node->minAngle = minAngle;
-		node->maxAngle = maxAngle;
-		node->angle = angle;
-		node->servoScale = servoScale;
-		node->servoRotate = servoRotate;
-		node->servoTranslate = servoTranslate;
-		return node;
 	}
 
 	Servo3D& SetAngle(float a) {
@@ -48,14 +42,16 @@ public:
 	float GetMaxAngle() { return maxAngle; }
 	Servo3D& SetMaxAngle(float angle) { maxAngle = angle; return *this; }
 
-	virtual void GLPaint(bool isSelectMode) override {
+	virtual void GLPaint(const mat4& pv, mat4 t, bool isSelectMode) override {
 		glPushMatrix();
-		glScalef(servoScale.x, servoScale.y, servoScale.z);
-		glTranslatef(servoTranslate.x, servoTranslate.y, servoTranslate.z);
-		glRotatef(servoRotate.x, 1.f, 0.f, 0.f);
-		glRotatef(servoRotate.y, 0.f, 1.f, 0.f);
-		glRotatef(servoRotate.z + angle, 0.f, 0.f, 1.f);
-		Node3D::GLPaint(isSelectMode);
+		mat4 transform = glm::scale(mat4(1.0f), servoScale);
+		transform = glm::translate(transform, servoTranslate);
+		transform = glm::rotate(transform, glm::radians(servoRotate.x), vec3(1, 0, 0));
+		transform = glm::rotate(transform, glm::radians(servoRotate.y), vec3(0, 1, 0));
+		transform = glm::rotate(transform, glm::radians(servoRotate.z + angle), vec3(0, 0, 1));
+		t = t * transform;
+		
+		Node3D::GLPaint(pv, t, isSelectMode);
 		if (!isSelectMode && isSelected) {
 			glDisable(GL_LIGHTING);
 			glColor4f(0.f, 0.5f, 0.f, 0.5f);
@@ -75,12 +71,12 @@ public:
 	Node3D& SetTranslate(const vec3& t) override { servoTranslate = t; return *this; }
 	const vec3& GetTranslate() const & override { return servoTranslate; }
 	
-	Servo3D& SetModelScale(const vec3& s) { scale = s; return *this; }
-	Servo3D& SetModelScale(const float s) { scale = {s, s, s}; return *this; }
-	virtual Servo3D& SetModelRotate(const vec3& p) { rotate = p; return *this; }
-	virtual vec3 GetModelRotate() const { return rotate; }
-	Servo3D& SetModelTranslate(const vec3& t) { translate = t; return *this; }
-	const vec3& GetModelTranslate() const & { return translate; }
+	Servo3D& SetModelScale(const vec3& s) { Node3D::SetScale(s); return *this; }
+	Servo3D& SetModelScale(const float s) { Node3D::SetScale(s); return *this; }
+	virtual Servo3D& SetModelRotate(const vec3& p) { Node3D::SetRotate(p); return *this; }
+	virtual vec3 GetModelRotate() const { return Node3D::GetRotate(); }
+	Servo3D& SetModelTranslate(const vec3& t) { Node3D::SetTranslate(t); return *this; }
+	const vec3& GetModelTranslate() const & { return Node3D::GetTranslate(); }
 	
 	virtual void Jsonize(JsonIO& json) override {
 		json("Angle", angle)("minAngle", minAngle)("maxAngle", maxAngle);

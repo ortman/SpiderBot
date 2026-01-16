@@ -6,10 +6,11 @@
 class View3D : public GLCtrl {
 private:
 	Point mouseLeftStart, mouseRightStart, mouseLeftClickPos;
-	float scale = 1.0f;
+	//float scale = 1.0f;
 	float distance = 2.0f;
-	float azimuth = (float)(-M_PI / 4.0);
+	float azimuth = (float)(-M_PI_4);
 	float elevation = (float)(M_PI / 6.0);
+	mat4 pv = mat4(1.f);
 
 	Vector<Node3D*> nodes;
 	vec3 cameraPos, cameraCenter, pivotPoint;
@@ -31,19 +32,31 @@ private:
 		light_position[0] = lp.x;
 		light_position[1] = lp.y;
 		light_position[2] = lp.z;
+		
+		Size sz = GetSize();
+		if (sz.cx > 0 && sz.cy > 0) {
+			float aspect = (float)sz.cx / (float)sz.cy;
+			mat4 projection = glm::perspective((float)M_PI_4, aspect, 0.1f, 2000.0f);
+			mat4 view = lookAt(
+		    cameraPos,
+		    cameraCenter,
+		    vec3(0.0f, 0.0f, 1.0f)
+			);
+			pv = projection * view;
+		}
 	}
 
 	// Настройка освещения
 	GLfloat light_position[4] = { 15.0f, 15.0f, 15.0f, 0.0f };
-	GLfloat light_ambient[4] = { 0.2f, 0.2f, 0.2f, 0.1f };
-	GLfloat light_diffuse[4] = { 0.6f, 0.6f, 0.6f, 1.0f };
-	GLfloat light_specular[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
+	//GLfloat light_ambient[4] = { 0.2f, 0.2f, 0.2f, 0.1f };
+	//GLfloat light_diffuse[4] = { 0.6f, 0.6f, 0.6f, 1.0f };
+	//GLfloat light_specular[4] = { 0.5f, 0.5f, 0.5f, 1.0f };
 
 	// Настройка материала
-	GLfloat mat_ambient[4] = { 0.2f, 0.4f, 0.7f, 1.0f };
-	GLfloat mat_diffuse[4] = { 0.3f, 0.6f, 0.9f, 1.0f };
-	GLfloat mat_specular[4] = { 0.8f, 0.8f, 0.8f, 0.8f };
-	GLfloat mat_shininess[1] = { 50.0f };
+	//GLfloat mat_ambient[4] = { 0.2f, 0.4f, 0.7f, 1.0f };
+	//GLfloat mat_diffuse[4] = { 0.3f, 0.6f, 0.9f, 1.0f };
+	//GLfloat mat_specular[4] = { 0.8f, 0.8f, 0.8f, 0.8f };
+	//GLfloat mat_shininess[1] = { 50.0f };
 
 public:
 	Event<int, Node3D*> WhenSelected; // id, node
@@ -99,13 +112,14 @@ public:
 		return *this;
 	}
 
-	View3D& SetScale(float s) {
-		scale = s;
-		return *this;
-	}
+	//View3D& SetScale(float s) {
+	//	scale = s;
+	//	return *this;
+	//}
 
 	int GetNodeId(const Point &p) {
 		int selectedId = -1;
+		return selectedId;
 		ExecuteGL([&] {
 			GLuint selectBuf[512] = {0};
 			GLint viewport[4];
@@ -118,29 +132,29 @@ public:
 			glPushName(0);
 
 			// Настройка проекции
-			glMatrixMode(GL_PROJECTION);
-			glLoadIdentity();
+			//glMatrixMode(GL_PROJECTION);
+			//glLoadIdentity();
 
 			// Область выбора вокруг курсора
-			gluPickMatrix(p.x, viewport[3] - p.y, 1.0, 1.0, viewport);
-			Size sz = GetSize();
-			gluPerspective(45.0, (double)sz.cx / sz.cy, 0.1, 2000.0);
+			//gluPickMatrix(p.x, viewport[3] - p.y, 1.0, 1.0, viewport);
+			//Size sz = GetSize();
+			//gluPerspective(45.0, (double)sz.cx / sz.cy, 0.1, 2000.0);
 
 			// Настройка вида (должна совпадать с GLPaint)
-			glMatrixMode(GL_MODELVIEW);
-			glLoadIdentity();
-			gluLookAt(cameraPos.x, cameraPos.y, cameraPos.z, cameraCenter.x, cameraCenter.y, cameraCenter.z, 0., 0., 1.);
-			glScalef(scale, scale, scale);
+			//glMatrixMode(GL_MODELVIEW);
+			//glLoadIdentity();
+			//gluLookAt(cameraPos.x, cameraPos.y, cameraPos.z, cameraCenter.x, cameraCenter.y, cameraCenter.z, 0., 0., 1.);
+			//glScalef(scale, scale, scale);
 
 			// Подготовка к рендерингу для выбора
 			glClear(GL_DEPTH_BUFFER_BIT);
 			glEnable(GL_DEPTH_TEST);
-			glDisable(GL_LIGHTING);
-			glDisable(GL_COLOR_MATERIAL);
+			//glDisable(GL_LIGHTING);
+			//glDisable(GL_COLOR_MATERIAL);
 
 			// Рисуем модели в режиме выбора
 			for (Node3D* node : nodes) {
-				node->GLPaint(true);
+				node->GLPaint(pv, mat4(1.f), true);
 			}
 			glFlush();
 			
@@ -269,38 +283,38 @@ private:
 
 		// Включаем буфер глубины и освещение
 		glEnable(GL_DEPTH_TEST);
-		glEnable(GL_LIGHTING);
-		glEnable(GL_LIGHT0);
-		glEnable(GL_COLOR_MATERIAL);
-		glShadeModel(GL_SMOOTH);
+		//glEnable(GL_LIGHTING);
+		//glEnable(GL_LIGHT0);
+		//glEnable(GL_COLOR_MATERIAL);
+		//glShadeModel(GL_SMOOTH);
 
 		// Устанавливаем источник света
-		glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-		glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
-		glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-		glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+		//glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+		//glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+		//glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+		//glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
 
 		// Устанавливаем параметры материала
-		glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
-		glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
-		glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-		glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+		//glMaterialfv(GL_FRONT, GL_AMBIENT, mat_ambient);
+		//glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
+		//glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+		//glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
 
 		// Настройка проекции
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		Size sz = GetSize();
-		gluPerspective(45.0, (double)sz.cx / sz.cy, 0.1, 2000.0);
+		//glMatrixMode(GL_PROJECTION);
+		//glLoadIdentity();
+		//Size sz = GetSize();
+		//gluPerspective(45.0, (double)sz.cx / sz.cy, 0.1, 2000.0);
 
 		// Настройка вида
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		gluLookAt(cameraPos.x, cameraPos.y, cameraPos.z, cameraCenter.x, cameraCenter.y, cameraCenter.z, 0., 0., 1.);
+		//glMatrixMode(GL_MODELVIEW);
+		//glLoadIdentity();
+		//gluLookAt(cameraPos.x, cameraPos.y, cameraPos.z, cameraCenter.x, cameraCenter.y, cameraCenter.z, 0., 0., 1.);
 
-		glScalef(scale, scale, scale);
+		//glScalef(scale, scale, scale);
 
 		for (Node3D* node : nodes) {
-			node->GLPaint(false);
+			node->GLPaint(pv, mat4(1.f), false);
 
 			//glDisable(GL_LIGHTING);
 			//glLineWidth(1.0f);

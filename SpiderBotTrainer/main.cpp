@@ -136,5 +136,6 @@ private:
 
 GUI_APP_MAIN {
 	StdLogSetup(LOG_FILE);
+	LOG("START");
 	MainWindow().Run();
 }

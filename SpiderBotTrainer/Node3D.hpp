@@ -10,16 +10,20 @@ using namespace glm;
 
 class Node3D {
 private:
+	vec3 scale = {1.0f, 1.0f, 1.0f};
+	vec3 rotate;
+	vec3 translate;
+	mat4 transform = mat4(1.f);
+	
 	GLuint vao = 0;
 	GLuint vbo = 0;
 	static ArrayMap<String, Node3D*> nodeTypes;
+	static GLuint program;
 
 protected:
 	static int nextId;
 	int id;
-	vec3 scale = {1.0f, 1.0f, 1.0f};
-	vec3 rotate;
-	vec3 translate;
+	
 	Color color = LtGray;
 	bool isSelected = false;
 	Bboxf bbox;
@@ -41,8 +45,8 @@ public:
 		nodeTypes.FindAdd(type, n);
 	}
 
-	virtual Node3D* Copy() const {
-		Node3D* node = new Node3D();
+	virtual Node3D* Copy(Node3D* node = NULL) const {
+		if (node == NULL) node = new Node3D();
 		node->bbox = bbox;
 		node->scale = scale;
 		node->rotate = rotate;
@@ -179,29 +183,37 @@ public:
 		}
 	}
 
-	virtual void GLPaint(bool isSelectMode) {
+	virtual void GLPaint(const mat4& pv, mat4 t, bool isSelectMode) {
 		if (!vao) GLInit();
 		glPushMatrix();
 		// Преобразования модели
-		glScalef(scale.x, scale.y, scale.z);
-		glTranslatef(translate.x, translate.y, translate.z);
-		glRotatef(rotate.x, 1, 0, 0);
-		glRotatef(rotate.y, 0, 1, 0);
-		glRotatef(rotate.z, 0, 0, 1);
+		transform = glm::scale(mat4(1.0f), scale);
+		transform = glm::translate(transform, translate);
+		transform = glm::rotate(transform, glm::radians(rotate.x), vec3(1, 0, 0));
+		transform = glm::rotate(transform, glm::radians(rotate.y), vec3(0, 1, 0));
+		transform = glm::rotate(transform, glm::radians(rotate.z), vec3(0, 0, 1));
+		
+		t = t * transform;
 		
 		for (Node3D& node : nodes) {
-			node.GLPaint(isSelectMode);
+			node.GLPaint(pv, t, isSelectMode);
 		}
 		
 		if (points.GetCount() > 0) {
 			if (isSelectMode) {
 				glLoadName(id);
 			} else {
+				GLint colorLoc = glGetUniformLocation(program, "u_color");
 				if (isSelected) {
-					glColor3ub(255, 0, 0);
+					glUniform4f(colorLoc, 1.f, 0.f, 0.f, 1.f);
 				} else {
-					glColor3ub(color.GetR(), color.GetG(), color.GetB());
+					glUniform4f(colorLoc, (float)color.GetR() / 255.f, (float)color.GetG() / 255.f, (float)color.GetB() / 255.f, 1.f);
 				}
+				GLint vpLoc = glGetUniformLocation(program, "u_projection_view");
+				glUniformMatrix4fv(vpLoc, 1, GL_FALSE, &pv[0][0]);
+				GLint modelLoc = glGetUniformLocation(program, "u_model");
+				glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &t[0][0]);
+				glUseProgram(program);
 			}
 			DrawObject();
 		}
@@ -312,6 +324,7 @@ private:
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 2, (void*)(sizeof(vec3)));
 
     glBindVertexArray(0);
+    InitShaders();
 	}
 	
 	virtual void GLDeinit() {
@@ -369,10 +382,89 @@ private:
 			in.SeekCur(2);
 		}
 	}
+	
+	static void InitShaders() {
+		if (program) return;
+		// Vertex Shader
+		const char* vs_src = R"(
+			#version 330 core
+			layout(location = 0) in vec3 aPos;
+			uniform mat4 u_projection_view;
+			uniform mat4 u_model;
+			uniform vec4 u_color;
+			out vec4 vColor;
+			
+			void main() {
+				gl_Position = u_projection_view * u_model * vec4(aPos, 1.0);
+				vColor = u_color;
+			}
+		)";
+		// Fragment Shader
+		const char* fs_src = R"(
+			#version 330 core
+			in vec4 vColor;
+			out vec4 FragColor;
+			
+			//vec3 lightPos     = vec3(15.0, 15.0, 15.0);
+	    //vec3 lightAmbient  = vec3(0.2, 0.2, 0.2);
+	    //vec3 lightDiffuse  = vec3(0.6, 0.6, 0.6);
+	    //vec3 lightSpecular = vec3(0.5, 0.5, 0.5);
+	
+	    // --- КОНСТАНТЫ МАТЕРИАЛА ---
+	    //vec3 matAmbient   = vec3(0.2, 0.4, 0.7);
+	    //vec3 matDiffuse   = vec3(0.3, 0.6, 0.9);
+	    //vec3 matSpecular  = vec3(0.8, 0.8, 0.8);
+	    //float matShininess = 50.0;
+			
+			void main() {
+				// 1. Ambient (Фоновое)
+		    //vec3 ambient = lightAmbient * matAmbient;
+		
+		    // 2. Diffuse (Рассеянное)
+		    //vec3 norm = normalize(vNormal);
+		    //vec3 lightDir = normalize(lightPos - vFragPos);
+		    //float diff = max(dot(norm, lightDir), 0.0);
+		    //vec3 diffuse = lightDiffuse * (diff * matDiffuse);
+		
+		    // 3. Specular (Блики)
+		    //vec3 viewDir = normalize(u_viewPos - vFragPos);
+		    //vec3 reflectDir = reflect(-lightDir, norm);
+		    //float spec = pow(max(dot(viewDir, reflectDir), 0.0), matShininess);
+		    //vec3 specular = lightSpecular * (spec * matSpecular);
+		    
+		    // Итоговый цвет
+				//vec3 result = ambient + diffuse + specular;
+				//FragColor = vec4(result, 1.0);
+				FragColor = vColor;
+			}
+		)";
+		
+		auto compile = [](GLenum type, const char* src) {
+        GLuint s = glCreateShader(type);
+        glShaderSource(s, 1, &src, nullptr);
+        glCompileShader(s);
+        return s;
+    };
+
+    GLuint vs = compile(GL_VERTEX_SHADER, vs_src);
+    GLuint fs = compile(GL_FRAGMENT_SHADER, fs_src);
+
+    program = glCreateProgram();
+    glAttachShader(program, vs);
+    glAttachShader(program, fs);
+    glLinkProgram(program);
+    
+    char buffer[512];
+		glGetProgramInfoLog(program, 512, NULL, buffer);
+		if (strlen(buffer) > 0) {
+			LOG("Shader Error: " << buffer);
+		}
+	}
 };
 
 int Node3D::nextId = 1;
 ArrayMap<String, Node3D*> Node3D::nodeTypes;
+GLuint Node3D::program = 0;
 
 INITBLOCK {
 	Node3D::Register<Node3D>();
