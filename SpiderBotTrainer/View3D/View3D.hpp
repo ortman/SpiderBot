@@ -25,9 +25,9 @@ private:
 		cameraPos = pivotPoint + cameraVector;
 		cameraCenter = pivotPoint;
 		
-		vec3 eulerAngles(10.f, 30., 0.);
-		quat q(radians(eulerAngles));
-		vec3 lp = pivotPoint + q * cameraVector;
+		//vec3 eulerAngles(10.f, 30., 0.);
+		//quat q(radians(eulerAngles));
+		//vec3 lp = pivotPoint + q * cameraVector;
 		//light_position[0] = lp.x;
 		//light_position[1] = lp.y;
 		//light_position[2] = lp.z;

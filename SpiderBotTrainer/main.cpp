@@ -1,5 +1,5 @@
 #include <CtrlLib/CtrlLib.h>
-#include "View3D.hpp"
+#include "View3D/View3D.hpp"
 #include "Servo3D.hpp"
 #include "RobotEditor.hpp"
 

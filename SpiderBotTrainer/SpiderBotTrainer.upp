@@ -4,14 +4,17 @@ uses
 	plugin/glew;
 
 file
-	Servo3D.hpp,
-	Primitives3D.hpp,
-	Bboxf.hpp,
-	Node3D.hpp,
-	View3D.hpp,
+	main.cpp,
 	Layouts.lay,
 	RobotEditor.hpp,
-	main.cpp;
+	Servo3D.hpp,
+	View3D readonly separator,
+	View3D/View3D.hpp,
+	View3D/Bboxf.hpp,
+	View3D/Node3D.hpp,
+	View3D/Primitives3D.hpp,
+	View3D/Shader.hpp,
+	View3D/ShaderModel.hpp;
 
 mainconfig
 	"" = "GUI";

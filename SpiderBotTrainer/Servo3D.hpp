@@ -1,7 +1,7 @@
 #ifndef _SERVO_3D_HPP_
 #define _SERVO_3D_HPP_
 
-#include "Node3D.hpp"
+#include "View3D/Node3D.hpp"
 
 class Servo3D : public Node3D {
 private:
