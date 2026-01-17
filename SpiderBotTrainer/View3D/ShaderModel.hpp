@@ -35,8 +35,8 @@ private:
 			uniform vec3 u_viewPos;
 			
 			// lights
-			vec3 lightPos      = vec3(55.0, 55.0, 155.0);
-	    vec3 lightAmbient  = vec3(0.2, 0.2, 0.2);
+			vec3 lightPos      = u_viewPos;
+	    vec3 lightAmbient  = vec3(0.3, 0.3, 0.3);
 	    vec3 lightDiffuse  = vec3(0.6, 0.6, 0.6);
 	    vec3 lightSpecular = vec3(0.5, 0.5, 0.5);
 	

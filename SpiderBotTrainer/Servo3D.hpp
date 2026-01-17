@@ -42,7 +42,7 @@ public:
 	float GetMaxAngle() { return maxAngle; }
 	Servo3D& SetMaxAngle(float angle) { maxAngle = angle; return *this; }
 
-	virtual void GLPaint(const mat4& pv, mat4 t, bool isSelectMode) override {
+	virtual void GLPaint(const mat4& pv, const vec3& cameraPos, mat4 t, bool isSelectMode) override {
 		glPushMatrix();
 		mat4 transform = glm::scale(mat4(1.0f), servoScale);
 		transform = glm::translate(transform, servoTranslate);
@@ -51,7 +51,7 @@ public:
 		transform = glm::rotate(transform, glm::radians(servoRotate.z + angle), vec3(0, 0, 1));
 		t = t * transform;
 		
-		Node3D::GLPaint(pv, t, isSelectMode);
+		Node3D::GLPaint(pv, cameraPos, t, isSelectMode);
 		if (!isSelectMode && isSelected) {
 			glDisable(GL_LIGHTING);
 			glColor4f(0.f, 0.5f, 0.f, 0.5f);

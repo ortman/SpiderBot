@@ -184,7 +184,7 @@ public:
 		}
 	}
 
-	virtual void GLPaint(const mat4& pv, mat4 t, bool isSelectMode) {
+	virtual void GLPaint(const mat4& pv, const vec3& cameraPos, mat4 t, bool isSelectMode) {
 		if (!vao) GLInit();
 		glPushMatrix();
 		
@@ -197,7 +197,7 @@ public:
 		t = t * transform;
 		
 		for (Node3D& node : nodes) {
-			node.GLPaint(pv, t, isSelectMode);
+			node.GLPaint(pv, cameraPos, t, isSelectMode);
 		}
 		
 		if (points.GetCount() > 0) {
@@ -214,7 +214,7 @@ public:
 				GLint vpLoc = glGetUniformLocation(program, "u_projection_view");
 				glUniformMatrix4fv(vpLoc, 1, GL_FALSE, &pv[0][0]);
 				GLint viewPosLoc = glGetUniformLocation(program, "u_viewPos");
-				glUniform3f(viewPosLoc, 1000.f, 1000.f, 1000.f);
+				glUniform3f(viewPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
 				GLint modelLoc = glGetUniformLocation(program, "u_model");
 				glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &t[0][0]);
 				

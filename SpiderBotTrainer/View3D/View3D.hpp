@@ -119,7 +119,7 @@ public:
 
 			// Рисуем модели в режиме выбора
 			for (Node3D* node : nodes) {
-				node->GLPaint(pv, mat4(1.f), true);
+				node->GLPaint(pv, cameraPos, mat4(1.f), true);
 			}
 			glFlush();
 			
@@ -250,7 +250,7 @@ private:
 		glEnable(GL_DEPTH_TEST);
 
 		for (Node3D* node : nodes) {
-			node->GLPaint(pv, mat4(1.f), false);
+			node->GLPaint(pv, cameraPos,  mat4(1.f), false);
 
 			//glDisable(GL_LIGHTING);
 			//glLineWidth(1.0f);
