@@ -33,6 +33,14 @@ protected:
 	Array<Node3D> nodes;
 	Node3D* parent = NULL;
 	String stlPath;
+	
+	void UpdateTranfsormMatrix() {
+		transform = glm::scale(mat4(1.0f), scale);
+		transform = glm::translate(transform, translate);
+		transform = glm::rotate(transform, glm::radians(rotate.x), vec3(1, 0, 0));
+		transform = glm::rotate(transform, glm::radians(rotate.y), vec3(0, 1, 0));
+		transform = glm::rotate(transform, glm::radians(rotate.z), vec3(0, 0, 1));
+	}
 
 public:
 	Node3D() {
@@ -142,6 +150,7 @@ public:
 		json("Color", color);
 		if (json.IsLoading()) {
 			if (!stlPath.IsEmpty()) LoadSTL(stlPath);
+			UpdateTranfsormMatrix();
 
 			const Value& va = json.Get("nodes");
 			nodes.Clear();
@@ -188,12 +197,6 @@ public:
 		if (!vao) GLInit();
 		glPushMatrix();
 		
-		transform = glm::scale(mat4(1.0f), scale);
-		transform = glm::translate(transform, translate);
-		transform = glm::rotate(transform, glm::radians(rotate.x), vec3(1, 0, 0));
-		transform = glm::rotate(transform, glm::radians(rotate.y), vec3(0, 1, 0));
-		transform = glm::rotate(transform, glm::radians(rotate.z), vec3(0, 0, 1));
-		
 		t = t * transform;
 		
 		for (Node3D& node : nodes) {
@@ -225,21 +228,22 @@ public:
 		glPopMatrix();
 	}
 
+	virtual vec3 GetScale() const { return scale; }
 	virtual Node3D& SetScale(const vec3& s) {
 		scale = s;
-		// TODO
+		UpdateTranfsormMatrix();
 		return *this;
 	}
-	virtual Node3D& SetScale(const float s) { return SetScale({s, s, s}); }
+	Node3D& SetScale(const float s) { return SetScale({s, s, s}); }
 	virtual Node3D& SetRotate(const vec3& p) {
 		rotate = p;
-		//TODO
+		UpdateTranfsormMatrix();
 		return *this;
 	}
 	virtual vec3 GetRotate() const { return rotate; }
 	virtual Node3D& SetTranslate(const vec3& t) {
 		translate = t;
-		//TODO
+		UpdateTranfsormMatrix();
 		return *this;
 	}
 	virtual const vec3& GetTranslate() const & { return translate; }

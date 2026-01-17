@@ -12,6 +12,15 @@ private:
 	vec3 servoScale = {1.0f, 1.0f, 1.0f};
 	vec3 servoRotate;
 	vec3 servoTranslate;
+	mat4 setvoTransform;
+	
+	void UpdateServoTransform() {
+		setvoTransform = glm::scale(mat4(1.0f), servoScale);
+		setvoTransform = glm::translate(setvoTransform, servoTranslate);
+		setvoTransform = glm::rotate(setvoTransform, glm::radians(servoRotate.x), vec3(1, 0, 0));
+		setvoTransform = glm::rotate(setvoTransform, glm::radians(servoRotate.y), vec3(0, 1, 0));
+		setvoTransform = glm::rotate(setvoTransform, glm::radians(servoRotate.z + angle), vec3(0, 0, 1));
+	}
 	
 public:
 	Servo3D() = default;
@@ -44,12 +53,7 @@ public:
 
 	virtual void GLPaint(const mat4& pv, const vec3& cameraPos, mat4 t, bool isSelectMode) override {
 		glPushMatrix();
-		mat4 transform = glm::scale(mat4(1.0f), servoScale);
-		transform = glm::translate(transform, servoTranslate);
-		transform = glm::rotate(transform, glm::radians(servoRotate.x), vec3(1, 0, 0));
-		transform = glm::rotate(transform, glm::radians(servoRotate.y), vec3(0, 1, 0));
-		transform = glm::rotate(transform, glm::radians(servoRotate.z + angle), vec3(0, 0, 1));
-		t = t * transform;
+		t = t * setvoTransform;
 		
 		Node3D::GLPaint(pv, cameraPos, t, isSelectMode);
 		if (!isSelectMode && isSelected) {
@@ -64,12 +68,24 @@ public:
 		glPopMatrix();
 	}
 	
-	Node3D& SetScale(const vec3& s) override { servoScale = s; return *this; }
-	Node3D& SetScale(const float s) override { servoScale = {s, s, s}; return *this; }
-	Node3D& SetRotate(const vec3& p) override { servoRotate = p; return *this; }
+	vec3 GetScale() const override { return servoScale; }
+	Node3D& SetScale(const vec3& s) override {
+		servoScale = s;
+		UpdateServoTransform();
+		return *this;
+	}
 	vec3 GetRotate() const override { return servoRotate; }
-	Node3D& SetTranslate(const vec3& t) override { servoTranslate = t; return *this; }
+	Node3D& SetRotate(const vec3& p) override {
+		servoRotate = p;
+		UpdateServoTransform();
+		return *this;
+	}
 	const vec3& GetTranslate() const & override { return servoTranslate; }
+	Node3D& SetTranslate(const vec3& t) override {
+		servoTranslate = t;
+		UpdateServoTransform();
+		return *this;
+	}
 	
 	Servo3D& SetModelScale(const vec3& s) { Node3D::SetScale(s); return *this; }
 	Servo3D& SetModelScale(const float s) { Node3D::SetScale(s); return *this; }
@@ -82,6 +98,7 @@ public:
 		json("Angle", angle)("minAngle", minAngle)("maxAngle", maxAngle);
 		json("servoScale", servoScale)("servoRotate", servoRotate)("servoTranslate", servoTranslate);
 		Node3D::Jsonize(json);
+		if (json.IsLoading()) UpdateServoTransform();
 	}
 
 	virtual const Bboxf GetBbox() const override {
