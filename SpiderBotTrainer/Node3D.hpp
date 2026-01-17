@@ -186,7 +186,7 @@ public:
 	virtual void GLPaint(const mat4& pv, mat4 t, bool isSelectMode) {
 		if (!vao) GLInit();
 		glPushMatrix();
-		// Преобразования модели
+		
 		transform = glm::scale(mat4(1.0f), scale);
 		transform = glm::translate(transform, translate);
 		transform = glm::rotate(transform, glm::radians(rotate.x), vec3(1, 0, 0));
@@ -211,8 +211,11 @@ public:
 				}
 				GLint vpLoc = glGetUniformLocation(program, "u_projection_view");
 				glUniformMatrix4fv(vpLoc, 1, GL_FALSE, &pv[0][0]);
+				GLint viewPosLoc = glGetUniformLocation(program, "u_viewPos");
+				glUniform3f(viewPosLoc, 1000.f, 1000.f, 1000.f);
 				GLint modelLoc = glGetUniformLocation(program, "u_model");
 				glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &t[0][0]);
+				
 				glUseProgram(program);
 			}
 			DrawObject();
@@ -313,15 +316,15 @@ private:
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     
-    glBufferData(GL_ARRAY_BUFFER, pointsCount * sizeof(vec3), points.begin(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, pointsCount * sizeof(float) * 2, points.begin(), GL_STATIC_DRAW);
 
-    // Атрибут 0: Координаты (3 float)
+    // Attribute 0: Vertex (3 float)
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 2, (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)0);
 
-    // Атрибут 1: Нормали (3 float). Смещение 3 float (т.к. сначала идет x,y,z)
+    // Attribute 1: Normal (3 float)
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 2, (void*)(sizeof(vec3)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 3));
 
     glBindVertexArray(0);
     InitShaders();
@@ -357,19 +360,16 @@ private:
 	}
 
 	void LoadBinarySTL(FileIn& in) {
-		// Пропускаем 80-байтовый заголовок
+		// Seek 80 bytes header
 		in.SeekCur(80);
 		vec3 normal, p;
-		// Читаем количество треугольников
 		uint32_t triCount;
 		in.Get(&triCount, sizeof(triCount));
 		for (uint32_t i = 0; i < triCount; i++) {
-			// Читаем нормаль
 			in.Get(&normal.x, sizeof(float));
 			in.Get(&normal.y, sizeof(float));
 			in.Get(&normal.z, sizeof(float));
 			
-			// Читаем вершины
 			for (int i = 0; i < 3; ++i) {
 				in.Get(&p.x, sizeof(float));
 				in.Get(&p.y, sizeof(float));
@@ -378,7 +378,7 @@ private:
 				points.Add(normal);
 			}
 			
-			// Пропускаем атрибуты
+			// Seek atributes
 			in.SeekCur(2);
 		}
 	}
@@ -389,53 +389,60 @@ private:
 		const char* vs_src = R"(
 			#version 330 core
 			layout(location = 0) in vec3 aPos;
+			layout(location = 1) in vec3 aNormal;
+			
 			uniform mat4 u_projection_view;
 			uniform mat4 u_model;
-			uniform vec4 u_color;
-			out vec4 vColor;
+			
+			out vec3 vFragPos;
+			out vec3 vNormal;
 			
 			void main() {
-				gl_Position = u_projection_view * u_model * vec4(aPos, 1.0);
-				vColor = u_color;
+		    vFragPos = vec3(u_model * vec4(aPos, 1.0));
+		    vNormal = mat3(transpose(inverse(u_model))) * aNormal;
+		    gl_Position = u_projection_view * vec4(vFragPos, 1.0);
 			}
 		)";
 		// Fragment Shader
 		const char* fs_src = R"(
 			#version 330 core
-			in vec4 vColor;
+			in vec3 vFragPos;
+			in vec3 vNormal;
+			
 			out vec4 FragColor;
 			
-			//vec3 lightPos     = vec3(15.0, 15.0, 15.0);
-	    //vec3 lightAmbient  = vec3(0.2, 0.2, 0.2);
-	    //vec3 lightDiffuse  = vec3(0.6, 0.6, 0.6);
-	    //vec3 lightSpecular = vec3(0.5, 0.5, 0.5);
+			uniform vec4 u_color;
+			uniform vec3 u_viewPos;
+			
+			// lights
+			vec3 lightPos      = vec3(55.0, 55.0, 155.0);
+	    vec3 lightAmbient  = vec3(0.2, 0.2, 0.2);
+	    vec3 lightDiffuse  = vec3(0.6, 0.6, 0.6);
+	    vec3 lightSpecular = vec3(0.5, 0.5, 0.5);
 	
-	    // --- КОНСТАНТЫ МАТЕРИАЛА ---
-	    //vec3 matAmbient   = vec3(0.2, 0.4, 0.7);
-	    //vec3 matDiffuse   = vec3(0.3, 0.6, 0.9);
-	    //vec3 matSpecular  = vec3(0.8, 0.8, 0.8);
-	    //float matShininess = 50.0;
+	    // materials
+	    vec3 matAmbient    = u_color.rgb * 0.5;
+	    vec3 matDiffuse    = u_color.rgb;
+	    vec3 matSpecular   = vec3(0.8, 0.8, 0.8);
+	    float matShininess = 50.0;
 			
 			void main() {
-				// 1. Ambient (Фоновое)
-		    //vec3 ambient = lightAmbient * matAmbient;
+		    vec3 norm = normalize(vNormal);
+		    vec3 lightDir = normalize(lightPos - vFragPos);
+		    vec3 viewDir = normalize(u_viewPos - vFragPos);
 		
-		    // 2. Diffuse (Рассеянное)
-		    //vec3 norm = normalize(vNormal);
-		    //vec3 lightDir = normalize(lightPos - vFragPos);
-		    //float diff = max(dot(norm, lightDir), 0.0);
-		    //vec3 diffuse = lightDiffuse * (diff * matDiffuse);
+		    vec3 ambient = lightAmbient * matAmbient;
 		
-		    // 3. Specular (Блики)
-		    //vec3 viewDir = normalize(u_viewPos - vFragPos);
-		    //vec3 reflectDir = reflect(-lightDir, norm);
-		    //float spec = pow(max(dot(viewDir, reflectDir), 0.0), matShininess);
-		    //vec3 specular = lightSpecular * (spec * matSpecular);
+		    float diff = max(dot(norm, lightDir), 0.0);
+		    vec3 diffuse = lightDiffuse * (diff * matDiffuse);
+		
+		    vec3 reflectDir = reflect(-lightDir, norm);
+		    float spec = pow(max(dot(viewDir, reflectDir), 0.0), matShininess);
+		    vec3 specular = lightSpecular * (spec * matSpecular);
+		
+		    vec3 result = ambient + diffuse + specular;
 		    
-		    // Итоговый цвет
-				//vec3 result = ambient + diffuse + specular;
-				//FragColor = vec4(result, 1.0);
-				FragColor = vColor;
+		    FragColor = vec4(result, u_color.a);
 			}
 		)";
 		
@@ -474,7 +481,7 @@ namespace Upp {
     void Jsonize(JsonIO& io, glm::vec3& v) {
         double x = v.x, y = v.y, z = v.z;
         io("x", x)("y", y)("z", z);
-        if(io.IsLoading()) {
+        if (io.IsLoading()) {
             v.x = (float)x;
             v.y = (float)y;
             v.z = (float)z;
