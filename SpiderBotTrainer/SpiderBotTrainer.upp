@@ -11,12 +11,12 @@ file
 	View3D readonly separator,
 	View3D/View3D.hpp,
 	View3D/Bboxf.hpp,
-	View3D/ShaderSelect.hpp,
 	View3D/Node3D.hpp,
 	View3D/Primitives3D.hpp,
 	View3D/Shader.hpp,
 	View3D/ShaderFlat.hpp,
-	View3D/ShaderModel.hpp;
+	View3D/ShaderModel.hpp,
+	View3D/ShaderSelect.hpp;
 
 mainconfig
 	"" = "GUI";

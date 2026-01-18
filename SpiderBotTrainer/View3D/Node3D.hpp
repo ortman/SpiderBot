@@ -108,7 +108,7 @@ public:
 	
 	void RemoveAll() { nodes.Clear(); }
 
-	virtual Node3D& LoadSTL(const String& filepath) {
+	Node3D& LoadSTL(const String& filepath) {
 		points.Clear();
 		FileIn in(filepath);
 		if (!in) {
