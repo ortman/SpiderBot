@@ -43,6 +43,7 @@ public:
 
 	Servo3D& SetAngle(float a) {
 		angle = UPP::clamp(a, minAngle, maxAngle);
+		UpdateServoTransform();
 		return *this;
 	}
 	float GetAngle() { return angle; }
@@ -52,20 +53,15 @@ public:
 	Servo3D& SetMaxAngle(float angle) { maxAngle = angle; return *this; }
 
 	virtual void GLPaint(const mat4& pv, const vec3& cameraPos, mat4 t, bool isSelectMode) override {
-		glPushMatrix();
 		t = t * setvoTransform;
-		
 		Node3D::GLPaint(pv, cameraPos, t, isSelectMode);
 		if (!isSelectMode && isSelected) {
-			glDisable(GL_LIGHTING);
-			glColor4f(0.f, 0.5f, 0.f, 0.5f);
-			glEnable(GL_BLEND);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-				DrawSector(90.f - angle, maxAngle - minAngle, 40.0f);
-			glDisable(GL_BLEND);
-			glEnable(GL_LIGHTING);
+//			glColor4f(0.f, 0.5f, 0.f, 0.5f);
+//			glEnable(GL_BLEND);
+//				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+//				DrawSector(90.f - angle, maxAngle - minAngle, 40.0f);
+//			glDisable(GL_BLEND);
 		}
-		glPopMatrix();
 	}
 	
 	vec3 GetScale() const override { return servoScale; }

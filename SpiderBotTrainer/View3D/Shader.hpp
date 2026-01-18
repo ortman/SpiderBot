@@ -18,13 +18,12 @@ public:
 	GLuint GetId() {
 		if (id == 0) {
 			id = glCreateProgram();
+			LOG("Create shader " << typeid(*this).name() << ": " << id);
 			Load();
 			glLinkProgram(id);
 	    char buffer[512];
 			glGetProgramInfoLog(id, 512, NULL, buffer);
-			if (strlen(buffer) > 0) {
-				LOG("Shader Error: " << buffer);
-			}
+			if (strlen(buffer)) LOG("Shader Error: " << buffer);
 		}
 		return id;
 	}

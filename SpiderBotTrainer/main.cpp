@@ -100,25 +100,12 @@ private:
 		AddNodeToTree(body);
 	}
 	
-	void SaveRobot() {
-		StoreAsJsonFile(body, "robot.json", true);
-	}
-	
 	void MainMenu(Bar& bar) {
 		bar.Sub(t_("File"), [=](Bar& bar) {
-			bar.Add(t_("Exit"), [=] {
-				Exit();
-			});
+			bar.Add(t_("Exit"), [=] {	Exit(); });
 		});
-		bar.Add(t_("Robot editor"), [=] {
-			if (!robotEditor.IsOpen()) robotEditor.Open();
-		});
-		bar.Add(t_("Load robot"), [=] {
-			LoadRobot();
-		});
-		bar.Add(t_("Save robot"), [=] {
-			SaveRobot();
-		});
+		bar.Add(t_("Robot editor"), [=] { if (!robotEditor.IsOpen()) robotEditor.Open(); });
+		bar.Add(t_("Load robot"), [=] { LoadRobot(); });
 	}
 
 	void AddNodeToTree(const Node3D& node, int parentId = -1) {
@@ -136,6 +123,5 @@ private:
 
 GUI_APP_MAIN {
 	StdLogSetup(LOG_FILE);
-	LOG("START");
 	MainWindow().Run();
 }

@@ -1,9 +1,9 @@
-#ifndef _SHADER_MODEL_HPP_
-#define _SHADER_MODEL_HPP_
+#ifndef _SHADER_SELECT_HPP_
+#define _SHADER_SELECT_HPP_
 
 #include "Shader.hpp"
 
-class ShaderModel : public Shader {
+class ShaderSelect : public Shader {
 private:
 	virtual void Load() override {
 		// Vertex Shader
@@ -47,7 +47,7 @@ private:
 		    vec3 matDiffuse    = u_color.rgb;
 		    vec3 matSpecular   = vec3(0.8, 0.8, 0.8);
 		    float matShininess = 50.0;
-		    
+	    
 		    vec3 norm = normalize(vNormal);
 		    vec3 lightDir = normalize(lightPos - vFragPos);
 		    vec3 viewDir = normalize(u_viewPos - vFragPos);
@@ -63,7 +63,8 @@ private:
 		
 		    vec3 result = ambient + diffuse + specular;
 		    
-		    FragColor = vec4(result, u_color.a);
+		    //FragColor = vec4(result, u_color.a);
+		    FragColor = vec4(1,0,0,1);
 			}
 		)";
 

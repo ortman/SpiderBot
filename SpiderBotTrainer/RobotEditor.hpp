@@ -20,7 +20,7 @@ public:
 		fs.ActiveDir(GetExeFolder());
 
 		viewer.Add(&body);
-		tMotors.SetRoot(CtrlImg::File(), (int64_t)&body, t_("Body"));
+		AddNodeToTree(-1, &body);
 
 		bAddMotor.WhenPush = [=] {
 			int parentId = tMotors.GetCursor();

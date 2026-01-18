@@ -4,6 +4,8 @@
 #include <GLCtrl/GLCtrl.h>
 #include <plugin/glm/glm.hpp>
 #include "ShaderModel.hpp"
+#include "ShaderSelect.hpp"
+#include "ShaderFlat.hpp"
 
 using namespace Upp;
 using namespace glm;
@@ -12,14 +14,13 @@ using namespace glm;
 class Node3D {
 private:
 	vec3 scale = {1.0f, 1.0f, 1.0f};
-	vec3 rotate;
-	vec3 translate;
+	vec3 rotate = {0.0f, 0.0f, 0.0f};
+	vec3 translate = {0.0f, 0.0f, 0.0f};
 	mat4 transform = mat4(1.f);
 	
 	GLuint vao = 0;
 	GLuint vbo = 0;
 	static ArrayMap<String, Node3D*> nodeTypes;
-	static ShaderModel shaderModel;
 
 protected:
 	static int nextId;
@@ -29,6 +30,9 @@ protected:
 	bool isSelected = false;
 	Bboxf bbox;
 	Vector<vec3> points; // XYZ, normal XYZ
+	static ShaderModel shaderModel;
+	static ShaderSelect shaderSelect;
+	static ShaderFlat shaderFlat;
 
 	Array<Node3D> nodes;
 	Node3D* parent = NULL;
@@ -176,26 +180,13 @@ public:
 	void DrawObject() {
 		if (vao && vbo) {
 			glBindVertexArray(vao);
-			
-			glEnableClientState(GL_VERTEX_ARRAY);
-			glEnableClientState(GL_NORMAL_ARRAY);
-			
-			glBindBuffer(GL_ARRAY_BUFFER, vbo);
-			glVertexPointer(3, GL_FLOAT, sizeof(float) * 6, (void*)0);
-			glNormalPointer(GL_FLOAT, sizeof(float) * 6, (void*)(3 * sizeof(float)));
-			
 			glDrawArrays(GL_TRIANGLES, 0, points.GetCount() / 2);
-			
-			glDisableClientState(GL_NORMAL_ARRAY);
-			glDisableClientState(GL_VERTEX_ARRAY);
-			
 			glBindVertexArray(0);
 		}
 	}
 
 	virtual void GLPaint(const mat4& pv, const vec3& cameraPos, mat4 t, bool isSelectMode) {
 		if (!vao) GLInit();
-		glPushMatrix();
 		
 		t = t * transform;
 		
@@ -206,26 +197,21 @@ public:
 		if (points.GetCount() > 0) {
 			if (isSelectMode) {
 				glLoadName(id);
+				glUseProgram(0);
 			} else {
-				GLuint program = shaderModel.GetId();
-				GLint colorLoc = glGetUniformLocation(program, "u_color");
-				if (isSelected) {
-					glUniform4f(colorLoc, 1.f, 0.f, 0.f, 1.f);
-				} else {
-					glUniform4f(colorLoc, (float)color.GetR() / 255.f, (float)color.GetG() / 255.f, (float)color.GetB() / 255.f, 1.f);
-				}
-				GLint vpLoc = glGetUniformLocation(program, "u_projection_view");
-				glUniformMatrix4fv(vpLoc, 1, GL_FALSE, &pv[0][0]);
-				GLint viewPosLoc = glGetUniformLocation(program, "u_viewPos");
-				glUniform3f(viewPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+				GLuint program = isSelected ? shaderSelect.GetId() : shaderModel.GetId();
+				glUseProgram(program);
 				GLint modelLoc = glGetUniformLocation(program, "u_model");
 				glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &t[0][0]);
-				
-				glUseProgram(program);
+				GLint vpLoc = glGetUniformLocation(program, "u_projection_view");
+				glUniformMatrix4fv(vpLoc, 1, GL_FALSE, &pv[0][0]);
+				GLint colorLoc = glGetUniformLocation(program, "u_color");
+				glUniform4f(colorLoc, (float)color.GetR() / 255.f, (float)color.GetG() / 255.f, (float)color.GetB() / 255.f, 1.f);
+				GLint viewPosLoc = glGetUniformLocation(program, "u_viewPos");
+				glUniform3f(viewPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
 			}
 			DrawObject();
 		}
-		glPopMatrix();
 	}
 
 	virtual vec3 GetScale() const { return scale; }
@@ -322,18 +308,19 @@ private:
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     
-    glBufferData(GL_ARRAY_BUFFER, pointsCount * sizeof(float) * 2, points.begin(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, pointsCount * sizeof(vec3), points.begin(), GL_STATIC_DRAW);
 
+		GLsizei stride = 2 * sizeof(vec3);
     // Attribute 0: Vertex (3 float)
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
 
     // Attribute 1: Normal (3 float)
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 3));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(vec3)));
 
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-    //InitShaders();
 	}
 	
 	virtual void GLDeinit() {
@@ -392,7 +379,9 @@ private:
 
 int Node3D::nextId = 1;
 ArrayMap<String, Node3D*> Node3D::nodeTypes;
-ShaderModel Node3D::shaderModel;
+ShaderModel  Node3D::shaderModel;
+ShaderSelect Node3D::shaderSelect;
+ShaderFlat   Node3D::shaderFlat;
 
 INITBLOCK {
 	Node3D::Register<Node3D>();

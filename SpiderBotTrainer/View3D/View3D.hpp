@@ -176,7 +176,7 @@ public:
 	void SelectNode(int id, bool recursive = false) {
 		Node3D* selectedNode = GetNode<Node3D>(id);
 		SelectNode(selectedNode, recursive);
-		WhenSelected(id, selectedNode);
+		//WhenSelected(id, selectedNode);
 	}
 
 private:
@@ -211,24 +211,20 @@ private:
 
 	virtual void LeftDown(Point p, dword keyflags) {
 		mouseLeftClickPos = mouseLeftStart = p;
-		//SetCapture();
 	}
 
 	virtual void LeftUp(Point p, dword keyflags) {
 		if (p == mouseLeftClickPos) {
 			SelectNode(GetNodeId(p));
 		}
-		//ReleaseCapture();
 	}
 
 	virtual void RightDown(Point p, dword keyflags) {
 		mouseRightStart = p;
-		//SetCapture();
 	}
 
-	virtual void RightUp(Point p, dword keyflags) {
-		//ReleaseCapture();
-	}
+	//virtual void RightUp(Point p, dword keyflags) {
+	//}
 	
 	virtual void MouseWheel(Point p, int zdelta, dword keyflags) {
 		if (keyflags) {
@@ -250,7 +246,7 @@ private:
 		glEnable(GL_DEPTH_TEST);
 
 		for (Node3D* node : nodes) {
-			node->GLPaint(pv, cameraPos,  mat4(1.f), false);
+			node->GLPaint(pv, cameraPos, mat4(1.f), false);
 
 			//glDisable(GL_LIGHTING);
 			//glLineWidth(1.0f);
@@ -258,19 +254,19 @@ private:
 			//node->DrawBbox();
 			//glEnable(GL_LIGHTING);
 		}
-
-		glDisable(GL_LIGHTING);
-		glLineWidth(1.0f);
-		glColor3f(1.0f, 1.0f, 1.0f); // White
-		vec3* p;
-		glBegin(GL_LINES);
-		for (int i = 0; i < 20; ++i) {
-				p = &grid[i * 2];
-				glVertex3f(p->x, p->y, p->z);
-				p = &grid[i * 2 + 1];
-				glVertex3f(p->x, p->y, p->z);
-		}
-		glEnd();
+		return;
+		//glDisable(GL_LIGHTING);
+		//glLineWidth(1.0f);
+		//glColor3f(1.0f, 1.0f, 1.0f); // White
+		//vec3* p;
+		//glBegin(GL_LINES);
+		//for (int i = 0; i < 20; ++i) {
+		//	p = &grid[i * 2];
+		//	glVertex3f(p->x, p->y, p->z);
+		//	p = &grid[i * 2 + 1];
+		//	glVertex3f(p->x, p->y, p->z);
+		//}
+		//glEnd();
 	}
 
 	void calcGrid() {
