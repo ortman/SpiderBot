@@ -27,7 +27,7 @@ public:
 			if (idx >= 0) viewer.SelectNode(tFoots[idx]);
 		};
 
-		GLCtrl::SetDoubleBuffering();
+		//GLCtrl::SetDoubleBuffering();
 		GLCtrl::SetMSAA(); // Anti-aliasing on
 
 		viewer.WhenSelected = [=](int id, Node3D* node) {

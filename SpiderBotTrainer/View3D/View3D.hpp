@@ -101,7 +101,7 @@ public:
 
 	int GetNodeId(const Point &p) {
 		int selectedId = -1;
-		return selectedId;
+		//return selectedId;
 		ExecuteGL([&] {
 			GLuint selectBuf[512] = {0};
 			GLint viewport[4];
@@ -176,7 +176,7 @@ public:
 	void SelectNode(int id, bool recursive = false) {
 		Node3D* selectedNode = GetNode<Node3D>(id);
 		SelectNode(selectedNode, recursive);
-		//WhenSelected(id, selectedNode);
+		WhenSelected(id, selectedNode);
 	}
 
 private:
@@ -247,15 +247,11 @@ private:
 
 		for (Node3D* node : nodes) {
 			node->GLPaint(pv, cameraPos, mat4(1.f), false);
-
-			//glDisable(GL_LIGHTING);
 			//glLineWidth(1.0f);
 			//glColor3f(1.0f, 1.0f, 1.0f); // White
 			//node->DrawBbox();
-			//glEnable(GL_LIGHTING);
 		}
 		return;
-		//glDisable(GL_LIGHTING);
 		//glLineWidth(1.0f);
 		//glColor3f(1.0f, 1.0f, 1.0f); // White
 		//vec3* p;
