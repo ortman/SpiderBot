@@ -29,10 +29,6 @@ protected:
 	bool isSelected = false;
 	Bboxf bbox;
 	Vector<vec3> points; // XYZ, normal XYZ
-	static ShaderModel shaderModel;
-	static ShaderSelect shaderSelect;
-	static ShaderFlat shaderFlat;
-	static ShaderGetNode shaderGetNode;
 
 	Array<Node3D> nodes;
 	Node3D* parent = NULL;
@@ -47,6 +43,11 @@ protected:
 	}
 
 public:
+	static ShaderModel shaderModel;
+	static ShaderSelect shaderSelect;
+	static ShaderFlat shaderFlat;
+	static ShaderGetNode shaderGetNode;
+	
 	Node3D() {
 		id = nextId++;
 	}

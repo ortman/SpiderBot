@@ -220,18 +220,21 @@ private:
 			//glColor3f(1.0f, 1.0f, 1.0f); // White
 			//node->DrawBbox();
 		}
-		return;
-		//glLineWidth(1.0f);
-		//glColor3f(1.0f, 1.0f, 1.0f); // White
-		//vec3* p;
-		//glBegin(GL_LINES);
-		//for (int i = 0; i < 20; ++i) {
-		//	p = &grid[i * 2];
-		//	glVertex3f(p->x, p->y, p->z);
-		//	p = &grid[i * 2 + 1];
-		//	glVertex3f(p->x, p->y, p->z);
-		//}
-		//glEnd();
+		Node3D::shaderFlat.Use();
+		Node3D::shaderFlat.SetModel(mat4(1.f));
+		Node3D::shaderFlat.SetPV(pv);
+		Node3D::shaderFlat.SetColor(vec4(1.f));
+		Node3D::shaderFlat.SetViewPos(cameraPos);
+		glLineWidth(1.0f);
+		vec3* p;
+		glBegin(GL_LINES);
+		for (int i = 0; i < 20; ++i) {
+			p = &grid[i * 2];
+			glVertex3f(p->x, p->y, p->z);
+			p = &grid[i * 2 + 1];
+			glVertex3f(p->x, p->y, p->z);
+		}
+		glEnd();
 	}
 
 	void calcGrid() {
