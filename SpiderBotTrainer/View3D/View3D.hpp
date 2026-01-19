@@ -14,7 +14,8 @@ private:
 	Vector<Node3D*> nodes;
 	vec3 cameraPos, cameraCenter, pivotPoint;
 	Bboxf bbox;
-	vec3 grid[40];
+	GLuint gridVao = 0;
+	GLuint gridVbo = 0;
 
 	void UpdateCameraPosition() {
 		vec3 cameraVector = {
@@ -51,6 +52,12 @@ public:
 	
 	View3D() {
 		UpdateCameraPosition();
+	}
+	
+	~View3D() {
+		ExecuteGL([&] {
+			Shader::VaoDeinit(gridVao, gridVbo);
+		});
 	}
 
 	View3D& Add(Node3D* node) {
@@ -95,7 +102,6 @@ public:
 			bbox += node->GetBbox();
 		}
 		this->bbox = bbox;
-		calcGrid();
 		return *this;
 	}
 
@@ -220,36 +226,25 @@ private:
 			//glColor3f(1.0f, 1.0f, 1.0f); // White
 			//node->DrawBbox();
 		}
+		if (!gridVao) GridInit();
 		Node3D::shaderFlat.Use();
-		Node3D::shaderFlat.SetModel(mat4(1.f));
+		Node3D::shaderFlat.SetModel(scale(mat4(1.f), bbox.GetSize()));
 		Node3D::shaderFlat.SetPV(pv);
 		Node3D::shaderFlat.SetColor(vec4(1.f));
 		Node3D::shaderFlat.SetViewPos(cameraPos);
-		glLineWidth(1.0f);
-		vec3* p;
-		glBegin(GL_LINES);
-		for (int i = 0; i < 20; ++i) {
-			p = &grid[i * 2];
-			glVertex3f(p->x, p->y, p->z);
-			p = &grid[i * 2 + 1];
-			glVertex3f(p->x, p->y, p->z);
-		}
-		glEnd();
+		Shader::DrawLines(gridVao, gridVbo, 44);
 	}
-
-	void calcGrid() {
-		vec3 size = bbox.GetSize();
-		float stepX = size.x / 9.0f;
-		float stepY = size.y / 9.0f;
-		float x, y, z = bbox.min.z;
-		for (int i = 0; i < 10; ++i) {
-			x = bbox.min.x + stepX * i;
-			grid[i * 2]      = {x, bbox.min.y, z};
-			grid[i * 2 + 1]  = {x, bbox.max.y,  z};
-			y = bbox.min.y + stepY * i;
-			grid[i * 2 + 20] = {bbox.min.x, y, z};
-			grid[i * 2 + 21] = {bbox.max.x, y, z};
+	void GridInit() {
+		Vector<vec3> grid(44);
+		float s;
+		for (int i = 0; i < 11; ++i) {
+			s = i * 0.1f - 0.5f;
+			grid[i * 2]      = vec3(s, -0.5f, -0.5f);
+			grid[i * 2 + 1]  = vec3(s,  0.5f, -0.5f);
+			grid[i * 2 + 22] = vec3(-0.5f, s, -0.5f);
+			grid[i * 2 + 23] = vec3(0.5f,  s, -0.5f);
 		}
+		Shader::VaoLinesInit(grid, gridVao, gridVbo);
 	}
 };
 

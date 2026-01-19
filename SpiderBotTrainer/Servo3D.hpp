@@ -29,7 +29,7 @@ public:
 	Servo3D() = default;
 	
 	virtual ~Servo3D() {
-		GLDeinit(sectorVao, sectorVbo);
+		Shader::VaoDeinit(sectorVao, sectorVbo);
 	}
 	
 	virtual Servo3D* Copy(Node3D* node = NULL) const override {
@@ -123,7 +123,7 @@ private:
 			angle += M_PI / 180.;
 			points.Add(vec3(radius * cos(angle), radius * sin(angle), 0.0f)); points.Add(normal);
 		}
-		GLInit(points, sectorVao, sectorVbo);
+		Shader::VaoTrianglesInit(points, sectorVao, sectorVbo);
 	}
 
 	void DrawSector(float angle) {
@@ -132,7 +132,7 @@ private:
 		glEnable(GL_BLEND);
 		glDisable(GL_CULL_FACE);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-		DrawObject(sectorVao, sectorVbo, (int)angle * 3);
+		Shader::DrawObject(sectorVao, sectorVbo, (int)angle * 3);
 		glEnable(GL_CULL_FACE);
 		glDisable(GL_BLEND);
 	}

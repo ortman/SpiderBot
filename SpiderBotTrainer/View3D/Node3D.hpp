@@ -42,44 +42,6 @@ protected:
 		transform = glm::rotate(transform, glm::radians(rotate.z), vec3(0, 0, 1));
 	}
 
-	static void GLInit(Vector<vec3>& points, GLuint& vao, GLuint& vbo) {
-		int pointsCount = points.GetCount();
-		if (pointsCount == 0) return;
-		
-		if (!vao) glGenVertexArrays(1, &vao);
-		if (!vbo) glGenBuffers(1, &vbo);
-		
-		glBindVertexArray(vao);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		
-		glBufferData(GL_ARRAY_BUFFER, pointsCount * sizeof(vec3), points.begin(), GL_STATIC_DRAW);
-		
-		GLsizei stride = 2 * sizeof(vec3);
-		// Attribute 0: Vertex (3 float)
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
-		
-		// Attribute 1: Normal (3 float)
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, stride, (void*)(sizeof(vec3)));
-		
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-	}
-
-	static void GLDeinit(const GLuint& vao, const GLuint& vbo) {
-		glDeleteVertexArrays(1, &vao);
-		glDeleteBuffers(1, &vbo);
-	}
-	
-	static void DrawObject(GLuint vao, GLuint vbo, GLsizei pointsCount) {
-		if (vao && vbo && pointsCount) {
-			glBindVertexArray(vao);
-			glDrawArrays(GL_TRIANGLES, 0, pointsCount);
-			glBindVertexArray(0);
-		}
-	}
-
 public:
 	static ShaderModel shaderModel;
 	static ShaderSelect shaderSelect;
@@ -115,7 +77,7 @@ public:
 
 	virtual ~Node3D() {
 		nodes.Clear();
-		GLDeinit(vao, vbo);
+		Shader::VaoDeinit(vao, vbo);
 	}
 	
 	void Add(Node3D* node) {
@@ -217,7 +179,7 @@ public:
 	}
 
 	virtual void GLPaint(const mat4& pv, const vec3& cameraPos, mat4 t, bool isSelectMode) {
-		if (!vao) GLInit(points, vao, vbo);
+		if (!vao) Shader::VaoTrianglesInit(points, vao, vbo);
 		
 		t = t * transform;
 		
@@ -243,7 +205,7 @@ public:
 				
 					glEnable(GL_CULL_FACE);
 					glCullFace(GL_FRONT);
-					DrawObject(vao, vbo, points.GetCount() / 2);
+					Shader::DrawObject(vao, vbo, points.GetCount() / 2);
 					glCullFace(GL_BACK);
 				}
 				shaderModel.Use();
@@ -252,7 +214,7 @@ public:
 				shaderModel.SetColor(u_color);
 				shaderModel.SetViewPos(cameraPos);
 			}
-			DrawObject(vao, vbo, points.GetCount() / 2);
+			Shader::DrawObject(vao, vbo, points.GetCount() / 2);
 		}
 	}
 
