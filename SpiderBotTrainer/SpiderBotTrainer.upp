@@ -8,6 +8,7 @@ file
 	Layouts.lay,
 	RobotEditor.hpp,
 	Servo3D.hpp,
+	Command.hpp,
 	View3D readonly separator,
 	View3D/View3D.hpp,
 	View3D/Bboxf.hpp,

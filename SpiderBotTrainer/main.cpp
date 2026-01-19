@@ -2,6 +2,7 @@
 #include "View3D/View3D.hpp"
 #include "Servo3D.hpp"
 #include "RobotEditor.hpp"
+#include "Command.hpp"
 
 using namespace Upp;
 
@@ -20,7 +21,19 @@ public:
 		AddFrame(menu);
 		menu.Set([=](Bar& bar) { MainMenu(bar); });
 
-		clSteps.Add("Step1");
+		CommandStep defaultStep;
+		clSteps.Add(RawToValue(defaultStep), (Value)defaultStep.ToString());
+		
+		clSteps.WhenAction = [&]() {
+			int idx = clSteps.GetCursor();
+			if (idx >= 0) {
+				Value v = clSteps.Get(idx);
+				if (v.Is<CommandStep>()) {
+					const CommandStep& step = v.To<CommandStep>();
+					// ...
+				}
+			}
+		};
 
 		tFoots.WhenSel = [=] {
 			int idx = tFoots.GetCursor();
@@ -51,8 +64,11 @@ public:
 			}
 		};
 
-		bUnits.WhenPush = [=] {
-		};
+		bUnits << [=] {};
+		bAdd << [=] {};
+		bRemove << [=] {};
+		bUp << [=] {};
+		bDown << [=] {};
 		
 		bPlay.WhenPush = [=] {
 			if (ExistsTimeCallback(0)) {
