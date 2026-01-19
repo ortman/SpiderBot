@@ -56,11 +56,12 @@ public:
 		t = t * setvoTransform;
 		Node3D::GLPaint(pv, cameraPos, t, isSelectMode);
 		if (!isSelectMode && isSelected) {
-//			glColor4f(0.f, 0.5f, 0.f, 0.5f);
-//			glEnable(GL_BLEND);
-//				glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-//				DrawSector(90.f - angle, maxAngle - minAngle, 40.0f);
-//			glDisable(GL_BLEND);
+			shaderFlat.Use();
+			shaderFlat.SetModel(t);
+			shaderFlat.SetPV(pv);
+			shaderFlat.SetColor({0.3f, 1.0f, 0.3f, 0.8f});
+			shaderFlat.SetViewPos(cameraPos);
+			DrawSector(90.f - angle, maxAngle - minAngle, 40.0f);
 		}
 	}
 	
@@ -104,6 +105,8 @@ public:
 
 private:
 	void DrawSector(float startAngle, float angle, float radius) {
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 		glBegin(GL_TRIANGLE_FAN);
 			glVertex3f(0.0f, 0.0f, 0.0f);
 			int segments = 50;
@@ -114,6 +117,7 @@ private:
 				glVertex3f(radius * cos(a), radius * sin(a), 0.0f);
 			}
 		glEnd();
+		glDisable(GL_BLEND);
 	}
 };
 

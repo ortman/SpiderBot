@@ -208,6 +208,7 @@ public:
 					shaderSelect.SetPV(pv);
 					shaderSelect.SetColor(u_color);
 					shaderSelect.SetViewPos(cameraPos);
+					u_color = u_color * 1.5f;
 				
 					glEnable(GL_CULL_FACE);
 					glCullFace(GL_FRONT);
@@ -217,7 +218,6 @@ public:
 				shaderModel.Use();
 				shaderModel.SetModel(t);
 				shaderModel.SetPV(pv);
-				if (isSelected) u_color = u_color * 1.5f;
 				shaderModel.SetColor(u_color);
 				shaderModel.SetViewPos(cameraPos);
 			}
