@@ -67,8 +67,8 @@ private:
 			}
 		)";
 
-		glAttachShader(id, compile(GL_VERTEX_SHADER, vs_src));
-		glAttachShader(id, compile(GL_FRAGMENT_SHADER, fs_src));
+		glAttachShader(program_id, compile(GL_VERTEX_SHADER, vs_src));
+		glAttachShader(program_id, compile(GL_FRAGMENT_SHADER, fs_src));
 	}
 };
 

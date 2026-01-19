@@ -2,14 +2,12 @@
 #define _NODE_3D_HPP_
 
 #include <GLCtrl/GLCtrl.h>
-#include <plugin/glm/glm.hpp>
 #include "ShaderModel.hpp"
 #include "ShaderSelect.hpp"
 #include "ShaderFlat.hpp"
 #include "ShaderGetNode.hpp"
 
 using namespace Upp;
-using namespace glm;
 #include "Bboxf.hpp"
 
 class Node3D {
@@ -198,45 +196,30 @@ public:
 		
 		if (points.GetCount() > 0) {
 			if (isSelectMode) {
-				GLuint program = shaderGetNode.GetId();
-				glUseProgram(program);
-				GLint modelLoc = glGetUniformLocation(program, "u_model");
-				glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &t[0][0]);
-				GLint vpLoc = glGetUniformLocation(program, "u_projection_view");
-				glUniformMatrix4fv(vpLoc, 1, GL_FALSE, &pv[0][0]);
-				GLint idLoc = glGetUniformLocation(program, "u_id");
-				glUniform1i(idLoc, id);
+				shaderGetNode.Use();
+				shaderGetNode.SetModel(t);
+				shaderGetNode.SetPV(pv);
+				shaderGetNode.SetId(id);
 			} else {
-				vec3 u_color = vec3((float)color.GetR() / 255.f, (float)color.GetG() / 255.f, (float)color.GetB() / 255.f);
+				vec4 u_color = vec4((float)color.GetR() / 255.f, (float)color.GetG() / 255.f, (float)color.GetB() / 255.f, 1.0f);
 				if (isSelected) {
-					GLuint program = shaderSelect.GetId();
-					glUseProgram(program);
-					GLint modelLoc = glGetUniformLocation(program, "u_model");
-					glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &t[0][0]);
-					GLint vpLoc = glGetUniformLocation(program, "u_projection_view");
-					glUniformMatrix4fv(vpLoc, 1, GL_FALSE, &pv[0][0]);
-					GLint colorLoc = glGetUniformLocation(program, "u_color");
-					glUniform4f(colorLoc, u_color[0], u_color[1], u_color[2], 1.f);
-					GLint viewPosLoc = glGetUniformLocation(program, "u_viewPos");
-					glUniform3f(viewPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+					shaderSelect.Use();
+					shaderSelect.SetModel(t);
+					shaderSelect.SetPV(pv);
+					shaderSelect.SetColor(u_color);
+					shaderSelect.SetViewPos(cameraPos);
 				
 					glEnable(GL_CULL_FACE);
 					glCullFace(GL_FRONT);
 					DrawObject();
 					glCullFace(GL_BACK);
 				}
-				
-				GLuint program = shaderModel.GetId();
-				glUseProgram(program);
-				GLint modelLoc = glGetUniformLocation(program, "u_model");
-				glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &t[0][0]);
-				GLint vpLoc = glGetUniformLocation(program, "u_projection_view");
-				glUniformMatrix4fv(vpLoc, 1, GL_FALSE, &pv[0][0]);
-				GLint colorLoc = glGetUniformLocation(program, "u_color");
+				shaderModel.Use();
+				shaderModel.SetModel(t);
+				shaderModel.SetPV(pv);
 				if (isSelected) u_color = u_color * 1.5f;
-				glUniform4f(colorLoc, u_color[0], u_color[1], u_color[2], 1.f);
-				GLint viewPosLoc = glGetUniformLocation(program, "u_viewPos");
-				glUniform3f(viewPosLoc, cameraPos.x, cameraPos.y, cameraPos.z);
+				shaderModel.SetColor(u_color);
+				shaderModel.SetViewPos(cameraPos);
 			}
 			DrawObject();
 		}
@@ -407,6 +390,7 @@ private:
 
 int Node3D::nextId = 1;
 ArrayMap<String, Node3D*> Node3D::nodeTypes;
+
 ShaderModel   Node3D::shaderModel;
 ShaderSelect  Node3D::shaderSelect;
 ShaderFlat    Node3D::shaderFlat;

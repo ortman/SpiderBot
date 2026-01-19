@@ -28,9 +28,11 @@ private:
 				fragColor = vec4(r, g, b, 1.0);
 			}
 		)";
-		glAttachShader(id, compile(GL_VERTEX_SHADER, vs_src));
-		glAttachShader(id, compile(GL_FRAGMENT_SHADER, fs_src));
+		glAttachShader(program_id, compile(GL_VERTEX_SHADER, vs_src));
+		glAttachShader(program_id, compile(GL_FRAGMENT_SHADER, fs_src));
 	}
+public:
+	void SetId(int id) { Set("u_id", id); }
 };
 
 #endif
