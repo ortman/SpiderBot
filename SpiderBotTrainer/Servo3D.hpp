@@ -14,6 +14,9 @@ private:
 	vec3 servoTranslate;
 	mat4 setvoTransform;
 	
+	static GLuint sectorVao;
+	static GLuint sectorVbo;
+	
 	void UpdateServoTransform() {
 		setvoTransform = glm::scale(mat4(1.0f), servoScale);
 		setvoTransform = glm::translate(setvoTransform, servoTranslate);
@@ -24,6 +27,10 @@ private:
 	
 public:
 	Servo3D() = default;
+	
+	virtual ~Servo3D() {
+		GLDeinit(sectorVao, sectorVbo);
+	}
 	
 	virtual Servo3D* Copy(Node3D* node = NULL) const override {
 		Servo3D* serv = node ? dynamic_cast<Servo3D*>(node) : new Servo3D();
@@ -57,11 +64,12 @@ public:
 		Node3D::GLPaint(pv, cameraPos, t, isSelectMode);
 		if (!isSelectMode && isSelected) {
 			shaderFlat.Use();
+			t = glm::rotate(t, glm::radians(90.f - angle), vec3(0, 0, 1));
 			shaderFlat.SetModel(t);
 			shaderFlat.SetPV(pv);
 			shaderFlat.SetColor({0.3f, 1.0f, 0.3f, 0.5f});
 			shaderFlat.SetViewPos(cameraPos);
-			DrawSector(90.f - angle, maxAngle - minAngle, 40.0f);
+			DrawSector(maxAngle - minAngle);
 		}
 	}
 	
@@ -104,24 +112,34 @@ public:
 	}
 
 private:
-	void DrawSector(float startAngle, float angle, float radius) {
+	void CreateSector(float radius = 40.f) {
+		Vector<vec3> points; // XYZ, normal XYZ
+		double angle = 0.0f;
+		vec3 center(0.0f);
+		vec3 normal(0.f, 0.f, 1.f);
+		while (angle < M_2PI) {
+			points.Add(center); points.Add(normal);
+			points.Add(vec3(radius * cos(angle), radius * sin(angle), 0.0f)); points.Add(normal);
+			angle += M_PI / 180.;
+			points.Add(vec3(radius * cos(angle), radius * sin(angle), 0.0f)); points.Add(normal);
+		}
+		GLInit(points, sectorVao, sectorVbo);
+	}
+
+	void DrawSector(float angle) {
+		if (angle < 1.0 || angle > 360.) return;
+		if (!sectorVao) CreateSector();
 		glEnable(GL_BLEND);
 		glDisable(GL_CULL_FACE);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-		glBegin(GL_TRIANGLE_FAN);
-			glVertex3f(0.0f, 0.0f, 0.0f);
-			int segments = 50;
-			startAngle *= (float)(M_PI / 180.0);
-			float a, angleStep = (float)(angle * M_PI / 180.0 / segments);
-			for (int i = 0; i < segments; ++i) {
-				a = startAngle + angleStep * i;
-				glVertex3f(radius * cos(a), radius * sin(a), 0.0f);
-			}
-		glEnd();
+		DrawObject(sectorVao, sectorVbo, (int)angle * 3);
 		glEnable(GL_CULL_FACE);
 		glDisable(GL_BLEND);
 	}
 };
+
+GLuint Servo3D::sectorVao = 0;
+GLuint Servo3D::sectorVbo = 0;
 
 INITBLOCK {
 	Node3D::Register<Servo3D>();
