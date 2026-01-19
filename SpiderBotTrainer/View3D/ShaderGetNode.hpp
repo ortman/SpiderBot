@@ -8,6 +8,7 @@ private:
 	virtual void Load() override {
 		// Vertex Shader
 		const char* vs_src = R"(
+			#version 330 core
 			layout(location = 0) in vec3 pos;
 			uniform mat4 u_projection_view;
 			uniform mat4 u_model;
@@ -18,6 +19,7 @@ private:
 		)";
 		// Fragment Shader
 		const char* fs_src = R"(
+			#version 330 core
 			uniform int u_id;
 			out vec4 fragColor;
 			
