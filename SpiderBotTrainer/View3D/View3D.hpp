@@ -101,50 +101,19 @@ public:
 
 	int GetNodeId(const Point &p) {
 		int selectedId = -1;
-		//return selectedId;
 		ExecuteGL([&] {
-			GLuint selectBuf[512] = {0};
-			GLint viewport[4];
-			glGetIntegerv(GL_VIEWPORT, viewport);
-
-			glSelectBuffer(512, selectBuf);
-			glRenderMode(GL_SELECT);
-
-			glInitNames();
-			glPushName(0);
-
-			// Подготовка к рендерингу для выбора
-			glClear(GL_DEPTH_BUFFER_BIT);
-			glEnable(GL_DEPTH_TEST);
-
-			// Рисуем модели в режиме выбора
+			glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			
 			for (Node3D* node : nodes) {
 				node->GLPaint(pv, cameraPos, mat4(1.f), true);
 			}
-			glFlush();
-			
-			// Анализ результатов выбора
-			GLint hits = glRenderMode(GL_RENDER);
-
-			// Обработка попаданий
-			if (hits <= 0) return;
-
-			GLuint minDepth = 0xFFFFFFFF;
-			GLuint* ptr = selectBuf;
-
-			for (int i = 0; i < hits; ++i) {
-				GLuint numNames = *ptr++;
-				GLuint minZ = *ptr++;
-				ptr++; // пропускаем maxZ
-
-				if (numNames > 0) {
-					GLuint id = *ptr;
-					if (minZ < minDepth) {
-						minDepth = minZ;
-						selectedId = id;
-					}
-				}
-				ptr += numNames;
+			GLint viewport[4];
+			glGetIntegerv(GL_VIEWPORT, viewport);
+			unsigned char res[4];
+			glReadPixels(p.x, viewport[3] - p.y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, &res);
+			if (res[3] > 0) { // Проверка alpha, если объект там есть
+				selectedId = res[0] + (res[1] << 8) + (res[2] << 16);
 			}
 		});
 		return selectedId;

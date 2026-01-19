@@ -6,6 +6,7 @@
 #include "ShaderModel.hpp"
 #include "ShaderSelect.hpp"
 #include "ShaderFlat.hpp"
+#include "ShaderGetNode.hpp"
 
 using namespace Upp;
 using namespace glm;
@@ -33,6 +34,7 @@ protected:
 	static ShaderModel shaderModel;
 	static ShaderSelect shaderSelect;
 	static ShaderFlat shaderFlat;
+	static ShaderGetNode shaderGetNode;
 
 	Array<Node3D> nodes;
 	Node3D* parent = NULL;
@@ -196,8 +198,14 @@ public:
 		
 		if (points.GetCount() > 0) {
 			if (isSelectMode) {
-				glLoadName(id);
-				glUseProgram(0);
+				GLuint program = shaderGetNode.GetId();
+				glUseProgram(program);
+				GLint modelLoc = glGetUniformLocation(program, "u_model");
+				glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &t[0][0]);
+				GLint vpLoc = glGetUniformLocation(program, "u_projection_view");
+				glUniformMatrix4fv(vpLoc, 1, GL_FALSE, &pv[0][0]);
+				GLint idLoc = glGetUniformLocation(program, "u_id");
+				glUniform1i(idLoc, id);
 			} else {
 				vec3 u_color = vec3((float)color.GetR() / 255.f, (float)color.GetG() / 255.f, (float)color.GetB() / 255.f);
 				if (isSelected) {
@@ -399,9 +407,10 @@ private:
 
 int Node3D::nextId = 1;
 ArrayMap<String, Node3D*> Node3D::nodeTypes;
-ShaderModel  Node3D::shaderModel;
-ShaderSelect Node3D::shaderSelect;
-ShaderFlat   Node3D::shaderFlat;
+ShaderModel   Node3D::shaderModel;
+ShaderSelect  Node3D::shaderSelect;
+ShaderFlat    Node3D::shaderFlat;
+ShaderGetNode Node3D::shaderGetNode;
 
 INITBLOCK {
 	Node3D::Register<Node3D>();

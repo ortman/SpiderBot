@@ -16,7 +16,8 @@ file
 	View3D/Shader.hpp,
 	View3D/ShaderFlat.hpp,
 	View3D/ShaderModel.hpp,
-	View3D/ShaderSelect.hpp;
+	View3D/ShaderSelect.hpp,
+	View3D/ShaderGetNode.hpp;
 
 mainconfig
 	"" = "GUI";
