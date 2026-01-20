@@ -242,10 +242,10 @@ public:
 	virtual const Bboxf GetBbox() const {
 		Bboxf res{{FLT_MAX, FLT_MAX, FLT_MAX}, {-FLT_MAX, -FLT_MAX, -FLT_MAX}};
 		for (const Node3D& node : nodes) {
-			res += node.GetBbox();
+			res += node.GetBbox().Transform(transform);
 		}
 		if (!bbox.isEmpty() || nodes.GetCount() == 0) res += bbox;
-		return res.Rotate(rotate).Translate(translate) * scale;
+		return res;
 	}
 
 	Node3D& Selected(bool isSel = true, bool recursive = false) {
@@ -271,34 +271,12 @@ public:
 		return res;
 	}
 	
-	void DrawBbox() {
+	void DrawBbox(Shader& shader) {
 		for (Node3D& node : nodes) {
-			node.DrawBbox();
+			node.DrawBbox(shader);
 		}
-		const Bboxf bbx = GetBbox();
-		glBegin(GL_LINE_STRIP);
-			glVertex3f(bbx.min.x, bbx.min.y, bbx.min.z);
-			glVertex3f(bbx.min.x, bbx.max.y, bbx.min.z);
-			glVertex3f(bbx.max.x, bbx.max.y, bbx.min.z);
-			glVertex3f(bbx.max.x, bbx.min.y, bbx.min.z);
-			glVertex3f(bbx.min.x, bbx.min.y, bbx.min.z);
-			
-			glVertex3f(bbx.min.x, bbx.min.y, bbx.max.z);
-			glVertex3f(bbx.min.x, bbx.max.y, bbx.max.z);
-			glVertex3f(bbx.max.x, bbx.max.y, bbx.max.z);
-			glVertex3f(bbx.max.x, bbx.min.y, bbx.max.z);
-			glVertex3f(bbx.min.x, bbx.min.y, bbx.max.z);
-		glEnd();
-		glBegin(GL_LINES);
-			glVertex3f(bbx.max.x, bbx.min.y, bbx.min.z);
-			glVertex3f(bbx.max.x, bbx.min.y, bbx.max.z);
-			
-			glVertex3f(bbx.min.x, bbx.max.y, bbx.min.z);
-			glVertex3f(bbx.min.x, bbx.max.y, bbx.max.z);
-			
-			glVertex3f(bbx.max.x, bbx.max.y, bbx.min.z);
-			glVertex3f(bbx.max.x, bbx.max.y, bbx.max.z);
-		glEnd();
+		shader.SetModel(glm::scale(mat4(1.f), GetBbox().GetSize())); //TODO GetBbox() recalculate bbox
+		bbox.GLPaint();
 	}
 	
 private:

@@ -107,8 +107,7 @@ public:
 	}
 
 	virtual const Bboxf GetBbox() const override {
-		Bboxf res = Node3D::GetBbox();
-		return res.Rotate(servoRotate).Translate(servoTranslate) * servoScale;
+		return Node3D::GetBbox().Transform(setvoTransform);
 	}
 
 private:

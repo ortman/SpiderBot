@@ -217,22 +217,20 @@ private:
 		glClearColor(bgColor.x, bgColor.y, bgColor.z, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Включаем буфер глубины и освещение
 		glEnable(GL_DEPTH_TEST);
-
 		for (Node3D* node : nodes) {
 			node->GLPaint(pv, cameraPos, mat4(1.f), false);
-			//glLineWidth(1.0f);
-			//glColor3f(1.0f, 1.0f, 1.0f); // White
-			//node->DrawBbox();
 		}
-		if (!gridVao) GridInit();
 		Node3D::shaderFlat.Use();
-		Node3D::shaderFlat.SetModel(scale(mat4(1.f), bbox.GetSize()));
 		Node3D::shaderFlat.SetPV(pv);
 		Node3D::shaderFlat.SetColor(vec4(1.f));
 		Node3D::shaderFlat.SetViewPos(cameraPos);
+		Node3D::shaderFlat.SetModel(scale(mat4(1.f), bbox.GetSize()));
+		if (!gridVao) GridInit();
 		Shader::DrawLines(gridVao, gridVbo, 44);
+		//for (Node3D* node : nodes) {
+		//	node->DrawBbox(Node3D::shaderFlat);
+		//}
 	}
 	void GridInit() {
 		Vector<vec3> grid(44);

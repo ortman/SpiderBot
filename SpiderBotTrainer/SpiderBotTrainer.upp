@@ -4,12 +4,12 @@ uses
 	plugin/glew;
 
 file
-	SpiderBot.iml,
 	main.cpp,
-	Layouts.lay,
-	RobotEditor.hpp,
 	Servo3D.hpp,
 	Command.hpp,
+	RobotEditor.hpp,
+	Layouts.lay,
+	SpiderBot.iml,
 	View3D readonly separator,
 	View3D/View3D.hpp,
 	View3D/Bboxf.hpp,
