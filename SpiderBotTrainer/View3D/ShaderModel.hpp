@@ -38,7 +38,7 @@ private:
 			void main() {
 				// lights
 				vec3 lightPos      = u_viewPos;
-		    vec3 lightAmbient  = vec3(0.3, 0.3, 0.3);
+		    vec3 lightAmbient  = vec3(0.8, 0.8, 0.8);
 		    vec3 lightDiffuse  = vec3(0.6, 0.6, 0.6);
 		    vec3 lightSpecular = vec3(0.5, 0.5, 0.5);
 		
