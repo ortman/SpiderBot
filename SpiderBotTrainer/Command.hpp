@@ -4,6 +4,8 @@
 #include <CtrlLib/CtrlLib.h>
 
 class CommandStep : public Moveable<CommandStep> {
+private:
+	String name = "Step";
 public:
 	struct Segment : public Moveable<Segment> {
 		float angle;
@@ -19,11 +21,14 @@ public:
 	
 	Vector<Segment> segments;
 	
-	CommandStep() {}
-	CommandStep(const CommandStep& s) { segments <<= s.segments; }
-  void operator=(const CommandStep& s) { segments <<= s.segments; }
+	CommandStep() {};
+	CommandStep(String name) { this->name = name; }
+	CommandStep(const CommandStep& s) {
+		name = s.name;
+		segments <<= s.segments;
+	}
     
-	String ToString() const { return "Step"; }
+	String ToString() const { return name; }
 	void Jsonize(JsonIO& json) {
 		json("segments", segments);
 	}

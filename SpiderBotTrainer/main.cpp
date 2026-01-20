@@ -33,9 +33,11 @@ public:
 				Value v = clSteps.Get(idx);
 				if (v.Is<CommandStep>()) {
 					const CommandStep& step = v.To<CommandStep>();
-					// ...
+					//PromptOK(step.ToString());
 				}
 			}
+			bUp.Enable(idx > 0);
+			bDown.Enable(clSteps.GetCount() - idx > 1);
 		};
 
 		tFoots.WhenSel = [=] {
@@ -68,10 +70,39 @@ public:
 		};
 
 		bUnits << [=] {};
-		bAdd << [=] {};
-		bRemove << [=] {};
-		bUp << [=] {};
-		bDown << [=] {};
+		bAdd.SetImage(CtrlImg::Add());
+		bAdd << [=] {
+			int stepsCount = clSteps.GetCount();
+			CommandStep step("Step " + IntStr(stepsCount + 1));
+			clSteps.Add(RawToValue(step), (Value)step.ToString());
+		};
+		bRemove.SetImage(CtrlImg::Remove());
+		bRemove << [=] {
+			int stepsPos = clSteps.GetCursor();
+			if (stepsPos < 0) return;
+			clSteps.Remove(stepsPos);
+		};
+		bUp.SetImage(CtrlImg::up_arrow());
+		bUp << [=] {
+			int stepsPos = clSteps.GetCursor();
+			if (stepsPos < 1) return;
+			const Value v = clSteps.Get(stepsPos);
+			const Value vName = clSteps.GetValue(stepsPos);
+			clSteps.Set(stepsPos, clSteps.Get(stepsPos - 1), clSteps.GetValue(stepsPos - 1));
+			clSteps.Set(stepsPos - 1, v, vName);
+			clSteps.SetCursor(stepsPos - 1);
+		};
+		bDown.SetImage(CtrlImg::down_arrow());
+		bDown << [=] {
+			int stepsPos = clSteps.GetCursor();
+			int stepsCount = clSteps.GetCount();
+			if (stepsPos >= stepsCount - 1) return;
+			const Value v = clSteps.Get(stepsPos);
+			const Value vName = clSteps.GetValue(stepsPos);
+			clSteps.Set(stepsPos, clSteps.Get(stepsPos + 1), clSteps.GetValue(stepsPos + 1));
+			clSteps.Set(stepsPos + 1, v, vName);
+			clSteps.SetCursor(stepsPos + 1);
+		};
 		
 		bPlay.SetImage(SpiderBotImg::Play());
 		bPlay.WhenPush = [=] {
@@ -121,8 +152,9 @@ private:
 		viewer.Add(&body).ViewAll();
 		AddNodeToTree(body);
 		
-		CommandStep defaultStep;
+		CommandStep defaultStep("Step 1");
 		clSteps.Add(RawToValue(defaultStep), (Value)defaultStep.ToString());
+		clSteps.SetCursor(0);
 	}
 	
 	void MainMenu(Bar& bar) {
