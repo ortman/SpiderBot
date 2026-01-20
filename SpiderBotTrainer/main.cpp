@@ -114,6 +114,7 @@ private:
 	void LoadRobot() {
 		viewer.Clear();
 		tFoots.Clear();
+		clSteps.Clear();
 		body.RemoveAll();
 
 		LoadFromJsonFile(body, "robot.json");

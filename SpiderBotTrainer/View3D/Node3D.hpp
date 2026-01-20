@@ -126,14 +126,6 @@ public:
 		} else {
 			LoadBinarySTL(in);
 		}
-
-		if (!points.IsEmpty()) {
-			bbox = {{FLT_MAX, FLT_MAX, FLT_MAX}, {-FLT_MAX, -FLT_MAX, -FLT_MAX}};
-			int pointsCount = points.GetCount();
-			for (int i = 0; i < pointsCount; ++i) {
-				bbox += points[i++];
-			}
-		}
 		String appFolder = GetExeFolder();
 		if (filepath.StartsWith(appFolder)) {
 			stlPath = filepath.Mid(appFolder.GetLength() + 1);
@@ -284,6 +276,7 @@ private:
 	void LoadAsciiSTL(FileIn& in) {
 		String line;
 		vec3 normal, p;
+		bbox = {{FLT_MAX, FLT_MAX, FLT_MAX}, {-FLT_MAX, -FLT_MAX, -FLT_MAX}};
 		while (!in.IsEof()) {
 			line = TrimBoth(in.GetLine());
 			Vector<String> tokens = Split(line, ' ', true);
@@ -301,27 +294,25 @@ private:
 
 				points.Add(p);
 				points.Add(normal);
+				bbox += p;
 			}
 		}
 	}
 
 	void LoadBinarySTL(FileIn& in) {
+		bbox = {{FLT_MAX, FLT_MAX, FLT_MAX}, {-FLT_MAX, -FLT_MAX, -FLT_MAX}};
 		// Seek 80 bytes header
 		in.SeekCur(80);
 		vec3 normal, p;
 		uint32_t triCount;
 		in.Get(&triCount, sizeof(triCount));
 		for (uint32_t i = 0; i < triCount; i++) {
-			in.Get(&normal.x, sizeof(float));
-			in.Get(&normal.y, sizeof(float));
-			in.Get(&normal.z, sizeof(float));
-			
+			in.Get(&normal, sizeof(vec3));
 			for (int i = 0; i < 3; ++i) {
-				in.Get(&p.x, sizeof(float));
-				in.Get(&p.y, sizeof(float));
-				in.Get(&p.z, sizeof(float));
+				in.Get(&p, sizeof(vec3));
 				points.Add(p);
 				points.Add(normal);
+				bbox += p;
 			}
 			
 			// Seek atributes
