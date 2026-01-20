@@ -153,9 +153,13 @@ public:
 		SelectNode(selectedNode, recursive);
 		WhenSelected(id, selectedNode);
 	}
+	
+	virtual void Layout() override {
+		UpdateCameraPosition();
+	}
 
 private:
-	virtual void MouseMove(Point p, dword keyflags) {
+	virtual void MouseMove(Point p, dword keyflags) override {
 		if (keyflags & K_MOUSELEFT) {
 			float dx = (float)(p.x - mouseLeftStart.x) * 0.01f;
 			float dy = (float)(p.y - mouseLeftStart.y) * 0.01f;
@@ -184,24 +188,24 @@ private:
 		}
 	}
 
-	virtual void LeftDown(Point p, dword keyflags) {
+	virtual void LeftDown(Point p, dword keyflags) override {
 		mouseLeftClickPos = mouseLeftStart = p;
 	}
 
-	virtual void LeftUp(Point p, dword keyflags) {
+	virtual void LeftUp(Point p, dword keyflags) override {
 		if (p == mouseLeftClickPos) {
 			SelectNode(GetNodeId(p));
 		}
 	}
 
-	virtual void RightDown(Point p, dword keyflags) {
+	virtual void RightDown(Point p, dword keyflags) override {
 		mouseRightStart = p;
 	}
 
-	//virtual void RightUp(Point p, dword keyflags) {
+	//virtual void RightUp(Point p, dword keyflags) override {
 	//}
 	
-	virtual void MouseWheel(Point p, int zdelta, dword keyflags) {
+	virtual void MouseWheel(Point p, int zdelta, dword keyflags) override {
 		if (keyflags) {
 			WhenWeel(p, zdelta, keyflags);
 		} else {
@@ -212,7 +216,7 @@ private:
 		}
 	}
 
-	virtual void GLPaint() {
+	virtual void GLPaint() override {
 		vec3 bgColor((float)SColorFace().GetR() / 255.0f, (float)SColorFace().GetG() / 255.0f, (float)SColorFace().GetB() / 255.0f);
 		glClearColor(bgColor.x, bgColor.y, bgColor.z, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -232,6 +236,7 @@ private:
 		//	node->DrawBbox(Node3D::shaderFlat);
 		//}
 	}
+	
 	void GridInit() {
 		Vector<vec3> grid(44);
 		float s;
