@@ -4,6 +4,12 @@
 #include "RobotEditor.hpp"
 #include "Command.hpp"
 
+#include <CtrlLib/CtrlLib.h>
+
+#define IMAGECLASS SpiderBotImg
+#define IMAGEFILE <SpiderBotTrainer/SpiderBot.iml>
+#include <Draw/iml.h>
+
 using namespace Upp;
 
 class MainWindow : public WithMainlayout<TopWindow> {
@@ -20,9 +26,6 @@ public:
 
 		AddFrame(menu);
 		menu.Set([=](Bar& bar) { MainMenu(bar); });
-
-		CommandStep defaultStep;
-		clSteps.Add(RawToValue(defaultStep), (Value)defaultStep.ToString());
 		
 		clSteps.WhenAction = [&]() {
 			int idx = clSteps.GetCursor();
@@ -70,10 +73,11 @@ public:
 		bUp << [=] {};
 		bDown << [=] {};
 		
+		bPlay.SetImage(SpiderBotImg::Play());
 		bPlay.WhenPush = [=] {
 			if (ExistsTimeCallback(0)) {
 				KillTimeCallback(0);
-				bPlay.SetLabel("▶");
+				bPlay.SetImage(SpiderBotImg::Play());
 			} else {
 				SetTimeCallback(-1000 / 25, [=] {
 					const Array<Node3D>& foots = body.GetChildren();
@@ -94,9 +98,10 @@ public:
 					
 					viewer.Refresh();
 				}, 0);
-				bPlay.SetLabel("||");
+				bPlay.SetImage(SpiderBotImg::Pause());
 			}
 		};
+		LoadRobot();
 	}
 
 	~MainWindow() {
@@ -114,6 +119,9 @@ private:
 		LoadFromJsonFile(body, "robot.json");
 		viewer.Add(&body).ViewAll();
 		AddNodeToTree(body);
+		
+		CommandStep defaultStep;
+		clSteps.Add(RawToValue(defaultStep), (Value)defaultStep.ToString());
 	}
 	
 	void MainMenu(Bar& bar) {

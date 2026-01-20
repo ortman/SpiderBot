@@ -4,6 +4,7 @@ uses
 	plugin/glew;
 
 file
+	SpiderBot.iml,
 	main.cpp,
 	Layouts.lay,
 	RobotEditor.hpp,
