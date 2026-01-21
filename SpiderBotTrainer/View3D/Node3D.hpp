@@ -6,6 +6,7 @@
 #include "ShaderSelect.hpp"
 #include "ShaderFlat.hpp"
 #include "ShaderGetNode.hpp"
+#include "Types.hpp"
 
 using namespace Upp;
 #include "Bboxf.hpp"
@@ -28,7 +29,7 @@ protected:
 	Color color = LtGray;
 	bool isSelected = false;
 	Bboxf bbox;
-	Vector<vec3> points; // XYZ, normal XYZ
+	Vector<View3D_Point_t> points;
 
 	Array<Node3D> nodes;
 	Node3D* parent = NULL;
@@ -110,12 +111,12 @@ public:
 	void RemoveAll() { nodes.Clear(); }
 
 	Node3D& LoadSTL(const String& filepath) {
-		points.Clear();
 		FileIn in(filepath);
 		if (!in) {
 			LOG("Ошибка открытия файла: " + filepath);
 			return *this;
 		}
+		points.Clear();
 
 		String header = in.Get(80);
 		bool is_ascii = header.StartsWith("solid") && header.Find("endsolid") < 0;
@@ -126,6 +127,7 @@ public:
 		} else {
 			LoadBinarySTL(in);
 		}
+		SmoothNormales();
 		String appFolder = GetExeFolder();
 		if (filepath.StartsWith(appFolder)) {
 			stlPath = filepath.Mid(appFolder.GetLength() + 1);
@@ -197,7 +199,7 @@ public:
 				
 					glEnable(GL_CULL_FACE);
 					glCullFace(GL_FRONT);
-					Shader::DrawObject(vao, vbo, points.GetCount() / 2);
+					Shader::DrawObject(vao, vbo, points.GetCount());
 					glCullFace(GL_BACK);
 				}
 				shaderModel.Use();
@@ -206,7 +208,7 @@ public:
 				shaderModel.SetColor(u_color);
 				shaderModel.SetViewPos(cameraPos);
 			}
-			Shader::DrawObject(vao, vbo, points.GetCount() / 2);
+			Shader::DrawObject(vao, vbo, points.GetCount());
 		}
 	}
 
@@ -275,7 +277,7 @@ private:
 	
 	void LoadAsciiSTL(FileIn& in) {
 		String line;
-		vec3 normal, p;
+		View3D_Point_t point;
 		bbox = {{FLT_MAX, FLT_MAX, FLT_MAX}, {-FLT_MAX, -FLT_MAX, -FLT_MAX}};
 		while (!in.IsEof()) {
 			line = TrimBoth(in.GetLine());
@@ -283,18 +285,17 @@ private:
 			if (tokens.IsEmpty()) continue;
 			if (tokens[0] == "facet" && tokens.GetCount() >= 5) {
 				// facet normal ni nj nk
-				normal.x = (float)ScanDouble(tokens[2]);
-				normal.y = (float)ScanDouble(tokens[3]);
-				normal.z = (float)ScanDouble(tokens[4]);
+				point.n.x = (float)ScanDouble(tokens[2]);
+				point.n.y = (float)ScanDouble(tokens[3]);
+				point.n.z = (float)ScanDouble(tokens[4]);
 			}	else if (tokens[0] == "vertex" && tokens.GetCount() >= 4) {
 				// vertex x y z
-				p.x = (float)ScanDouble(tokens[1]);
-				p.y = (float)ScanDouble(tokens[2]);
-				p.z = (float)ScanDouble(tokens[3]);
+				point.p.x = (float)ScanDouble(tokens[1]);
+				point.p.y = (float)ScanDouble(tokens[2]);
+				point.p.z = (float)ScanDouble(tokens[3]);
 
-				points.Add(p);
-				points.Add(normal);
-				bbox += p;
+				points.Add(point);
+				bbox += point.p;
 			}
 		}
 	}
@@ -303,22 +304,25 @@ private:
 		bbox = {{FLT_MAX, FLT_MAX, FLT_MAX}, {-FLT_MAX, -FLT_MAX, -FLT_MAX}};
 		// Seek 80 bytes header
 		in.SeekCur(80);
-		vec3 normal, p;
+		View3D_Point_t point;
 		uint32_t triCount;
 		in.Get(&triCount, sizeof(triCount));
 		for (uint32_t i = 0; i < triCount; i++) {
-			in.Get(&normal, sizeof(vec3));
+			in.Get(&point.n, sizeof(vec3));
 			for (int i = 0; i < 3; ++i) {
-				in.Get(&p, sizeof(vec3));
-				points.Add(p);
-				points.Add(normal);
-				bbox += p;
+				in.Get(&point.p, sizeof(vec3));
+				points.Add(point);
+				bbox += point.p;
 			}
 			
 			// Seek atributes
 			in.SeekCur(2);
 		}
 	}
+	
+	void SmoothNormales() {
+	}
+	
 };
 
 int Node3D::nextId = 1;

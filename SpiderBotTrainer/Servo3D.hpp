@@ -112,15 +112,15 @@ public:
 
 private:
 	void CreateSector(float radius = 40.f) {
-		Vector<vec3> points; // XYZ, normal XYZ
+		Vector<View3D_Point_t> points;
 		double angle = 0.0f;
 		vec3 center(0.0f);
 		vec3 normal(0.f, 0.f, 1.f);
 		while (angle < M_2PI) {
-			points.Add(center); points.Add(normal);
-			points.Add(vec3(radius * cos(angle), radius * sin(angle), 0.0f)); points.Add(normal);
+			points.Add({center, normal});
+			points.Add({vec3(radius * cos(angle), radius * sin(angle), 0.0f), normal});
 			angle += M_PI / 180.;
-			points.Add(vec3(radius * cos(angle), radius * sin(angle), 0.0f)); points.Add(normal);
+			points.Add({vec3(radius * cos(angle), radius * sin(angle), 0.0f), normal});
 		}
 		Shader::VaoTrianglesInit(points, sectorVao, sectorVbo);
 	}

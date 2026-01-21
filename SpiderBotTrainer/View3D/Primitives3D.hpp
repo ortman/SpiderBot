@@ -6,9 +6,9 @@
 struct Primitive : public Node3D {
 protected:
 	void AddTriangle(vec3 p1, vec3 p2, vec3 p3, vec3 n1, vec3 n2, vec3 n3) {
-		points.Add(p1); points.Add(n1);
-		points.Add(p2); points.Add(n2);
-		points.Add(p3); points.Add(n3);
+		points.Add({p1, n1});
+		points.Add({p2, n2});
+		points.Add({p3, n3});
 	}
 	
   void AddFlatTriangle(vec3 p1, vec3 p2, vec3 p3, vec3 n) {

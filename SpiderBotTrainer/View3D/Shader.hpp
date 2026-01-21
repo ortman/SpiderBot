@@ -3,6 +3,7 @@
 
 #include <plugin/glm/glm.hpp>
 using namespace glm;
+#include "Types.hpp"
 
 class Shader {
 private:
@@ -68,7 +69,7 @@ public:
 		));
 	}
 
-	static void VaoTrianglesInit(UPP::Vector<vec3>& points, GLuint& vao, GLuint& vbo) {
+	static void VaoTrianglesInit(UPP::Vector<View3D_Point_t>& points, GLuint& vao, GLuint& vbo) {
 		int pointsCount = points.GetCount();
 		if (pointsCount == 0) return;
 		
@@ -78,7 +79,7 @@ public:
 		glBindVertexArray(vao);
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		
-		glBufferData(GL_ARRAY_BUFFER, pointsCount * sizeof(vec3), points.begin(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, pointsCount * sizeof(View3D_Point_t), points.begin(), GL_STATIC_DRAW);
 		
 		GLsizei stride = 2 * sizeof(vec3);
 		// Attribute 0: Vertex (3 float)

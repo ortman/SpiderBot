@@ -11,6 +11,7 @@ file
 	Layouts.lay,
 	SpiderBot.iml,
 	View3D readonly separator,
+	View3D/Types.hpp,
 	View3D/View3D.hpp,
 	View3D/Bboxf.hpp,
 	View3D/Node3D.hpp,
