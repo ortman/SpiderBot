@@ -127,7 +127,6 @@ public:
 		} else {
 			LoadBinarySTL(in);
 		}
-		SmoothNormales();
 		String appFolder = GetExeFolder();
 		if (filepath.StartsWith(appFolder)) {
 			stlPath = filepath.Mid(appFolder.GetLength() + 1);
@@ -189,19 +188,7 @@ public:
 				shaderGetNode.SetId(id);
 			} else {
 				vec4 u_color = vec4((float)color.GetR() / 255.f, (float)color.GetG() / 255.f, (float)color.GetB() / 255.f, 1.0f);
-				if (isSelected) {
-					shaderSelect.Use();
-					shaderSelect.SetModel(t);
-					shaderSelect.SetPV(pv);
-					shaderSelect.SetColor(u_color);
-					shaderSelect.SetViewPos(cameraPos);
-					u_color = u_color * 1.5f;
-				
-					glEnable(GL_CULL_FACE);
-					glCullFace(GL_FRONT);
-					Shader::DrawObject(vao, vbo, points.GetCount());
-					glCullFace(GL_BACK);
-				}
+				if (isSelected) u_color *= 1.5f;
 				shaderModel.Use();
 				shaderModel.SetModel(t);
 				shaderModel.SetPV(pv);
@@ -319,10 +306,6 @@ private:
 			in.SeekCur(2);
 		}
 	}
-	
-	void SmoothNormales() {
-	}
-	
 };
 
 int Node3D::nextId = 1;
