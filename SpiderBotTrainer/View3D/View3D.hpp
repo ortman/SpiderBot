@@ -6,7 +6,7 @@
 class View3D : public GLCtrl {
 private:
 	bool multiselect = false;
-	Point mouseLeftStart, mouseRightStart, mouseLeftClickPos;
+	Point mouseMiddleStart, mouseRightStart;
 	float distance = 2.0f;
 	float azimuth = (float)(-M_PI_4);
 	float elevation = (float)(M_PI / 6.0);
@@ -164,9 +164,9 @@ public:
 
 private:
 	virtual void MouseMove(Point p, dword keyflags) override {
-		if (keyflags & K_MOUSELEFT) {
-			float dx = (float)(p.x - mouseLeftStart.x) * 0.01f;
-			float dy = (float)(p.y - mouseLeftStart.y) * 0.01f;
+		if (keyflags & K_MOUSEMIDDLE) {
+			float dx = (float)(p.x - mouseMiddleStart.x) * 0.01f;
+			float dy = (float)(p.y - mouseMiddleStart.y) * 0.01f;
 
 			azimuth += dx;
 			elevation += dy;
@@ -175,7 +175,7 @@ private:
 			elevation = UPP::clamp(elevation, -maxElevation, maxElevation);
 			
 			UpdateCameraPosition();
-			mouseLeftStart = p;
+			mouseMiddleStart = p;
 			Refresh();
 		} else if (keyflags & K_MOUSERIGHT) {
 			float dx = (float)(p.x - mouseRightStart.x) * -0.001f;
@@ -192,18 +192,16 @@ private:
 		}
 	}
 
-	virtual void LeftDown(Point p, dword keyflags) override {
-		mouseLeftClickPos = mouseLeftStart = p;
+	virtual void MiddleDown(Point p, dword keyflags) override {
+		mouseMiddleStart = p;
 	}
 
-	virtual void LeftUp(Point p, dword keyflags) override {
-		if (p == mouseLeftClickPos) {
-			int id = GetNodeId(p);
-			Node3D* selectedNode = GetNode<Node3D>(id);
-			bool ms = multiselect && keyflags & K_CTRL;
-			SelectNode(selectedNode, false, ms);
-			WhenSelected(id, selectedNode, ms);
-		}
+	virtual void LeftDown(Point p, dword keyflags) override {
+		int id = GetNodeId(p);
+		Node3D* selectedNode = GetNode<Node3D>(id);
+		bool ms = multiselect && keyflags & K_CTRL;
+		SelectNode(selectedNode, false, ms);
+		WhenSelected(id, selectedNode, ms);
 	}
 
 	virtual void RightDown(Point p, dword keyflags) override {
