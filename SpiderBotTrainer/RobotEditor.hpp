@@ -78,8 +78,8 @@ public:
 			SetNoNode();
 		};
 
-		viewer.WhenSelected = [=](int id, Node3D* node) {
-			if (node != NULL) {
+		viewer.WhenSelected = [=](int id, Node3D* node, bool multiselect) {
+			if (node != NULL && !multiselect) {
 				Servo3D* serv = dynamic_cast<Servo3D*>(node);
 				while (serv == NULL && node != NULL) {
 					node = node->GetParent();

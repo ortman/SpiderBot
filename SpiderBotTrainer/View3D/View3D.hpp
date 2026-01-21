@@ -5,6 +5,7 @@
 
 class View3D : public GLCtrl {
 private:
+	bool multiselect = false;
 	Point mouseLeftStart, mouseRightStart, mouseLeftClickPos;
 	float distance = 2.0f;
 	float azimuth = (float)(-M_PI_4);
@@ -47,7 +48,7 @@ private:
 	}
 
 public:
-	Event<int, Node3D*> WhenSelected; // id, node
+	Event<int, Node3D*, bool> WhenSelected; // id, node, multiselect
 	Event<Point, int, dword> WhenWeel;
 	
 	View3D() {
@@ -140,23 +141,26 @@ public:
 		return NULL;
 	}
 
-	void SelectNode(Node3D* node, bool recursive = false) {
-		for (Node3D* n : nodes) {
-			n->Selected(false, true);
+	void SelectNode(Node3D* node, bool recursive = false, bool multiSelect = false) {
+		if (!multiSelect || !multiselect) {
+			for (Node3D* n : nodes) {
+				n->Selected(false, true);
+			}
 		}
 		if (node != NULL) node->Selected(true, recursive);
 		Refresh();
 	}
 
-	void SelectNode(int id, bool recursive = false) {
+	void SelectNode(int id, bool recursive = false, bool multiSelect = false) {
 		Node3D* selectedNode = GetNode<Node3D>(id);
-		SelectNode(selectedNode, recursive);
-		WhenSelected(id, selectedNode);
+		SelectNode(selectedNode, recursive, multiSelect);
 	}
 	
 	virtual void Layout() override {
 		UpdateCameraPosition();
 	}
+	
+	View3D& MultiSelect(bool b = true) { multiselect = b; return *this; }
 
 private:
 	virtual void MouseMove(Point p, dword keyflags) override {
@@ -194,7 +198,11 @@ private:
 
 	virtual void LeftUp(Point p, dword keyflags) override {
 		if (p == mouseLeftClickPos) {
-			SelectNode(GetNodeId(p));
+			int id = GetNodeId(p);
+			Node3D* selectedNode = GetNode<Node3D>(id);
+			bool ms = multiselect && keyflags & K_CTRL;
+			SelectNode(selectedNode, false, ms);
+			WhenSelected(id, selectedNode, ms);
 		}
 	}
 
