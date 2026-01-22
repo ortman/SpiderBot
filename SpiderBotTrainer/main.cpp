@@ -41,6 +41,7 @@ public:
 		};
 
 		tFoots.MultiSelect();
+		tFoots.NoRoot();
 		tFoots.WhenLeftClick = [=] {
 			Vector<int> idxs = tFoots.GetSel();
 			viewer.SelectNode(NULL);
@@ -52,15 +53,21 @@ public:
 
 		viewer.MultiSelect();
 		viewer.WhenSelected = [=](int id, Node3D* node, bool multiselect) {
-			if (!multiselect) tFoots.ClearSelection();
 			int i = tFoots.Find(id);
+			if (i < 0) {
+				if (!multiselect) tFoots.ClearSelection();
+				return;
+			}
+			Vector<int> sel;
+			if (multiselect) sel = tFoots.GetSel();
 			if (i >= 0) {
 				int openI = i;
 				while((openI = tFoots.GetParent(openI)) >= 0) {
 					tFoots.Open(openI);
 				}
-				tFoots.SelectOne(i);
+				sel.Add(i);
 			}
+			for (const int& s : sel) tFoots.SelectOne(s);
 		};
 		viewer.WhenWeel = [=](Point p, int zdelta, dword keyflags) {
 			Vector<int> idxs = tFoots.GetSel();
