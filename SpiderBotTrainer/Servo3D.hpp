@@ -53,10 +53,10 @@ public:
 		UpdateServoTransform();
 		return *this;
 	}
-	float GetAngle() { return angle; }
-	float GetMinAngle() { return minAngle; }
+	float GetAngle() const { return angle; }
+	float GetMinAngle() const { return minAngle; }
 	Servo3D& SetMinAngle(float angle) { minAngle = angle; return *this; }
-	float GetMaxAngle() { return maxAngle; }
+	float GetMaxAngle() const { return maxAngle; }
 	Servo3D& SetMaxAngle(float angle) { maxAngle = angle; return *this; }
 
 	virtual void GLPaint(const mat4& pv, const vec3& cameraPos, mat4 t, bool isSelectMode) override {

@@ -17,6 +17,7 @@ private:
 	MenuBar menu;
 	RobotEditor robotEditor;
 	Node3D body;
+	Command cmd;
 
 public:
 	MainWindow() {
@@ -27,98 +28,95 @@ public:
 		AddFrame(menu);
 		menu.Set([=](Bar& bar) { MainMenu(bar); });
 		
-		clSteps.WhenAction = [&]() {
-			int idx = clSteps.GetCursor();
-			if (idx >= 0) {
-				Value v = clSteps.Get(idx);
-				if (v.Is<CommandStep>()) {
-					const CommandStep& step = v.To<CommandStep>();
-					//PromptOK(step.ToString());
-				}
-			}
+		//stepEdit.SetFrame(ViewFrame());
+				
+		clStates.WhenAction = [&]() {
+			int idx = clStates.GetCursor();
+			SetStep(idx);
 			bUp.Enable(idx > 0);
-			bDown.Enable(clSteps.GetCount() - idx > 1);
+			bDown.Enable(cmd.GetStepCount() - idx > 1);
 		};
 
-		tFoots.MultiSelect();
-		tFoots.NoRoot();
-		tFoots.WhenLeftClick = [=] {
-			Vector<int> idxs = tFoots.GetSel();
-			viewer.SelectNode(NULL);
-			for (int i : idxs) viewer.SelectNode(tFoots[i], false, true);
-		};
+		//tFoots.MultiSelect();
+		//tFoots.NoRoot();
+		//tFoots.WhenLeftClick = [=] {
+		//	Vector<int> idxs = tFoots.GetSel();
+		//	viewer.SelectNode(NULL);
+		//	for (int i : idxs) viewer.SelectNode(tFoots[i], false, true);
+		//};
 
 		//GLCtrl::SetDoubleBuffering();
 		GLCtrl::SetMSAA(); // Anti-aliasing on
 
 		viewer.MultiSelect();
 		viewer.WhenSelected = [=](int id, Node3D* node, bool multiselect) {
-			int i = tFoots.Find(id);
-			if (i < 0) {
-				if (!multiselect) tFoots.ClearSelection();
-				return;
-			}
-			Vector<int> sel;
-			if (multiselect) sel = tFoots.GetSel();
-			if (i >= 0) {
-				int openI = i;
-				while((openI = tFoots.GetParent(openI)) >= 0) {
-					tFoots.Open(openI);
-				}
-				sel.Add(i);
-			}
-			for (const int& s : sel) tFoots.SelectOne(s);
+			//TODO
 		};
 		viewer.WhenWeel = [=](Point p, int zdelta, dword keyflags) {
-			Vector<int> idxs = tFoots.GetSel();
+			//Vector<int> idxs = tFoots.GetSel();
 			if (keyflags & (K_CTRL | K_SHIFT)) {
-				for (int i : idxs) {
-					Servo3D* serv = viewer.GetNode<Servo3D>(tFoots[i]);
-					if (serv) {
-						float delta = zdelta > 0 ? 1.f : -1.f;
-						if (keyflags & K_SHIFT) delta *= 10.f;
-						serv->SetAngle(serv->GetAngle() + delta);
-						viewer.Refresh();
-					}
-				}
+			//	for (int i : idxs) {
+			//		Servo3D* serv = viewer.GetNode<Servo3D>(tFoots[i]);
+			//		if (serv) {
+			//			float delta = zdelta > 0 ? 1.f : -1.f;
+			//			if (keyflags & K_SHIFT) delta *= 10.f;
+			//			serv->SetAngle(serv->GetAngle() + delta);
+			//			viewer.Refresh();
+			//		}
+			//	}
 			}
 		};
 
 		bUnits << [=] {};
 		bAdd.SetImage(CtrlImg::Add());
+
 		bAdd << [=] {
-			int stepsCount = clSteps.GetCount();
-			CommandStep step("Step " + IntStr(stepsCount + 1));
-			clSteps.Add(RawToValue(step), (Value)step.ToString());
+			int idx = cmd.GetCursor();
+			if (idx < 0) {
+				RobotState state(&body);
+				cmd.AddStep(state);
+				clStates.Add(state.GetName());
+			} else {
+				RobotState state(cmd[idx]);
+				cmd.InsertStep(idx, state);
+				clStates.Insert(idx + 1, state.GetName());
+			}
+			clStates.SetCursor(idx + 1);
 		};
+ 
 		bRemove.SetImage(CtrlImg::Remove());
 		bRemove << [=] {
-			int stepsPos = clSteps.GetCursor();
-			if (stepsPos < 0) return;
-			clSteps.Remove(stepsPos);
+			int idx = cmd.GetCursor();
+			if (idx < 0) return;
+			stepEdit.SetStep(NULL);
+			cmd.RemoveStep(idx);
+			clStates.Remove(idx);
 		};
 		bUp.SetImage(CtrlImg::up_arrow());
+
 		bUp << [=] {
-			int stepsPos = clSteps.GetCursor();
-			if (stepsPos < 1) return;
-			const Value v = clSteps.Get(stepsPos);
-			const Value vName = clSteps.GetValue(stepsPos);
-			clSteps.Set(stepsPos, clSteps.Get(stepsPos - 1), clSteps.GetValue(stepsPos - 1));
-			clSteps.Set(stepsPos - 1, v, vName);
-			clSteps.SetCursor(stepsPos - 1);
+			int stPos = clStates.GetCursor();
+			if (stPos < 1) return;
+			int prevPos = stPos - 1;
+			cmd.Replace(stPos, prevPos);
+			clStates.Set(stPos, cmd[stPos].GetName());
+			clStates.Set(prevPos, cmd[prevPos].GetName());
+			clStates.SetCursor(prevPos);
 		};
+
 		bDown.SetImage(CtrlImg::down_arrow());
+
 		bDown << [=] {
-			int stepsPos = clSteps.GetCursor();
-			int stepsCount = clSteps.GetCount();
-			if (stepsPos >= stepsCount - 1) return;
-			const Value v = clSteps.Get(stepsPos);
-			const Value vName = clSteps.GetValue(stepsPos);
-			clSteps.Set(stepsPos, clSteps.Get(stepsPos + 1), clSteps.GetValue(stepsPos + 1));
-			clSteps.Set(stepsPos + 1, v, vName);
-			clSteps.SetCursor(stepsPos + 1);
+			int stPos = clStates.GetCursor();
+			int stCount = clStates.GetCount();
+			int nextPos = stPos + 1;
+			if (nextPos >= stCount) return;
+			cmd.Replace(stPos, nextPos);
+			clStates.Set(stPos, cmd[stPos].GetName());
+			clStates.Set(nextPos, cmd[nextPos].GetName());
+			clStates.SetCursor(nextPos);
 		};
-		
+
 		bPlay.SetImage(SpiderBotImg::Play());
 		bPlay.WhenPush = [=] {
 			if (ExistsTimeCallback(0)) {
@@ -157,19 +155,24 @@ private:
 	float testDelta = 1.f;
 	float testDelta2 = 1.f;
 	
+	void SetStep(int idx) {
+		if (!cmd.SetCursor(idx)) return;
+		stepEdit.SetStep(&cmd[idx]);
+	}
+	
 	void LoadRobot() {
 		viewer.Clear();
-		tFoots.Clear();
-		clSteps.Clear();
+		clStates.Clear();
 		body.RemoveAll();
 
-		LoadFromJsonFile(body, "robot.json");
+		if (!LoadFromJsonFile(body, "robot.json")) return;
 		viewer.Add(&body).ViewAll();
-		AddNodeToTree(body);
 		
-		CommandStep defaultStep("Step 1");
-		clSteps.Add(RawToValue(defaultStep), (Value)defaultStep.ToString());
-		clSteps.SetCursor(0);
+		RobotState defaultState(&body);
+		cmd.AddStep(defaultState);
+		
+		clStates.Add(defaultState.GetName());
+		clStates.SetCursor(0);
 	}
 	
 	void MainMenu(Bar& bar) {
@@ -178,18 +181,6 @@ private:
 		});
 		bar.Add(t_("Robot editor"), [=] { if (!robotEditor.IsOpen()) robotEditor.Open(); });
 		bar.Add(t_("Load robot"), [=] { LoadRobot(); });
-	}
-
-	void AddNodeToTree(const Node3D& node, int parentId = -1) {
-		int id = 0;
-		if (parentId < 0) {
-			tFoots.SetRoot(CtrlImg::File(), node.GetId(), t_("Body") + IntStr(node.GetId()));
-		} else {
-			id = tFoots.Add(parentId, CtrlImg::File(), node.GetId(), t_("Servo") + IntStr(node.GetId()));
-		}
-		for (const Node3D& n : node.GetChildren()) {
-			AddNodeToTree(n, id);
-		}
 	}
 };
 
