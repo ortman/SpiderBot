@@ -27,9 +27,8 @@ public:
 
 		AddFrame(menu);
 		menu.Set([=](Bar& bar) { MainMenu(bar); });
-		
-		//stepEdit.SetFrame(ViewFrame());
-				
+
+		clStates.NoRoundSize();
 		clStates.WhenAction = [&]() {
 			int idx = clStates.GetCursor();
 			SetStep(idx);
@@ -37,33 +36,28 @@ public:
 			bDown.Enable(cmd.GetStepCount() - idx > 1);
 		};
 
-		//tFoots.MultiSelect();
-		//tFoots.NoRoot();
-		//tFoots.WhenLeftClick = [=] {
-		//	Vector<int> idxs = tFoots.GetSel();
-		//	viewer.SelectNode(NULL);
-		//	for (int i : idxs) viewer.SelectNode(tFoots[i], false, true);
-		//};
-
 		//GLCtrl::SetDoubleBuffering();
 		GLCtrl::SetMSAA(); // Anti-aliasing on
 
 		viewer.MultiSelect();
 		viewer.WhenSelected = [=](int id, Node3D* node, bool multiselect) {
-			//TODO
+			int i = cmd.GetCursor();
+			if (i) {
+				RobotState& state = cmd[i];
+				if (!multiselect) state.ClearSelection();
+				SegmentState* seg = state.GetSegment(id);
+				if (seg) seg->Select(!seg->IsSel());
+			}
 		};
 		viewer.WhenWeel = [=](Point p, int zdelta, dword keyflags) {
-			//Vector<int> idxs = tFoots.GetSel();
 			if (keyflags & (K_CTRL | K_SHIFT)) {
-			//	for (int i : idxs) {
-			//		Servo3D* serv = viewer.GetNode<Servo3D>(tFoots[i]);
-			//		if (serv) {
-			//			float delta = zdelta > 0 ? 1.f : -1.f;
-			//			if (keyflags & K_SHIFT) delta *= 10.f;
-			//			serv->SetAngle(serv->GetAngle() + delta);
-			//			viewer.Refresh();
-			//		}
-			//	}
+				int step = cmd.GetCursor();
+				if (step) {
+					for (SegmentState& seg : cmd[step].segments) {
+						if (seg.IsSel()) seg.SetAngle(seg.GetAngle() + 1.f);
+						//TODO
+					}
+				}
 			}
 		};
 
