@@ -233,7 +233,7 @@ private:
 		}
 		Node3D::shaderFlat.Use();
 		Node3D::shaderFlat.SetPV(pv);
-		Node3D::shaderFlat.SetColor(vec4(1.f));
+		Node3D::shaderFlat.SetColor(SBlack());
 		Node3D::shaderFlat.SetViewPos(cameraPos);
 		Node3D::shaderFlat.SetModel(scale(mat4(1.f), bbox.GetSize()));
 		if (!gridVao) GridInit();
