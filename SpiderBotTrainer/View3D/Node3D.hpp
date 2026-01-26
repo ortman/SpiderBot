@@ -86,27 +86,18 @@ public:
 		nodes.Add(node);
 	}
 
-//	bool Remove(Node3D* node) {
-//		if (node == NULL) return false;
-//		for (int i = 0; i < nodes.GetCount(); ++i) {
-//			if (node == nodes[i]) {
-//				nodes.Remove(i);
-//				for (int j = 0; j < createdNodes.GetCount(); ++j) {
-//					if (node == createdNodes[j]) {
-//						delete createdNodes[j];
-//						createdNodes.Remove(j);
-//						break;
-//					}
-//				}
-//				return true;
-//			} else {
-//				if (nodes[i]->Remove(node)) {
-//					return true;
-//				}
-//			}
-//		}
-//		return false;
-//	}
+	bool Remove(Node3D* node) {
+		if (node == NULL) return false;
+		for (int i = 0; i < nodes.GetCount(); ++i) {
+			if (node == &nodes[i]) {
+				nodes.Remove(i);
+				return true;
+			} else {
+				if (nodes[i].Remove(node)) return true;
+			}
+		}
+		return false;
+	}
 	
 	void RemoveAll() { nodes.Clear(); }
 

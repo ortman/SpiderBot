@@ -42,7 +42,7 @@ public:
 			if (id > 0) {
 				Node3D* node = (Node3D*)(int64_t)tMotors[id];
 				tMotors.Remove(id);
-				//viewer.Remove(node);
+				body.Remove(node);
 				viewer.Refresh();
 			}
 		};
