@@ -24,14 +24,14 @@ public:
 		int x = 0, y = 0;
 		Size sz = GetSize();
 		int cnt = state->segments.GetCount();
-		if (cnt > 1) {
-			w.DrawLine(x, y + 9, x, y + cnt * (editHeight + step) + (editHeight / 2 - (editHeight + step)), 1, SColorHighlight());
-		}
 		editWidth = UPP::max(40, sz.cx / maxSegmentsX - step);
 		for (const SegmentState& s : state->segments) {
 			w.DrawLine(x, y + 9, x + step, y + 9, 1, SColorHighlight());
 			DrawSegment(w, s, x + step, y);
 			y += editHeight + step;
+		}
+		if (cnt > 1) {
+			w.DrawLine(x, 9, x, y + editHeight / 2 - (editHeight + step), 1, SColorHighlight());
 		}
 	}
 	
@@ -63,14 +63,14 @@ private:
 		int cnt = s.segments.GetCount();
 		for (int i = 0; i < cnt; i++) {
 			const SegmentState& ss = s.segments[i];
+			if (i) y += editHeight + step;
 			if (i) {
-				w.DrawLine(x + editWidth / 2, y + 9, xEnd + step, y + 9, 1, SColorHighlight());
-				w.DrawLine(x + editWidth / 2, y + 9, x + editWidth / 2, y - step, 1, SColorHighlight());
+				w.DrawLine(x + editWidth + step / 2, y + 9, xEnd + step, y + 9, 1, SColorHighlight());
+				w.DrawLine(x + editWidth + step / 2, y + 9, x + editWidth + step / 2, y - step - editHeight / 2, 1, SColorHighlight());
 			} else {
 				w.DrawLine(xEnd, y + 9, xEnd + step, y + 9, 1, SColorHighlight());
 			}
 			DrawSegment(w, ss, xEnd + step, y);
-			if (i) y += editHeight + step;
 		}
 	}
 };
