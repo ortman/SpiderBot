@@ -36,6 +36,14 @@ public:
 			bDown.Enable(cmd.GetStepCount() - idx > 1);
 		};
 
+		stateEdit.WhenAction = [=] {
+			int i = cmd.GetCursor();
+			if (i >= 0) {
+				cmd[i].ApplyTo(body);
+				viewer.Refresh();
+			}
+		};
+
 		//GLCtrl::SetDoubleBuffering();
 		GLCtrl::SetMSAA(); // Anti-aliasing on
 
@@ -51,9 +59,9 @@ public:
 		};
 		viewer.WhenWeel = [=](Point p, int zdelta, dword keyflags) {
 			if (keyflags & (K_CTRL | K_SHIFT)) {
-				int step = cmd.GetCursor();
-				if (step) {
-					for (SegmentState& seg : cmd[step].segments) {
+				int i = cmd.GetCursor();
+				if (i) {
+					for (SegmentState& seg : cmd[i].segments) {
 						if (seg.IsSel()) seg.SetAngle(seg.GetAngle() + 1.f);
 						//TODO
 					}
@@ -82,7 +90,7 @@ public:
 		bRemove << [=] {
 			int idx = cmd.GetCursor();
 			if (idx < 0) return;
-			stepEdit.SetStep(NULL);
+			stateEdit.SetState(NULL);
 			cmd.RemoveStep(idx);
 			clStates.Remove(idx);
 		};
@@ -151,7 +159,7 @@ private:
 	
 	void SetStep(int idx) {
 		if (!cmd.SetCursor(idx)) return;
-		stepEdit.SetStep(&cmd[idx]);
+		stateEdit.SetState(&cmd[idx]);
 	}
 	
 	void LoadRobot() {

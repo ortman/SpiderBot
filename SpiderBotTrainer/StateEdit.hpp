@@ -1,11 +1,11 @@
-#ifndef _STEP_EDIT_HPP_
-#define _STEP_EDIT_HPP_
+#ifndef _STATE_EDIT_HPP_
+#define _STATE_EDIT_HPP_
 
 #include "Command.hpp"
 
-class StepEdit : public Ctrl {
+class StateEdit : public Ctrl {
 private:
-	EditFloat e;
+	EditFloat edit;
 	RobotState* state = NULL;
 	int maxSegmentsX = 1;
 	int step = 7;
@@ -13,7 +13,14 @@ private:
 	int editWidth = 0;
 
 public:
-	void SetStep(RobotState* s) {
+	StateEdit() {
+		edit.WhenAction = [=] {
+			//TODO
+			WhenAction();
+		};
+	}
+	
+	void SetState(RobotState* s) {
 		state = s;
 		if (step) maxSegmentsX = state->GetMaxSegments();
 		Refresh();
@@ -41,12 +48,12 @@ public:
 			int y = p.y / (editHeight + step);
 			Node3D* node = state->GetNode(x, y);
 			if (Servo3D* serv = dynamic_cast<Servo3D*>(node)) {
-				Add(e.LeftPos(x * (editWidth + step) + step, editWidth).TopPos(y * (editHeight + step), editHeight));
-				e.SetData(serv->GetAngle());
-				e.SetFocus();
+				Add(edit.LeftPos(x * (editWidth + step) + step, editWidth).TopPos(y * (editHeight + step), editHeight));
+				edit.SetData(serv->GetAngle());
+				edit.SetFocus();
 			} else {
 				SetFocus();
-				RemoveChild(&e);
+				RemoveChild(&edit);
 			}
 		}
 	}

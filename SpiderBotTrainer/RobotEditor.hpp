@@ -3,7 +3,7 @@
 
 using namespace Upp;
 
-#include "StepEdit.hpp"
+#include "StateEdit.hpp"
 
 #define LAYOUTFILE <SpiderBotTrainer/Layouts.lay>
 #include <CtrlCore/lay.h>

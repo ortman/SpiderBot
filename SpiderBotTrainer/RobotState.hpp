@@ -31,36 +31,25 @@ public:
 	String GetName() const { return name; }
 	
 	int GetMaxSegments() const {
-		return 3; // TODO!
+		//TODO
+		return 3;
 	}
-	
-	/*
-	bool Set(Vector<int> idx, float val) {
-		Array<Segment>* s = &segments;
-		int cnt = idx.GetCount();
-		for (int i = 0; i < cnt; ++i) {
-			if (i < 0 || i >= s->GetCount()) return false;
-			if (i + 1 == cnt) {
-				(*s)[i].angle = val;
-				return true;
-			} else {
-				s = &(*s)[i].segments;
-			}
-		}
-		return false;
-	}
-	*/
 	
 	void ClearSelection() {
 		//TODO
 	}
 	
 	Node3D* GetNode(int col, int row) {
+		//TODO
 		return NULL;
 	}
 	
 	SegmentState* GetSegment(int id) {
+		//TODO
 		return NULL;
+	}
+	
+	void ApplyTo(Node3D& node) {
 	}
 };
 
