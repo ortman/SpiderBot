@@ -33,6 +33,8 @@ public:
 			int idx = clStates.GetCursor();
 			if (cmd.SetCursor(idx)) {
 				stateEdit.SetState(&cmd[idx]);
+				cmd[idx].ApplyTo(body);
+				viewer.Refresh();
 			}
 			bUp.Enable(idx > 0);
 			bDown.Enable(cmd.GetStepCount() - idx > 1);
