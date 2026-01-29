@@ -7,29 +7,47 @@ class StateEdit : public Ctrl {
 private:
 	EditFloat edit;
 	RobotState* state = NULL;
-	int maxSegmentsX = 1;
+	int maxSegmentsX = 0;
 	int step = 7;
 	int editHeight = 18;
 	int editWidth = 0;
+	Vector<Vector<SegmentState*>> segPointers;
+	SegmentState* editSegment = NULL;
 
 public:
 	StateEdit() {
 		edit.WhenAction = [=] {
-			//TODO
-			WhenAction();
+			if (editSegment) {
+				editSegment->SetAngle(~edit);
+				WhenAction();
+			}
 		};
 	}
 	
 	void SetState(RobotState* s) {
+		SetFocus();
+		RemoveChild(&edit);
+		editSegment = NULL;
 		state = s;
-		if (step) maxSegmentsX = state->GetMaxSegments();
+		segPointers.Clear();
+		maxSegmentsX = 0;
+		if (state) {
+			for (SegmentState& s : state->segments) {
+				InitSegment(segPointers.Create(), s, 0);
+			}
+			for (Vector<SegmentState*> &segs : segPointers) {
+				int cnt = segs.GetCount();
+				for (int i = cnt; i < maxSegmentsX; ++i) segs.Add(NULL);
+			}
+		}
 		Refresh();
 	}
 	
 	void Paint(Draw& w) override {
-		if (step == NULL) return;
-		int x = 0, y = 0;
 		Size sz = GetSize();
+		w.DrawRect(sz, SColorFace());
+		if (state == NULL || maxSegmentsX == 0) return;
+		int x = 0, y = 0;
 		int cnt = state->segments.GetCount();
 		editWidth = UPP::max(40, sz.cx / maxSegmentsX - step);
 		for (const SegmentState& s : state->segments) {
@@ -43,18 +61,17 @@ public:
 	}
 	
 	void LeftDown(Point p, dword keyflags) override {
-		if (state) {
-			int x = p.x / (editWidth + step);
-			int y = p.y / (editHeight + step);
-			Node3D* node = state->GetNode(x, y);
-			if (Servo3D* serv = dynamic_cast<Servo3D*>(node)) {
-				Add(edit.LeftPos(x * (editWidth + step) + step, editWidth).TopPos(y * (editHeight + step), editHeight));
-				edit.SetData(serv->GetAngle());
-				edit.SetFocus();
-			} else {
-				SetFocus();
-				RemoveChild(&edit);
-			}
+		if (state == NULL) return;
+		int x = p.x / (editWidth + step);
+		int y = p.y / (editHeight + step);
+		if (y < segPointers.GetCount() && x < segPointers[y].GetCount() && segPointers[y][x]) {
+			Add(edit.LeftPos(x * (editWidth + step) + step, editWidth).TopPos(y * (editHeight + step), editHeight));
+			editSegment = segPointers[y][x];
+			edit.SetData(editSegment->GetAngle());
+			edit.SetFocus();
+		} else {
+			SetFocus();
+			RemoveChild(&edit);
 		}
 	}
 
@@ -78,6 +95,15 @@ private:
 				w.DrawLine(xEnd, y + 9, xEnd + step, y + 9, 1, SColorHighlight());
 			}
 			DrawSegment(w, ss, xEnd + step, y);
+		}
+	}
+	
+	void InitSegment(Vector<SegmentState*> &segs, SegmentState& s, int maxX) {
+		segs.Add(&s);
+		maxSegmentsX = UPP::max(maxSegmentsX, ++maxX);
+		int cnt = s.segments.GetCount();
+		for (int i = 0; i < cnt; i++) {
+			InitSegment(i ? segPointers.Create(maxX, (SegmentState*)NULL) : segs, s.segments[i], maxX);
 		}
 	}
 };

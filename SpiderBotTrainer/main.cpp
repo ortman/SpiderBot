@@ -31,7 +31,9 @@ public:
 		clStates.NoRoundSize();
 		clStates.WhenAction = [&]() {
 			int idx = clStates.GetCursor();
-			SetStep(idx);
+			if (cmd.SetCursor(idx)) {
+				stateEdit.SetState(&cmd[idx]);
+			}
 			bUp.Enable(idx > 0);
 			bDown.Enable(cmd.GetStepCount() - idx > 1);
 		};
@@ -156,11 +158,6 @@ public:
 private:
 	float testDelta = 1.f;
 	float testDelta2 = 1.f;
-	
-	void SetStep(int idx) {
-		if (!cmd.SetCursor(idx)) return;
-		stateEdit.SetState(&cmd[idx]);
-	}
 	
 	void LoadRobot() {
 		viewer.Clear();

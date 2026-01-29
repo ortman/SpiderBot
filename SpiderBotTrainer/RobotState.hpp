@@ -30,18 +30,8 @@ public:
 	RobotState& SetName(const String& n) { name = n; return *this; }
 	String GetName() const { return name; }
 	
-	int GetMaxSegments() const {
-		//TODO
-		return 3;
-	}
-	
 	void ClearSelection() {
 		//TODO
-	}
-	
-	Node3D* GetNode(int col, int row) {
-		//TODO
-		return NULL;
 	}
 	
 	SegmentState* GetSegment(int id) {
