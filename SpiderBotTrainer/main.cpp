@@ -63,10 +63,15 @@ public:
 			if (keyflags & (K_CTRL | K_SHIFT)) {
 				int i = cmd.GetCursor();
 				if (i) {
-					for (SegmentState& seg : cmd[i].segments) {
-						if (seg.IsSel()) seg.SetAngle(seg.GetAngle() + 1.f);
-						//TODO
+					RobotState& state = cmd[i];
+					float d = (zdelta > 0) ? 1.f : -1.f;
+					//TODO
+					for (SegmentState& seg : state.segments) {
+						if (seg.IsSel()) seg.SetAngle(seg.GetAngle() + d);
 					}
+					stateEdit.SetState(&state);
+					state.ApplyTo(body);
+					viewer.Refresh();
 				}
 			}
 		};

@@ -230,6 +230,7 @@ public:
 	int GetId() const { return id; }
 	Node3D& SetId(int id) { this->id = id; return *this; }
 	Node3D* GetParent() { return parent; }
+	Array<Node3D>& GetChildren() { return nodes; }
 	const Array<Node3D>& GetChildren() const { return nodes; }
 
 	template <class T>

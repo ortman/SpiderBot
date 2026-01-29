@@ -31,7 +31,7 @@ public:
 	String GetName() const { return name; }
 	
 	void ClearSelection() {
-		//TODO
+		for (SegmentState& s : segments) s.ClearSelection();
 	}
 	
 	SegmentState* GetSegment(int id) {
@@ -39,7 +39,14 @@ public:
 		return NULL;
 	}
 	
-	void ApplyTo(Node3D& node) {
+	bool ApplyTo(Node3D& node) {
+		Array<Node3D>& nodes = node.GetChildren();
+		int cnt = segments.GetCount();
+		if (cnt != nodes.GetCount()) return false;
+		for (int i = 0; i < cnt; ++i) {
+			if (!segments[i].ApplyTo(nodes[i])) return false;
+		}
+		return true;
 	}
 };
 
