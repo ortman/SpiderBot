@@ -54,22 +54,22 @@ public:
 		viewer.MultiSelect();
 		viewer.WhenSelected = [=](int id, Node3D* node, bool multiselect) {
 			int i = cmd.GetCursor();
-			if (i) {
+			if (i >= 0) {
 				RobotState& state = cmd[i];
 				if (!multiselect) state.ClearSelection();
-				SegmentState* seg = state.GetSegment(id);
+				SegmentState* seg = state.GetSegment(body, id);
 				if (seg) seg->Select(!seg->IsSel());
 			}
 		};
 		viewer.WhenWeel = [=](Point p, int zdelta, dword keyflags) {
 			if (keyflags & (K_CTRL | K_SHIFT)) {
 				int i = cmd.GetCursor();
-				if (i) {
+				if (i >= 0) {
 					RobotState& state = cmd[i];
 					float d = (zdelta > 0) ? 1.f : -1.f;
-					//TODO
+					if (keyflags & K_SHIFT) d *= 10.f;
 					for (SegmentState& seg : state.segments) {
-						if (seg.IsSel()) seg.SetAngle(seg.GetAngle() + d);
+						ChangeAngleOfSelectedSegment(seg, d);
 					}
 					stateEdit.SetState(&state);
 					state.ApplyTo(body);
@@ -187,6 +187,13 @@ private:
 		});
 		bar.Add(t_("Robot editor"), [=] { if (!robotEditor.IsOpen()) robotEditor.Open(); });
 		bar.Add(t_("Load robot"), [=] { LoadRobot(); });
+	}
+	
+	void ChangeAngleOfSelectedSegment(SegmentState& seg, float d) {
+		if (seg.IsSel()) seg.SetAngle(seg.GetAngle() + d);
+		for (SegmentState& s : seg.segments) {
+			ChangeAngleOfSelectedSegment(s, d);
+		}
 	}
 };
 

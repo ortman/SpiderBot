@@ -34,8 +34,16 @@ public:
 		for (SegmentState& s : segments) s.ClearSelection();
 	}
 	
-	SegmentState* GetSegment(int id) {
-		//TODO
+	SegmentState* GetSegment(Node3D& parent, int id) {
+		SegmentState* res = NULL;
+		Array<Node3D>& children = parent.GetChildren();
+		int cnt = children.GetCount();
+		if (segments.GetCount() != cnt) return NULL;
+		for (int i = 0; i < cnt; ++i) {
+			if (children[i].GetId() == id) return &segments[i];
+			res = segments[i].GetSegment(children[i], id);
+			if (res) return res;
+		}
 		return NULL;
 	}
 	
