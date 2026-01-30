@@ -4,6 +4,7 @@ uses
 	plugin/glew;
 
 file
+	Algorithm.hpp,
 	main.cpp,
 	Servo3D.hpp,
 	RobotEditor.hpp,

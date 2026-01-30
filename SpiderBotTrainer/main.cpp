@@ -3,6 +3,7 @@
 #include "Servo3D.hpp"
 #include "RobotEditor.hpp"
 #include "Command.hpp"
+#include "Algorithm.hpp"
 
 #include <CtrlLib/CtrlLib.h>
 
@@ -18,6 +19,7 @@ private:
 	RobotEditor robotEditor;
 	Node3D body;
 	Command cmd;
+	Algorithm algLinear;
 
 public:
 	MainWindow() {
@@ -27,6 +29,8 @@ public:
 
 		AddFrame(menu);
 		menu.Set([=](Bar& bar) { MainMenu(bar); });
+
+		algLinear.SetCount(10).SetTime(5000);
 
 		clStates.NoRoundSize();
 		clStates.WhenAction = [&]() {
@@ -154,6 +158,16 @@ public:
 					viewer.Refresh();
 				}, 0);
 				bPlay.SetImage(SpiderBotImg::Pause());
+			}
+		};
+		bCalc.WhenPush = [=] {
+			if (cmd.GetStepCount() > 1) {
+				algLinear.SetStates(cmd[0], cmd[1]);
+				algLinear.Calculate();
+				for (RobotState& s : algLinear.states) {
+					cmd.AddStep(s);
+					clStates.Add(s.GetName());
+				}
 			}
 		};
 		LoadRobot();
