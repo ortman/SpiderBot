@@ -20,6 +20,7 @@ private:
 	Node3D body;
 	Command cmd;
 	Algorithm algLinear;
+	Array<RobotState> playStates;
 
 public:
 	MainWindow() {
@@ -29,8 +30,6 @@ public:
 
 		AddFrame(menu);
 		menu.Set([=](Bar& bar) { MainMenu(bar); });
-
-		algLinear.SetCount(10).SetTime(5000);
 
 		clStates.NoRoundSize();
 		clStates.WhenAction = [&]() {
@@ -138,36 +137,24 @@ public:
 				KillTimeCallback(0);
 				bPlay.SetImage(SpiderBotImg::Play());
 			} else {
+				playStates.Clear();
+				int stateCount = cmd.GetStepCount();
+				if (stateCount < 2) return;
+				algLinear.SetCount(10).SetTime(5000);
+				for (int i = 1; i < stateCount; ++i) {
+					algLinear.SetStates(cmd[i - 1], cmd[i]);
+					algLinear.Calculate();
+					playStates.Append(algLinear.states);
+				}
+				
 				SetTimeCallback(-1000 / 25, [=] {
-					const Array<Node3D>& foots = body.GetChildren();
-					if (foots.GetCount() != 6) return;
-					Servo3D* foot3 = (Servo3D*)&foots[3];
-					Servo3D* segment2 = (Servo3D*)&foot3->GetChildren()[0];
-					if (segment2 == NULL || foot3 == NULL) return;
-					
-					float angle1 = foot3->GetAngle() + testDelta2;
-					if (angle1 > foot3->GetMaxAngle()) testDelta2 = -1.f;
-					if (angle1 < foot3->GetMinAngle()) testDelta2 = 1.f;
-					foot3->SetAngle(angle1);
-					
-					float angle2 = segment2->GetAngle() + testDelta;
-					if (angle2 > segment2->GetMaxAngle()) testDelta = -1.f;
-					if (angle2 < segment2->GetMinAngle()) testDelta = 1.f;
-					segment2->SetAngle(angle2);
-					
+					static int pos = 0;
+					if (pos >= playStates.GetCount()) pos = 0;
+					playStates[pos].ApplyTo(body);
 					viewer.Refresh();
+					++pos;
 				}, 0);
 				bPlay.SetImage(SpiderBotImg::Pause());
-			}
-		};
-		bCalc.WhenPush = [=] {
-			if (cmd.GetStepCount() > 1) {
-				algLinear.SetStates(cmd[0], cmd[1]);
-				algLinear.Calculate();
-				for (RobotState& s : algLinear.states) {
-					cmd.AddStep(s);
-					clStates.Add(s.GetName());
-				}
 			}
 		};
 		LoadRobot();
